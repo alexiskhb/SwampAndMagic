@@ -26,7 +26,39 @@
 
 using namespace std;
 
-bool game_over = false;
+
+class Object {
+public:
+	Object() {
+	}
+
+	Object(int x_coord, int y_coord) : x(x_coord), y(y_coord) {
+	}
+
+	bool near(const Object& obj) {
+		return 
+			(abs(x - obj.x) == 1 && abs(y - obj.y) == 0) ||
+			(abs(x - obj.x) == 0 && abs(y - obj.y) == 1);
+	}
+	
+	bool operator==(const Object& obj) {
+		return x == obj.x && y == obj.y;
+	}
+
+	virtual char symbol() {
+		return SYM_EMPTY;
+	}	
+
+	virtual bool is_permeable() {
+		return false;
+	}
+
+protected:
+	int x = -1;
+	int y = -1;
+	// for lifetime -1 means infinity
+	int lifetime = -1;
+};
 
 
 class Map {
@@ -37,30 +69,20 @@ public:
 };
 
 
-class Object {
+class Wall : public Object {
 public:
-	Object() {
+	Wall() {
+
 	}
 
-	Object(int x_coord, int y_coord) : x(x_coord), y(y_coord) {
+	Wall(int x_coord, int y_coord) : Object(x_coord, y_coord) {
+
 	}
 
-	virtual char symbol() {
-		return SYM_EMPTY;
+	char symbol() {
+		return SYM_WALL;
 	}
 
-	virtual bool is_permeable();
-
-protected:
-	int x = -1;
-	int y = -1;
-	// for lifetime -1 means infinity
-	int lifetime = -1;
-};
-
-
-class Wall : Object {
-public:
 	bool is_permeable() {
 		return false;
 	}
@@ -68,15 +90,19 @@ public:
 };
 
 
-class Flame : Object {
+class Flame : public Object {
 public:
+	char symbol() {
+		return SYM_FLAME;
+	}
+
 	bool is_permeable(){
 		return true;
 	}
 };
 
 
-class Swamp : Object {
+class Swamp : public Object {
 public:
 	char symbol() {
 		return SYM_SWAMP;
@@ -85,11 +111,10 @@ public:
 	bool is_permeable() {
 		return true;
 	}
-
 };
 
 // magic can heal
-class Magic : Object {
+class Magic : public Object {
 public:
 	Magic() {
 		lifetime = 5;
@@ -109,7 +134,7 @@ public:
 
 };
 
-class Character : Object {
+class Character : public Object {
 public:
 	Character() {
 	}
@@ -120,11 +145,11 @@ public:
 	Character(int x_coord, int y_coord, int hp, int dmg) : Object(x_coord, y_coord), health(hp), damage(dmg) {
 	}
 
-	virtual void move();
-	virtual int  hitpoints();
-	virtual char attack();
+	// virtual int  hitpoints();
+	// virtual char attack();
+
 	// returns True if Character died
-	virtual bool suffer(int dmg);
+	// virtual bool suffer(int dmg);
 
 	bool is_permeable() {
 		return false;
@@ -136,8 +161,12 @@ protected:
 };
 
 
-class Knight : Character {
+class Knight : public Character {
 public:
+	Knight(int x_coord, int y_coord) : Character(x_coord, y_coord) {
+
+	}
+
 	char symbol() {
 		return SYM_KNIGHT;
 	}
@@ -150,7 +179,12 @@ public:
 };
 
 
-class Princess : Character {
+class Princess : public Character {
+public:
+	Princess(int x_coord, int y_coord) : Character(x_coord, y_coord) {
+
+	}
+
 	char symbol() {
 		return SYM_PRINCESS;
 	}
@@ -158,19 +192,27 @@ class Princess : Character {
 };
 
 
-class Monster : Character {
+class Monster : public Character {
+public:
+	Monster(int x_coord, int y_coord) : Character(x_coord, y_coord) {
 
+	}
 };
 
 
-class Dragon : Monster {
+class Dragon : public Monster {
+public:
+	Dragon(int x_coord, int y_coord) : Monster(x_coord, y_coord) {
+
+	}
+
 	char symbol() {
 		return SYM_DRAGON;
 	}
 };
 
 
-class Zombie : Monster {
+class Zombie : public Monster {
 	char symbol() {
 		return SYM_ZOMBIE;
 	}
@@ -200,7 +242,27 @@ struct {
 } Game;
 
 
+char symb(Object& o) {
+	return o.symbol();
+}
+
+
 int main(int argc, char** argv) {
+	Knight k(1, 2);
+	Wall w(1, 3);
+	Dragon d(1, 2);
+	// Object* ok = &k;
+	Object* ow = &w;
+	Object* od = &d;
+	cout << symb(k) << ' ' << ow->symbol() << ' ' << od->symbol() << endl;
+	// Character c = static_cast<Character>(k);
+	// Object o1 = static_cast<Object>(k);
+	// Object o2 = static_cast<Object>(w);
+
+	cout << (k == w) << endl;
+	cout << (w == d) << endl;
+	cout << (d == k) << endl;
+
  	while (!Game.is_over()) {
  		Game.next_turn();
  	}

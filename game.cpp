@@ -84,11 +84,16 @@ public:
 		return prev_col;
 	}
 
+	void move_to_prev() {
+		row = prev_row;
+		col = prev_col;
+	}
+
 	virtual char symbol() {
 		return SYM_EMPTY;
 	}	
 
-	virtual bool is_permeable() {
+	virtual bool is_penetrable() {
 		return true;
 	}
 
@@ -99,6 +104,8 @@ public:
 protected:
 	int row = -1;
 	int col = -1;
+	// we need prev_coords to remove reference to object
+	// from previous cell of map after move
 	int prev_row = -1;
 	int prev_col = -1;
 	// for lifetime -1 means infinity
@@ -130,9 +137,15 @@ public:
 		return map[index];
 	}
 
+	bool is_penetrable(int arow, int acol) {
+		bool is_p = true;
+		for(auto obj: map[arow][acol]) {
+			is_p &= obj->is_penetrable();
+		}
+		return is_p;
+	}
+
 private:
-	int width  = MAP_WIDTH;
-	int height = MAP_HEIGHT;
 	list<Object*> map[MAP_HEIGHT][MAP_WIDTH];
 };
 
@@ -147,7 +160,7 @@ public:
 		return SYM_WALL;
 	}
 
-	virtual bool is_permeable() {
+	virtual bool is_penetrable() {
 		return false;
 	}
 };
@@ -163,7 +176,7 @@ public:
 		return SYM_FLAME;
 	}
 
-	virtual bool is_permeable(){
+	virtual bool is_penetrable(){
 		return true;
 	}
 };
@@ -179,7 +192,7 @@ public:
 		return SYM_SWAMP;
 	}
 
-	virtual bool is_permeable() {
+	virtual bool is_penetrable() {
 		return true;
 	}
 };
@@ -195,7 +208,7 @@ public:
 		return SYM_MAGIC;
 	}
 
-	virtual bool is_permeable() {
+	virtual bool is_penetrable() {
 		return true;
 	}
 };
@@ -216,11 +229,12 @@ public:
 	}
 
 	virtual void move() {
-
+		prev_row = row;
+		prev_col = col;
 	}
 
 	// all characters are impenetrable
-	virtual bool is_permeable() {
+	virtual bool is_penetrable() {
 		return false;
 	}
 
@@ -286,7 +300,8 @@ public:
 	}
 
 	virtual void move() {
-
+		prev_row = row;
+		prev_col = col;
 	}
 };
 
@@ -314,7 +329,8 @@ public:
 	}
 
 	virtual void move() {
-
+		prev_row = row;
+		prev_col = col;
 	}
 };
 
@@ -334,7 +350,8 @@ public:
 	}
 
 	virtual void move() {
-
+		prev_row = row;
+		prev_col = col;
 	}
 };
 
@@ -371,12 +388,21 @@ struct {
 	void next_turn() {
 		for(auto ch: characters) {
 			ch->move();
+			// changes will be accepted after calling refresh_characters_objects
+			// so we can cancel move here. but prev_coords now match with actual
+			if (!map.is_penetrable(ch->getrow(), ch->getcol())) {
+				ch->move_to_prev();
+			}
 		}
 		refresh_characters_objects();
 	}
 
 	void render() {
 		cout << map << endl;
+	}
+
+	void generate_level() {
+
 	}
 
 	void init() {
@@ -398,6 +424,8 @@ struct {
 			objects.push_back(new Wall(MAP_HEIGHT-1, j));
 			map << objects.back();
 		}
+		generate_level();
+
 		characters.push_back(new Knight(MAP_HEIGHT-2, 1));
 		map << characters.back();
 		characters.push_back(new Princess(1, MAP_WIDTH-2));

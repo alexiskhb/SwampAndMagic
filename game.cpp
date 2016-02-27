@@ -53,7 +53,7 @@ public:
 	Object() {
 	}
 
-	Object(int arow, int acol) : row(arow), col(acol) {
+	Object(int arow, int acol) : row(arow), col(acol), prev_row(arow), prev_col(acol) {
 	}
 
 	// if two objects are NEAR but do not match
@@ -75,6 +75,14 @@ public:
 		return col;
 	}
 
+	int prevrow() {
+		return prev_row;
+	}
+
+	int prevcol() {
+		return prev_col;
+	}
+
 	virtual char symbol() {
 		return SYM_EMPTY;
 	}	
@@ -90,6 +98,8 @@ public:
 protected:
 	int row = -1;
 	int col = -1;
+	int prev_row = -1;
+	int prev_col = -1;
 	// for lifetime -1 means infinity
 	int lifetime = -1;
 	int damage = 0;
@@ -113,6 +123,10 @@ public:
 			display << endl;
 		}
 		return display;
+	}
+
+	list<Object*>* operator[](int index) {
+		return map[index];
 	}
 
 private:
@@ -225,8 +239,28 @@ public:
 	}
 
 	virtual void move() {
+		prev_row = row;
+		prev_col = col;
 		char action;
 		cin >> action;
+		switch (action) {
+			case CMD_UP: {
+				--row;
+				break;	
+			}
+			case CMD_DOWN: {
+				++row;
+				break;	
+			}
+			case CMD_LEFT: {
+				--col;
+				break;	
+			}
+			case CMD_RIGHT: {
+				++col;
+				break;	
+			}
+		}
 	}
 
 	virtual bool suffer(int dmg) {
@@ -322,8 +356,18 @@ struct {
 
 	}
 
-	void next_turn() {
+	void refresh_characters_objects() {
+		for(auto ch: characters) {
+			map[ch->prevrow()][ch->prevcol()].remove(ch);
+			map << ch;
+		}
+	}
 
+	void next_turn() {
+		for(auto ch: characters) {
+			ch->move();
+		}
+		refresh_characters_objects();
 	}
 
 	void render() {
@@ -360,8 +404,9 @@ struct {
 int main(int argc, char** argv) {
 	Game.init();
 	Game.render();
- 	while (Game.is_over()) {
+ 	while (!Game.is_over()) {
  		Game.next_turn();
+ 		Game.render();
  	}
 }
 

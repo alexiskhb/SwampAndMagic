@@ -1,9 +1,10 @@
 #include <iostream>
 #include <vector>
+#include <list>
 
 #define cint const int
 
-const char SYM_EMPTY    = '.';
+const char SYM_EMPTY    = ' ';
 const char SYM_WALL     = '#';
 const char SYM_KNIGHT   = 'K';
 const char SYM_PRINCESS = 'P';
@@ -21,7 +22,7 @@ const char CMD_RIGHT  = 'd';
 const char CMD_ATTACK = 'f';
 const char CMD_MAGIC  = 'r';
 
-const int MAP_SIZE    = 22; 
+const int MAP_SIZE    = 30; 
 
 const int HP_KNIGHT   = 50; 
 const int HP_PRINCESS = 2;  
@@ -34,7 +35,6 @@ const int DMG_PRINCESS = 0;
 const int DMG_DRAGON   = 10;
 const int DMG_FIRE     = 4; 
 const int DMG_ZOMBIE   = 3; 
-// #define 
 
 
 // player sees results of latest turn and takes next.
@@ -83,6 +83,10 @@ public:
 		return true;
 	}
 
+	virtual bool is_enemy() {
+		return true;
+	}
+
 protected:
 	int row = -1;
 	int col = -1;
@@ -94,17 +98,27 @@ protected:
 
 class Map {
 public:
-	Object& operator<<(Object& obj) {
-		int row = obj.getrow();
-		int col = obj.getcol();
-		map[row][col].push_back(&obj);
+	Object* operator<<(Object* obj) {
+		int row = obj->getrow();
+		int col = obj->getcol();
+		map[row][col].push_back(obj);
 		return obj;
+	}
+
+	friend ostream& operator<<(ostream& display, Map& m) {
+		for(int i = 0; i < MAP_SIZE; i++) {
+			for(int j = 0; j < MAP_SIZE; j++) {
+				display << m.map[i][j].back()->symbol();
+			}
+			display << endl;
+		}
+		return display;
 	}
 
 private:
 	int width  = MAP_SIZE;
 	int height = MAP_SIZE;
-	vector<Object*> map[MAP_SIZE][MAP_SIZE];
+	list<Object*> map[MAP_SIZE][MAP_SIZE];
 };
 
 
@@ -114,11 +128,11 @@ public:
 
 	}
 
-	char symbol() {
+	virtual char symbol() {
 		return SYM_WALL;
 	}
 
-	bool is_permeable() {
+	virtual bool is_permeable() {
 		return false;
 	}
 };
@@ -130,11 +144,11 @@ public:
 		lifetime = 6;
 	}
 
-	char symbol() {
+	virtual char symbol() {
 		return SYM_FLAME;
 	}
 
-	bool is_permeable(){
+	virtual bool is_permeable(){
 		return true;
 	}
 };
@@ -146,11 +160,11 @@ public:
 
 	}
 
-	char symbol() {
+	virtual char symbol() {
 		return SYM_SWAMP;
 	}
 
-	bool is_permeable() {
+	virtual bool is_permeable() {
 		return true;
 	}
 };
@@ -162,11 +176,11 @@ public:
 		lifetime = 5;
 	}
 
-	char symbol() {
+	virtual char symbol() {
 		return SYM_MAGIC;
 	}
 
-	bool is_permeable() {
+	virtual bool is_permeable() {
 		return true;
 	}
 };
@@ -181,9 +195,6 @@ public:
 		damage = dmg;
 	}
 
-	// virtual int  hitpoints();
-	// virtual char attack();
-
 	// returns True if character died
 	virtual bool suffer(int dmg) {
 		return (health -= dmg) <= 0;
@@ -194,7 +205,7 @@ public:
 	}
 
 	// all characters are impenetrable
-	bool is_permeable() {
+	virtual bool is_permeable() {
 		return false;
 	}
 
@@ -209,16 +220,16 @@ public:
 
 	}
 
-	char symbol() {
+	virtual char symbol() {
 		return SYM_KNIGHT;
 	}
 
-	void move() {
+	virtual void move() {
 		char action;
 		cin >> action;
 	}
 
-	bool suffer(int dmg) {
+	virtual bool suffer(int dmg) {
 		return (health -= dmg) <= 0;
 	}
 
@@ -231,15 +242,15 @@ public:
 
 	}
 
-	char symbol() {
+	virtual char symbol() {
 		return SYM_PRINCESS;
 	}
 	
-	bool suffer(int dmg) {
+	virtual bool suffer(int dmg) {
 		return (health -= dmg) <= 0;
 	}
 
-	void move() {
+	virtual void move() {
 
 	}
 };
@@ -259,15 +270,15 @@ public:
 
 	}
 
-	char symbol() {
+	virtual char symbol() {
 		return SYM_DRAGON;
 	}
 
-	bool suffer(int dmg) {
+	virtual bool suffer(int dmg) {
 		return (health -= dmg) <= 0;
 	}
 
-	void move() {
+	virtual void move() {
 
 	}
 };
@@ -279,24 +290,24 @@ public:
 
 	}
 
-	char symbol() {
+	virtual char symbol() {
 		return SYM_ZOMBIE;
 	}
 
-	bool suffer(int dmg) {
+	virtual bool suffer(int dmg) {
 		return (health -= dmg) <= 0;
 	}
 
-	void move() {
+	virtual void move() {
 
 	}
 };
 
 
 struct {
-	vector<Character> characters;
-	vector<Object> objects;
-	vector<Object> empties;
+	list<Character*> characters;
+	list<Object*> objects;
+	list<Object*> empties;
 	Map map;
 
 	bool is_over() {
@@ -315,45 +326,40 @@ struct {
 
 	}
 
+	void render() {
+		cout << map << endl;
+	}
+
 	void init() {
-		Knight   knight  (MAP_SIZE-1, 1);
-		Princess princess(1, MAP_SIZE-1);
-		Dragon   dragon  (MAP_SIZE-4, MAP_SIZE-4);
 		for(int i = 0; i < MAP_SIZE; i++) {
 			for(int j = 0; j < MAP_SIZE; j++) {
-				empties.push_back(Object(i, j));
+				empties.push_back(new Object(i, j));
 				map << empties.back();
 			}
 		}
-
+		for(int i = 0; i < MAP_SIZE; i++) {
+			objects.push_back(new Wall(0, i));
+			map << objects.back();
+			objects.push_back(new Wall(MAP_SIZE-1, i));
+			map << objects.back();
+			objects.push_back(new Wall(i, 0));
+			map << objects.back();
+			objects.push_back(new Wall(i, MAP_SIZE-1));
+			map << objects.back();
+		}
+		characters.push_back(new Knight(MAP_SIZE-2, 1));
+		map << characters.back();
+		characters.push_back(new Princess(1, MAP_SIZE-2));
+		map << characters.back();
+		characters.push_back(new Dragon(4, MAP_SIZE-4));
+		map << characters.back();
 	}
 } Game;
 
 
 int main(int argc, char** argv) {
-	Knight   k(1, 2);
-	Princess p(3, 4);
-
-	Dragon d(2, 3);
-	Zombie z(1, 4);
-
-	Wall  w(1, 3);
-	Flame f(3, 5);
-	Swamp s(4, 5);
-
-	Object* ok = &k;
-	Object* ow = &w;
-	Object* od = &d;
-	cout << ok->symbol() << ' ' << ow->symbol() << ' ' << od->symbol() << endl;
-	// Character c = static_cast<Character>(k);
-	// Object o1 = static_cast<Object>(k);
-	// Object o2 = static_cast<Object>(w);
-
-	cout << (k == w) << endl;
-	cout << (w == d) << endl;
-	cout << (d == k) << endl;
-
 	Game.init();
+	Game.render();
  	while (Game.is_over()) {
  		Game.next_turn();
  	}

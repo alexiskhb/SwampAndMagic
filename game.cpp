@@ -22,7 +22,8 @@ const char CMD_RIGHT  = 'd';
 const char CMD_ATTACK = 'f';
 const char CMD_MAGIC  = 'r';
 
-const int MAP_SIZE    = 30; 
+const int MAP_HEIGHT  = 30; 
+const int MAP_WIDTH   = 60; 
 
 const int HP_KNIGHT   = 50; 
 const int HP_PRINCESS = 2;  
@@ -116,8 +117,8 @@ public:
 	}
 
 	friend ostream& operator<<(ostream& display, Map& m) {
-		for(int i = 0; i < MAP_SIZE; i++) {
-			for(int j = 0; j < MAP_SIZE; j++) {
+		for(int i = 0; i < MAP_HEIGHT; i++) {
+			for(int j = 0; j < MAP_WIDTH; j++) {
 				display << m.map[i][j].back()->symbol();
 			}
 			display << endl;
@@ -130,9 +131,9 @@ public:
 	}
 
 private:
-	int width  = MAP_SIZE;
-	int height = MAP_SIZE;
-	list<Object*> map[MAP_SIZE][MAP_SIZE];
+	int width  = MAP_WIDTH;
+	int height = MAP_HEIGHT;
+	list<Object*> map[MAP_HEIGHT][MAP_WIDTH];
 };
 
 
@@ -361,6 +362,10 @@ struct {
 			map[ch->prevrow()][ch->prevcol()].remove(ch);
 			map << ch;
 		}
+		for(auto obj: objects) {
+			map[obj->prevrow()][obj->prevcol()].remove(obj);
+			map << obj;	
+		}
 	}
 
 	void next_turn() {
@@ -375,27 +380,29 @@ struct {
 	}
 
 	void init() {
-		for(int i = 0; i < MAP_SIZE; i++) {
-			for(int j = 0; j < MAP_SIZE; j++) {
+		for(int i = 0; i < MAP_HEIGHT; i++) {
+			for(int j = 0; j < MAP_WIDTH; j++) {
 				empties.push_back(new Object(i, j));
 				map << empties.back();
 			}
 		}
-		for(int i = 0; i < MAP_SIZE; i++) {
-			objects.push_back(new Wall(0, i));
-			map << objects.back();
-			objects.push_back(new Wall(MAP_SIZE-1, i));
-			map << objects.back();
+		for(int i = 0; i < MAP_HEIGHT; i++) {
 			objects.push_back(new Wall(i, 0));
 			map << objects.back();
-			objects.push_back(new Wall(i, MAP_SIZE-1));
+			objects.push_back(new Wall(i, MAP_WIDTH-1));
 			map << objects.back();
 		}
-		characters.push_back(new Knight(MAP_SIZE-2, 1));
+		for(int j = 0; j < MAP_WIDTH; j++) {
+			objects.push_back(new Wall(0, j));
+			map << objects.back();
+			objects.push_back(new Wall(MAP_HEIGHT-1, j));
+			map << objects.back();
+		}
+		characters.push_back(new Knight(MAP_HEIGHT-2, 1));
 		map << characters.back();
-		characters.push_back(new Princess(1, MAP_SIZE-2));
+		characters.push_back(new Princess(1, MAP_WIDTH-2));
 		map << characters.back();
-		characters.push_back(new Dragon(4, MAP_SIZE-4));
+		characters.push_back(new Dragon(4, MAP_WIDTH-4));
 		map << characters.back();
 	}
 } Game;

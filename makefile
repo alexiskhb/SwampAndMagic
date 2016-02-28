@@ -8,7 +8,7 @@ CFLAGS=-c -Wall -std=c++0x
 
 LIBS=
 
-SRC=$(NAME).cpp
+SRC=$(NAME).cpp $(NAME)_objects.cpp
 
 OBJ=$(SRC:.cpp=.o)
 

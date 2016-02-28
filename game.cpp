@@ -4,6 +4,10 @@
 #include <map>
 #include <string>
 #include <memory>
+#include <ctime>
+
+
+#define chance(a) (rand()%1000 + 1 <= 10*a)
 
 
 const char SYM_EMPTY    = ' ';
@@ -34,10 +38,10 @@ const int HP_PRINCESS = 2;
 const int HP_DRAGON   = 200;
 const int HP_ZOMBIE   = 20; 
 
-const int DMG_KN_SWORD = 7*10; 
+const int DMG_KN_SWORD = 7*100; 
 const int DMG_KN_MAGIC = 6*10; 
 const int DMG_PRINCESS = 0; 
-const int DMG_DRAGON   = 10;
+const int DMG_DRAGON   = 15;
 const int DMG_FIRE     = 4; 
 const int DMG_ZOMBIE   = 3; 
 
@@ -255,13 +259,13 @@ public:
 
 	void slash(list<CharacterPtr>& characters, CharacterPtr self) {
 		for(auto ch: characters) {
-			if (ch != self && *ch%*self) {
+			if (ch != self && *ch % *self) {
 				ch->suffer(damage);
 			}
 		}
 	}
 
-	virtual bool attack(list<CharacterPtr>& characters, CharacterPtr self) {
+	virtual bool attack(list<CharacterPtr>& characters, list<ObjectPtr>& objects, CharacterPtr self) {
 		return true;
 	}
 
@@ -274,7 +278,7 @@ public:
 		return (health -= dmg) <= 0;
 	}
 
-	virtual bool move()=0;
+	virtual bool move() = 0;
 
 	// all characters are impenetrable
 	virtual bool is_penetrable() {
@@ -297,7 +301,8 @@ public:
 	}
 
 	virtual ~Knight() {
-
+		cout << ">> Knight died\n>> You lose\n";
+		exit(0);
 	}
 
 	virtual char symbol() {
@@ -312,7 +317,7 @@ public:
 
 	}
 
-	virtual bool attack(list<CharacterPtr>& characters, CharacterPtr self) {
+	virtual bool attack(list<CharacterPtr>& characters, list<ObjectPtr>& objects, CharacterPtr self) {
 		std::string moves(STR_MOVES);
 		moved_on_attack = CMD_NONE;
 		char action;
@@ -332,6 +337,9 @@ public:
 				cin >> direction;
 				magic(direction);
 				return true;
+			}
+			case CMD_QUIT: {
+				exit(0);
 			}
 		}
 		return true;
@@ -387,7 +395,8 @@ public:
 	}
 
 	virtual ~Princess() {
-
+		cout << ">> Princess died\n>> You lose\n";
+		exit(0);
 	}
 
 	virtual char symbol() {
@@ -433,7 +442,24 @@ public:
 	}
 
 	virtual ~Dragon() {
+		cout << "Dragon died\n";
+	}
 
+	void magic() {
+
+	}
+
+	virtual bool attack(list<CharacterPtr>& characters, list<ObjectPtr>& objects, CharacterPtr self) {
+		CharacterPtr knight = characters.front();
+		if (*self % *knight) {
+			slash(characters, self);
+			return true;
+		}
+		if (abs(knight->getrow() - row) < 10 && abs(knight->getcol() - col) < 10) {
+			magic();
+			return chance(40);
+		}
+		return false;
 	}
 
 	virtual char symbol() {
@@ -463,7 +489,7 @@ public:
 	}
 
 	virtual ~Zombie() {
-
+		cout << "Zombie died\n";
 	}
 
 	virtual char symbol() {
@@ -495,6 +521,7 @@ struct {
 	list<ObjectPtr> objects;
 	list<ObjectPtr> empties;
 	Map map;
+	unsigned int counter = 0;
 
 	bool is_over() {
 		return false;
@@ -517,13 +544,14 @@ struct {
 		characters.remove_if([](CharacterPtr ch) { 
 			return ch->hitpoints() <= 0;
 		});
-
 	}
 
 	void next_turn() {
+		++counter;
+
 		CharacterBoolMap did_attack;
 		for(auto ch: characters) {
-			did_attack.insert(CharacterBoolPair(ch, ch->attack(characters, ch)));
+			did_attack.insert(CharacterBoolPair(ch, ch->attack(characters, objects, ch)));
 		}
 		for(auto ch: characters) {
 			if (!did_attack[ch]) {
@@ -539,6 +567,9 @@ struct {
 		}
 
 		refresh_characters_objects();
+
+		characters.push_back(CharacterPtr(new Dragon(4, MAP_WIDTH-4, HP_DRAGON, DMG_DRAGON)));
+		map << characters.back();
 	}
 
 	inline void render() {
@@ -553,6 +584,7 @@ struct {
 	}
 
 	void init() {
+		srand(time(0));
 		for(int i = 0; i < MAP_HEIGHT; i++) {
 			for(int j = 0; j < MAP_WIDTH; j++) {
 				empties.push_back(ObjectPtr(new Object(i, j)));
@@ -573,7 +605,7 @@ struct {
 		}
 		generate_level();
 
-		characters.push_back(CharacterPtr(new Knight(MAP_HEIGHT-2, 1, HP_KNIGHT, DMG_KN_SWORD)));
+		characters.push_back(CharacterPtr(new Knight(4, MAP_WIDTH-3, HP_KNIGHT, DMG_KN_SWORD)));
 		map << characters.back();
 		characters.push_back(CharacterPtr(new Princess(1, MAP_WIDTH-2, HP_PRINCESS, DMG_PRINCESS)));
 		map << characters.back();

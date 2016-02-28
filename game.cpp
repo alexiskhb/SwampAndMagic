@@ -5,7 +5,6 @@
 #include <string>
 #include <memory>
 
-#define cint const int
 
 const char SYM_EMPTY    = ' ';
 const char SYM_WALL     = '#';
@@ -121,10 +120,11 @@ protected:
 	int damage = 0;
 };
 
+typedef std::shared_ptr<Object> ObjectPtr;
 
 class Map {
 public:
-	Object* operator<<(Object* obj) {
+	ObjectPtr operator<<(ObjectPtr obj) {
 		int row = obj->getrow();
 		int col = obj->getcol();
 		map[row][col].push_back(obj);
@@ -141,7 +141,7 @@ public:
 		return display;
 	}
 
-	list<Object*>* operator[](int index) {
+	list<ObjectPtr>* operator[](int index) {
 		return map[index];
 	}
 
@@ -154,7 +154,7 @@ public:
 	}
 
 private:
-	list<Object*> map[MAP_HEIGHT][MAP_WIDTH];
+	list<ObjectPtr> map[MAP_HEIGHT][MAP_WIDTH];
 };
 
 
@@ -237,6 +237,8 @@ public:
 	}
 };
 
+class Character;
+typedef std::shared_ptr<Character> CharacterPtr;
 
 class Character : public Object {
 public:
@@ -251,7 +253,7 @@ public:
 
 	}
 
-	void slash(list<Character*>& characters, Character* self) {
+	void slash(list<CharacterPtr>& characters, CharacterPtr self) {
 		for(auto ch: characters) {
 			if (ch != self && *ch%*self) {
 				ch->suffer(damage);
@@ -259,7 +261,7 @@ public:
 		}
 	}
 
-	virtual bool attack(list<Character*>& characters, Character* self) {
+	virtual bool attack(list<CharacterPtr>& characters, CharacterPtr self) {
 		return true;
 	}
 
@@ -310,7 +312,7 @@ public:
 
 	}
 
-	virtual bool attack(list<Character*>& characters, Character* self) {
+	virtual bool attack(list<CharacterPtr>& characters, CharacterPtr self) {
 		std::string moves(STR_MOVES);
 		moved_on_attack = CMD_NONE;
 		char action;
@@ -479,8 +481,8 @@ public:
 	}
 };
 
-typedef std::map<Character*, bool> CharacterBoolMap;
-typedef std::pair<Character*, bool> CharacterBoolPair;
+typedef std::map<CharacterPtr, bool> CharacterBoolMap;
+typedef std::pair<CharacterPtr, bool> CharacterBoolPair;
 
 // struct Game
 struct {
@@ -489,9 +491,9 @@ struct {
 	// [1] : princess
 	// [2] : dragon
 	// [3+]: zombies and other(if any)
-	list<shared_ptr<Character>> characters;
-	list<Object*> objects;
-	list<Object*> empties;
+	list<CharacterPtr> characters;
+	list<ObjectPtr> objects;
+	list<ObjectPtr> empties;
 	Map map;
 
 	bool is_over() {
@@ -510,10 +512,12 @@ struct {
 		for(auto ch: characters) {
 			if (ch->hitpoints() <= 0) {
 				map[ch->getrow()][ch->getcol()].remove(ch);
-				delete ch;
-				// cout << ch;
 			}
 		}
+		characters.remove_if([](CharacterPtr ch) { 
+			return ch->hitpoints() <= 0;
+		});
+
 	}
 
 	void next_turn() {
@@ -524,54 +528,56 @@ struct {
 		for(auto ch: characters) {
 			if (!did_attack[ch]) {
 				ch->move();
-			}
-			// changes will be accepted after calling refresh_characters_objects()
-			// so we can cancel try to move on wall here. prev_coords now match with actual.
-			// there is no check for case when two or more characters going to
-			// step on the same cell, I know
-			if (!map.is_penetrable(ch->getrow(), ch->getcol())) {
-				ch->move_to_prev();
+				// changes will be accepted after calling refresh_characters_objects()
+				// so we can cancel try to move on wall here. prev_coords now match with actual.
+				// there is no check for case when two or more characters going to
+				// step on the same cell, I know
+				if (!map.is_penetrable(ch->getrow(), ch->getcol())) {
+					ch->move_to_prev();
+				}
 			}
 		}
+
 		refresh_characters_objects();
 	}
 
 	inline void render() {
 		cout << map;
-		cout << "HP: " << characters.front()->hitpoints() << "\n\n"; 
+		cout << "HP: " << characters.front()->hitpoints() << "\n"; 
+		cout << "enemies cnt: " << characters.size()-2 << "\n\n";
 	}
 
 	void generate_level() {
-		objects.push_back(new Wall(MAP_HEIGHT/2, MAP_WIDTH/2));
+		objects.push_back(ObjectPtr(new Wall(MAP_HEIGHT/2, MAP_WIDTH/2)));
 		map << objects.back();
 	}
 
 	void init() {
 		for(int i = 0; i < MAP_HEIGHT; i++) {
 			for(int j = 0; j < MAP_WIDTH; j++) {
-				empties.push_back(new Object(i, j));
+				empties.push_back(ObjectPtr(new Object(i, j)));
 				map << empties.back();
 			}
 		}
 		for(int i = 0; i < MAP_HEIGHT; i++) {
-			objects.push_back(new Wall(i, 0));
+			objects.push_back(ObjectPtr(new Wall(i, 0)));
 			map << objects.back();
-			objects.push_back(new Wall(i, MAP_WIDTH-1));
+			objects.push_back(ObjectPtr(new Wall(i, MAP_WIDTH-1)));
 			map << objects.back();
 		}
 		for(int j = 0; j < MAP_WIDTH; j++) {
-			objects.push_back(new Wall(0, j));
+			objects.push_back(ObjectPtr(new Wall(0, j)));
 			map << objects.back();
-			objects.push_back(new Wall(MAP_HEIGHT-1, j));
+			objects.push_back(ObjectPtr(new Wall(MAP_HEIGHT-1, j)));
 			map << objects.back();
 		}
 		generate_level();
 
-		characters.push_back(new Knight(MAP_HEIGHT-2, 1, HP_KNIGHT, DMG_KN_SWORD));
+		characters.push_back(CharacterPtr(new Knight(MAP_HEIGHT-2, 1, HP_KNIGHT, DMG_KN_SWORD)));
 		map << characters.back();
-		characters.push_back(new Princess(1, MAP_WIDTH-2, HP_PRINCESS, DMG_PRINCESS));
+		characters.push_back(CharacterPtr(new Princess(1, MAP_WIDTH-2, HP_PRINCESS, DMG_PRINCESS)));
 		map << characters.back();
-		characters.push_back(new Dragon(4, MAP_WIDTH-4, HP_DRAGON, DMG_DRAGON));
+		characters.push_back(CharacterPtr(new Dragon(4, MAP_WIDTH-4, HP_DRAGON, DMG_DRAGON)));
 		map << characters.back();
 	}
 } Game;
@@ -584,4 +590,5 @@ int main(int argc, char** argv) {
  		Game.next_turn();
  		Game.render();
  	}
+ 	return 0;
 }

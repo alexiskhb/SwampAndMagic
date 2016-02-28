@@ -4,7 +4,7 @@ NAME=game
 
 CC=g++
 
-CFLAGS=-c -Wall -std=c++11
+CFLAGS=-c -Wall -std=c++0x
 
 LIBS=
 

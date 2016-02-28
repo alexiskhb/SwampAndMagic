@@ -1,6 +1,9 @@
 #include <iostream>
 #include <vector>
 #include <list>
+#include <map>
+#include <string>
+#include <memory>
 
 #define cint const int
 
@@ -14,13 +17,15 @@ const char SYM_SWAMP    = '~';
 const char SYM_FLAME    = '*';
 const char SYM_MAGIC    = '%';
 
-const char CMD_QUIT   = 'Q';
+const char*STR_MOVES  = "wasd"; 
 const char CMD_UP     = 'w';
 const char CMD_DOWN   = 's';
 const char CMD_LEFT   = 'a';
 const char CMD_RIGHT  = 'd';
 const char CMD_ATTACK = 'f';
 const char CMD_MAGIC  = 'r';
+const char CMD_NONE   = 'n';
+const char CMD_QUIT   = 'Q';
 
 const int MAP_HEIGHT  = 30; 
 const int MAP_WIDTH   = 60; 
@@ -30,8 +35,8 @@ const int HP_PRINCESS = 2;
 const int HP_DRAGON   = 200;
 const int HP_ZOMBIE   = 20; 
 
-const int DMG_KN_SWORD = 7; 
-const int DMG_KN_MAGIC = 6; 
+const int DMG_KN_SWORD = 7*10; 
+const int DMG_KN_MAGIC = 6*10; 
 const int DMG_PRINCESS = 0; 
 const int DMG_DRAGON   = 10;
 const int DMG_FIRE     = 4; 
@@ -45,7 +50,6 @@ const int DMG_ZOMBIE   = 3;
 
 using namespace std;
 
-
 class Map;
 
 
@@ -55,6 +59,10 @@ public:
 	}
 
 	Object(int arow, int acol) : row(arow), col(acol), prev_row(arow), prev_col(acol) {
+	}
+
+	virtual ~Object() {
+
 	}
 
 	// if two objects are NEAR but do not match
@@ -97,7 +105,7 @@ public:
 		return true;
 	}
 
-	virtual bool is_enemy() {
+	virtual bool is_evil() {
 		return true;
 	}
 
@@ -156,6 +164,10 @@ public:
 
 	}
 
+	virtual ~Wall() {
+
+	}
+
 	virtual char symbol() {
 		return SYM_WALL;
 	}
@@ -170,6 +182,10 @@ class Flame : public Object {
 public:
 	Flame(int arow, int acol) : Object(arow, acol) {
 		lifetime = 6;
+	}
+
+	virtual ~Flame() {
+
 	}
 
 	virtual char symbol() {
@@ -188,6 +204,10 @@ public:
 
 	}
 
+	virtual ~Swamp() {
+
+	}
+
 	virtual char symbol() {
 		return SYM_SWAMP;
 	}
@@ -202,6 +222,10 @@ class Magic : public Object {
 public:
 	Magic(int arow, int acol) : Object(arow, acol) {
 		lifetime = 5;
+	}
+
+	virtual ~Magic() {
+
 	}
 
 	virtual char symbol() {
@@ -223,15 +247,32 @@ public:
 		damage = dmg;
 	}
 
+	virtual ~Character() {
+
+	}
+
+	void slash(list<Character*>& characters, Character* self) {
+		for(auto ch: characters) {
+			if (ch != self && *ch%*self) {
+				ch->suffer(damage);
+			}
+		}
+	}
+
+	virtual bool attack(list<Character*>& characters, Character* self) {
+		return true;
+	}
+
+	virtual int hitpoints() {
+		return health;
+	}
+
 	// returns True if character died
 	virtual bool suffer(int dmg) {
 		return (health -= dmg) <= 0;
 	}
 
-	virtual void move() {
-		prev_row = row;
-		prev_col = col;
-	}
+	virtual bool move()=0;
 
 	// all characters are impenetrable
 	virtual bool is_penetrable() {
@@ -249,45 +290,101 @@ public:
 
 	}
 
+	Knight(int arow, int acol, int hp, int dmg) : Character(arow, acol, hp, dmg) {
+
+	}
+
+	virtual ~Knight() {
+
+	}
+
 	virtual char symbol() {
 		return SYM_KNIGHT;
 	}
 
-	virtual void move() {
+	virtual bool is_evil() {
+		return false;
+	}
+
+	void magic(char direction) {
+
+	}
+
+	virtual bool attack(list<Character*>& characters, Character* self) {
+		std::string moves(STR_MOVES);
+		moved_on_attack = CMD_NONE;
+		char action;
+		cin >> action;
+		// condition means player wants to move
+		if (moves.find(action) != std::string::npos) {
+			moved_on_attack = action;
+			return false;
+		}	
+		switch (action) {
+			case CMD_ATTACK: {
+				slash(characters, self);
+				return true;	
+			}
+			case CMD_MAGIC: {
+				char direction;
+				cin >> direction;
+				magic(direction);
+				return true;
+			}
+		}
+		return true;
+	}
+
+	virtual bool move() {
 		prev_row = row;
 		prev_col = col;
 		char action;
-		cin >> action;
+		if (moved_on_attack == CMD_NONE) {
+			cin >> action;
+		}
+		else {
+			action = moved_on_attack;
+		}
 		switch (action) {
 			case CMD_UP: {
 				--row;
-				break;	
+				return true;	
 			}
 			case CMD_DOWN: {
 				++row;
-				break;	
+				return true;
 			}
 			case CMD_LEFT: {
 				--col;
-				break;	
+				return true;
 			}
 			case CMD_RIGHT: {
 				++col;
-				break;	
+				return true;
 			}
 		}
+		return false;
 	}
 
 	virtual bool suffer(int dmg) {
 		return (health -= dmg) <= 0;
 	}
-
+private:
+	char moved_on_attack;
 };
 
 
 class Princess : public Character {
 public:
 	Princess(int arow, int acol) : Character(arow, acol) {
+
+	}
+
+	Princess(int arow, int acol, int hp, int dmg) : Character(arow, acol, hp, dmg) {
+
+	}
+
+	virtual ~Princess() {
 
 	}
 
@@ -299,9 +396,10 @@ public:
 		return (health -= dmg) <= 0;
 	}
 
-	virtual void move() {
+	virtual bool move() {
 		prev_row = row;
 		prev_col = col;
+		return false;
 	}
 };
 
@@ -309,6 +407,14 @@ public:
 class Monster : public Character {
 public:
 	Monster(int arow, int acol) : Character(arow, acol) {
+
+	}
+
+	Monster(int arow, int acol, int hp, int dmg) : Character(arow, acol, hp, dmg) {
+
+	}
+
+	virtual ~Monster() {
 
 	}
 };
@@ -320,6 +426,14 @@ public:
 
 	}
 
+	Dragon(int arow, int acol, int hp, int dmg) : Monster(arow, acol, hp, dmg) {
+
+	}
+
+	virtual ~Dragon() {
+
+	}
+
 	virtual char symbol() {
 		return SYM_DRAGON;
 	}
@@ -328,9 +442,10 @@ public:
 		return (health -= dmg) <= 0;
 	}
 
-	virtual void move() {
+	virtual bool move() {
 		prev_row = row;
 		prev_col = col;
+		return true;
 	}
 };
 
@@ -338,6 +453,14 @@ public:
 class Zombie : public Monster {
 public:
 	Zombie(int arow, int acol) : Monster(arow, acol) {
+
+	}
+
+	Zombie(int arow, int acol, int hp, int dmg) : Monster(arow, acol, hp, dmg) {
+
+	}
+
+	virtual ~Zombie() {
 
 	}
 
@@ -349,15 +472,24 @@ public:
 		return (health -= dmg) <= 0;
 	}
 
-	virtual void move() {
+	virtual bool move() {
 		prev_row = row;
 		prev_col = col;
+		return true;
 	}
 };
 
+typedef std::map<Character*, bool> CharacterBoolMap;
+typedef std::pair<Character*, bool> CharacterBoolPair;
 
+// struct Game
 struct {
-	list<Character*> characters;
+	// CHARACTERS
+	// [0] : player(knight)
+	// [1] : princess
+	// [2] : dragon
+	// [3+]: zombies and other(if any)
+	list<shared_ptr<Character>> characters;
 	list<Object*> objects;
 	list<Object*> empties;
 	Map map;
@@ -366,30 +498,37 @@ struct {
 		return false;
 	}
 
-	void draw_objects() {
-
-	}
-
-	void draw_characters() {
-
-	}
-
 	void refresh_characters_objects() {
-		for(auto ch: characters) {
-			map[ch->prevrow()][ch->prevcol()].remove(ch);
-			map << ch;
-		}
 		for(auto obj: objects) {
 			map[obj->prevrow()][obj->prevcol()].remove(obj);
 			map << obj;	
 		}
+		for(auto ch: characters) {
+			map[ch->prevrow()][ch->prevcol()].remove(ch);
+			map << ch;
+		}
+		for(auto ch: characters) {
+			if (ch->hitpoints() <= 0) {
+				map[ch->getrow()][ch->getcol()].remove(ch);
+				delete ch;
+				// cout << ch;
+			}
+		}
 	}
 
 	void next_turn() {
+		CharacterBoolMap did_attack;
 		for(auto ch: characters) {
-			ch->move();
-			// changes will be accepted after calling refresh_characters_objects
-			// so we can cancel move here. but prev_coords now match with actual
+			did_attack.insert(CharacterBoolPair(ch, ch->attack(characters, ch)));
+		}
+		for(auto ch: characters) {
+			if (!did_attack[ch]) {
+				ch->move();
+			}
+			// changes will be accepted after calling refresh_characters_objects()
+			// so we can cancel try to move on wall here. prev_coords now match with actual.
+			// there is no check for case when two or more characters going to
+			// step on the same cell, I know
 			if (!map.is_penetrable(ch->getrow(), ch->getcol())) {
 				ch->move_to_prev();
 			}
@@ -397,12 +536,14 @@ struct {
 		refresh_characters_objects();
 	}
 
-	void render() {
-		cout << map << endl;
+	inline void render() {
+		cout << map;
+		cout << "HP: " << characters.front()->hitpoints() << "\n\n"; 
 	}
 
 	void generate_level() {
-
+		objects.push_back(new Wall(MAP_HEIGHT/2, MAP_WIDTH/2));
+		map << objects.back();
 	}
 
 	void init() {
@@ -426,11 +567,11 @@ struct {
 		}
 		generate_level();
 
-		characters.push_back(new Knight(MAP_HEIGHT-2, 1));
+		characters.push_back(new Knight(MAP_HEIGHT-2, 1, HP_KNIGHT, DMG_KN_SWORD));
 		map << characters.back();
-		characters.push_back(new Princess(1, MAP_WIDTH-2));
+		characters.push_back(new Princess(1, MAP_WIDTH-2, HP_PRINCESS, DMG_PRINCESS));
 		map << characters.back();
-		characters.push_back(new Dragon(4, MAP_WIDTH-4));
+		characters.push_back(new Dragon(4, MAP_WIDTH-4, HP_DRAGON, DMG_DRAGON));
 		map << characters.back();
 	}
 } Game;
@@ -444,7 +585,3 @@ int main(int argc, char** argv) {
  		Game.render();
  	}
 }
-
-
-
-

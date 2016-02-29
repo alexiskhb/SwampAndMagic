@@ -35,16 +35,12 @@ struct {
 			map << obj;	
 		}
 		for(auto ch: characters) {
-			map[ch->prevrow()][ch->prevcol()].remove(ch);
-			map << ch;
-		}
-		for(auto ch: characters) {
 			if (ch->hitpoints() <= 0) {
 				map[ch->getrow()][ch->getcol()].remove(ch);
 			}
 		}
-		characters.remove_if([](CharacterPtr ch) { 
-			return ch->hitpoints() <= 0;
+		characters.remove_if([&](CharacterPtr ch) {
+			return ch->hitpoints() <= 0 && ch != knight;
 		});
 	}
 
@@ -60,18 +56,18 @@ struct {
 				ch->move();
 				// changes will be accepted after calling refresh_characters_objects()
 				// so we can cancel try to move on wall here. prev_coords now match with actual.
-				// there is no check for case when two or more characters going to
-				// step on the same cell, I know
 				if (!map.is_penetrable(ch->getrow(), ch->getcol())) {
 					ch->move_to_prev();
 				}
+				else {
+					// here we attach a cell to character
+					// so other characters can not step on it
+					map[ch->prevrow()][ch->prevcol()].remove(ch);
+					map << ch;
+				}
 			}
 		}
-
-		refresh_characters_objects();
-
-		characters.push_back(CharacterPtr(new Dragon(4, MAP_WIDTH-4, HP_DRAGON, DMG_DRAGON)));
-		map << characters.back();
+		refresh_characters_objects();		
 	}
 
 	inline void render() {

@@ -1,4 +1,6 @@
-#include "game_objects.h"
+#include "base_objects.h"
+#include "objects.h"
+#include "characters.h"
 #include <iostream>
 #include <map>
 #include <ctime>

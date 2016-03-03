@@ -4,15 +4,15 @@ NAME=game
 
 CC=g++
 
-CFLAGS=-c -Wall -std=c++0x
+CFLAGS=-c -Wall -std=c++11
 
 LIBS=
 
-SRC=$(NAME).cpp $(NAME)_objects.cpp
+SRC=$(NAME).cpp base_objects.cpp objects.cpp characters.cpp
 
 OBJ=$(SRC:.cpp=.o)
 
-all: $(NAME)	
+all: $(NAME)
 
 game: $(OBJ)
 	$(CC) $(OBJ) $(LIBS) -o $(NAME)

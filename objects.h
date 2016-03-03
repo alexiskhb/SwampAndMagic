@@ -6,6 +6,8 @@
 class Object : public BaseObject {
 public:
 	Object(int arow, int acol);
+
+	virtual bool is_penetrable();
 };
 
 
@@ -32,8 +34,6 @@ public:
 	virtual ~Flame();
 
 	virtual char symbol();
-
-	virtual bool is_penetrable();
 };
 
 
@@ -47,8 +47,6 @@ public:
 	virtual ~Swamp();
 
 	virtual char symbol();
-
-	virtual bool is_penetrable();
 };
 
 
@@ -62,6 +60,4 @@ public:
 	virtual ~Magic();
 
 	virtual char symbol();
-
-	virtual bool is_penetrable();
 };

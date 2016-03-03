@@ -8,6 +8,10 @@ using namespace std;
 Object::Object(int arow, int acol) : BaseObject(arow, acol) {
 }
 
+bool Object::is_penetrable() {
+	return true;
+}
+
 
 
 Wall::Wall(int arow, int acol) : Object(arow, acol) {
@@ -42,10 +46,6 @@ char Flame::symbol() {
 	return SYM_FLAME;
 }
 
-bool Flame::is_penetrable(){
-	return true;
-}
-
 
 
 
@@ -60,10 +60,6 @@ Swamp::~Swamp() {
 
 char Swamp::symbol() {
 	return SYM_SWAMP;
-}
-
-bool Swamp::is_penetrable() {
-	return true;
 }
 
 
@@ -81,8 +77,4 @@ Magic::~Magic() {
 
 char Magic::symbol() {
 	return SYM_MAGIC;
-}
-
-bool Magic::is_penetrable() {
-	return true;
 }

@@ -55,7 +55,7 @@ struct {
 		}
 		for(auto ch: characters) {
 			if (!did_attack[ch]) {
-				ch->move();
+				ch->move(map, characters);
 				// changes will be accepted after calling refresh_characters_objects()
 				// so we can cancel try to move on wall here. prev_coords now match with actual.
 				if (!map.is_penetrable(ch->getrow(), ch->getcol())) {
@@ -69,7 +69,7 @@ struct {
 				}
 			}
 		}
-		refresh_characters_objects();		
+		refresh_characters_objects();
 	}
 
 	inline void render() {
@@ -111,6 +111,10 @@ struct {
 		map << characters.back();
 		characters.push_back(CharacterPtr(new Dragon(4, MAP_WIDTH-4, HP_DRAGON, DMG_DRAGON)));
 		map << characters.back();
+		for(int i = 1; i < 20; i++) {
+			characters.push_back(CharacterPtr(new Zombie(MAP_HEIGHT-4, i, HP_ZOMBIE, DMG_ZOMBIE)));
+			map << characters.back();
+		}
 	}
 } Game;
 

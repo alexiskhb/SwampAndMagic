@@ -58,7 +58,7 @@ void BaseObject::move_to_prev() {
 
 char BaseObject::symbol() {
 	return SYM_EMPTY;
-}	
+}
 
 bool BaseObject::is_penetrable() {
 	return true;
@@ -75,7 +75,13 @@ bool BaseObject::is_evil() {
 BaseObjectPtr Map::operator<<(BaseObjectPtr obj) {
 	int row = obj->getrow();
 	int col = obj->getcol();
-	map[row][col].push_back(obj);
+	// impenetrable objects should be in the back of the list
+	if (obj->is_penetrable()) {
+		map[row][col].push_front(obj);
+	}
+	else {
+		map[row][col].push_back(obj);
+	}
 	return obj;
 }
 
@@ -99,12 +105,139 @@ int Map::get_height() {
 
 int Map::get_width() {
 	return width;
-}	
+}
+
+void Map::clear_distances() {
+	fill(distance, distance + width*height, 0);
+}
+
+IntIntPairList Map::shortest_way(IntIntPair from, IntIntPair to) {
+	IntIntPairList way;
+	IntIntPairList temp_way;
+	int r = from.first;
+	int c = from.second;
+	int d = 0;
+	bool found = false;
+	IntIntPair target;
+	temp_way.push_back(IntIntPair(r, c));
+	while (temp_way.size() > 0) {
+		r = temp_way.front().first;
+		c = temp_way.front().second;
+		if (abs(r - to.first) <= 1 && abs(c - to.second) <= 1) {
+			found = true;
+			target = IntIntPair(r, c);
+			break;
+		}
+		d = get_distance(r, c);
+		temp_way.pop_front();
+		if (get_distance(r - 1, c) == 0 && is_on_the_map(r - 1, c) && is_penetrable(r - 1, c)) {
+			temp_way.push_back(IntIntPair(r - 1, c));
+			set_distance(r - 1, c, d + 1);
+		}
+		if (get_distance(r, c + 1) == 0 && is_on_the_map(r, c + 1) && is_penetrable(r, c + 1)) {
+			temp_way.push_back(IntIntPair(r, c + 1));
+			set_distance(r, c + 1, d + 1);
+		}
+		if (get_distance(r + 1, c) == 0 && is_on_the_map(r + 1, c) && is_penetrable(r + 1, c)) {
+			temp_way.push_back(IntIntPair(r + 1, c));
+			set_distance(r + 1, c, d + 1);
+		}
+		if (get_distance(r, c - 1) == 0 && is_on_the_map(r, c - 1) && is_penetrable(r, c - 1)) {
+			temp_way.push_back(IntIntPair(r, c - 1));
+			set_distance(r, c - 1, d + 1);
+		}
+
+		if (get_distance(r - 1, c - 1) == 0 && is_on_the_map(r - 1, c - 1) && is_penetrable(r - 1, c - 1)) {
+			temp_way.push_back(IntIntPair(r - 1, c - 1));
+			set_distance(r - 1, c - 1, d + 1);
+		}
+		if (get_distance(r - 1, c + 1) == 0 && is_on_the_map(r - 1, c + 1) && is_penetrable(r - 1, c + 1)) {
+			temp_way.push_back(IntIntPair(r - 1, c + 1));
+			set_distance(r - 1, c + 1, d + 1);
+		}
+		if (get_distance(r + 1, c + 1) == 0 && is_on_the_map(r + 1, c + 1) && is_penetrable(r + 1, c + 1)) {
+			temp_way.push_back(IntIntPair(r + 1, c + 1));
+			set_distance(r + 1, c + 1, d + 1);
+		}
+		if (get_distance(r + 1, c - 1) == 0 && is_on_the_map(r + 1, c - 1) && is_penetrable(r + 1, c - 1)) {
+			temp_way.push_back(IntIntPair(r + 1, c - 1));
+			set_distance(r + 1, c - 1, d + 1);
+		}
+	}
+	if (found) {
+		r = target.first;
+		c = target.second;
+		d = get_distance(r, c);
+		while (d > 0) {
+			way.push_front(IntIntPair(r, c));
+			if (get_distance(r - 1, c) == d - 1) {
+				r = r - 1;
+				--d;
+				continue;
+			}
+			if (get_distance(r, c + 1) == d - 1) {
+				c = c + 1;
+				--d;
+				continue;
+			}
+			if (get_distance(r + 1, c) == d - 1) {
+				r = r + 1;
+				--d;
+				continue;
+			}
+			if (get_distance(r, c - 1) == d - 1) {
+				c = c - 1;
+				--d;
+				continue;
+			}
+
+			if (get_distance(r - 1, c - 1) == d - 1) {
+				r = r - 1;
+				c = c - 1;
+				--d;
+				continue;
+			}
+			if (get_distance(r - 1, c + 1) == d - 1) {
+				r = r - 1;
+				c = c + 1;
+				--d;
+				continue;
+			}
+			if (get_distance(r + 1, c + 1) == d - 1) {
+				r = r + 1;
+				c = c + 1;
+				--d;
+				continue;
+			}
+			if (get_distance(r + 1, c - 1) == d - 1) {
+				r = r + 1;
+				c = c - 1;
+				--d;
+				continue;
+			}
+			--d;
+		}
+	}
+	clear_distances();
+	return way;
+}
 
 bool Map::is_penetrable(int arow, int acol) {
-	bool is_p = true;
-	for(auto obj: map[arow][acol]) {
-		is_p &= obj->is_penetrable();
-	}
-	return is_p;
+	// we know that impenetrable objects should be in the back of the list
+	return map[arow][acol].back()->is_penetrable();
+}
+
+inline void Map::set_distance(int arow, int acol, int value) {
+	distance[arow*width + acol] = value;
+}
+
+inline int Map::get_distance(int arow, int acol) {
+	return distance[arow*width + acol];
+}
+
+inline bool Map::is_on_the_map(int arow, int acol) {
+	// TODO
+	// remove this line to get an opportunity to throw off monsters
+	return true;
+	return arow >= 0 && acol >= 0 && arow < height && acol < width;
 }

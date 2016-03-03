@@ -6,10 +6,11 @@
 #include <string>
 #include <memory>
 #include <ctime>
+#include <algorithm>
 
 extern bool chance(int a, std::string s);
 
-// map is 4-connected area
+// map is 8-connected area
 
 static const char SYM_EMPTY    = ' ';
 static const char SYM_WALL     = '#';
@@ -45,6 +46,8 @@ class Character;
 typedef std::shared_ptr<BaseObject> BaseObjectPtr;
 typedef std::shared_ptr<Object> ObjectPtr;
 typedef std::shared_ptr<Character> CharacterPtr;
+typedef std::pair<int,int> IntIntPair;
+typedef std::list<IntIntPair> IntIntPairList;
 
 
 class BaseObject {
@@ -99,11 +102,18 @@ public:
 
 	int get_height();
 
-	int get_width();	
+	int get_width();
+
+	IntIntPairList shortest_way(IntIntPair from, IntIntPair to);
 private:
+	void clear_distances();
+	inline void set_distance(int arow, int acol, int value);
+	inline int  get_distance(int arow, int acol);
+	inline bool is_on_the_map(int arow, int acol);
 	int height = MAP_HEIGHT;
 	int width  = MAP_WIDTH;
 	std::list<BaseObjectPtr> map[MAP_HEIGHT][MAP_WIDTH];
+	int distance[MAP_HEIGHT * MAP_WIDTH];
 };
 
 std::ostream& operator<<(std::ostream& display, Map& m);

@@ -1,10 +1,14 @@
 #include "characters.h"
 
-static const char*STR_MOVES  = "wasd"; 
+static const char*STR_MOVES  = "wasdqezc"; 
 static const char CMD_UP     = 'w';
 static const char CMD_DOWN   = 's';
 static const char CMD_LEFT   = 'a';
 static const char CMD_RIGHT  = 'd';
+static const char CMD_LUP    = 'q';
+static const char CMD_LDOWN  = 'z';
+static const char CMD_RUP    = 'e';
+static const char CMD_RDOWN  = 'c';
 static const char CMD_ATTACK = 'f';
 static const char CMD_MAGIC  = 'r';
 static const char CMD_NONE   = 'n';
@@ -36,7 +40,7 @@ void Character::slash(list<CharacterPtr>& characters, CharacterPtr self) {
 }
 
 bool Character::attack(list<CharacterPtr>& characters, list<ObjectPtr>& objects, CharacterPtr self) {
-	return true;
+	return false;
 }
 
 int Character::hitpoints() {
@@ -109,7 +113,7 @@ bool Knight::attack(list<CharacterPtr>& characters, list<ObjectPtr>& objects, Ch
 	return true;
 }
 
-bool Knight::move() {
+bool Knight::move(Map& m, std::list<CharacterPtr>& characters) {
 	prev_row = row;
 	prev_col = col;
 	char action;
@@ -133,6 +137,26 @@ bool Knight::move() {
 			return true;
 		}
 		case CMD_RIGHT: {
+			++col;
+			return true;
+		}
+		case CMD_LUP: {
+			--row;
+			--col;
+			return true;	
+		}
+		case CMD_LDOWN: {
+			++row;
+			--col;
+			return true;
+		}
+		case CMD_RUP: {
+			--row;
+			++col;
+			return true;
+		}
+		case CMD_RDOWN: {
+			++row;
 			++col;
 			return true;
 		}
@@ -168,7 +192,7 @@ bool Princess::suffer(int dmg) {
 	return (health -= dmg) <= 0;
 }
 
-bool Princess::move() {
+bool Princess::move(Map& m, std::list<CharacterPtr>& characters) {
 	prev_row = row;
 	prev_col = col;
 	return false;
@@ -190,8 +214,11 @@ Monster::~Monster() {
 
 }
 
-
-
+IntIntPairList Monster::shortest_way_to(BaseObjectPtr obj, Map& m) {
+	return m.shortest_way(
+		IntIntPair(this->getrow(), this->getcol()), 
+		IntIntPair(obj ->getrow(), obj ->getcol()));
+}
 
 
 Dragon::Dragon(int arow, int acol) : Monster(arow, acol) {
@@ -231,10 +258,10 @@ bool Dragon::suffer(int dmg) {
 	return (health -= dmg) <= 0;
 }
 
-bool Dragon::move() {
+bool Dragon::move(Map& m, std::list<CharacterPtr>& characters) {
 	prev_row = row;
 	prev_col = col;
-	if (chance(100, "dragon")) {
+	if (chance(65, "")) {
 		row += dz_1[rand()%2];
 		col += dz_1[rand()%2];
 	}
@@ -265,8 +292,14 @@ bool Zombie::suffer(int dmg) {
 	return (health -= dmg) <= 0;
 }
 
-bool Zombie::move() {
+bool Zombie::move(Map& m, std::list<CharacterPtr>& characters) {
 	prev_row = row;
 	prev_col = col;
+	way = shortest_way_to(characters.front(), m);
+	if (way.size() > 0) {
+		row = way.front().first;
+		col = way.front().second;
+		way.pop_front();
+	}
 	return true;
 }

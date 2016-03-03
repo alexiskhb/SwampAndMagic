@@ -4,6 +4,12 @@
 using namespace std;
 
 
+
+Object::Object(int arow, int acol) : BaseObject(arow, acol) {
+}
+
+
+
 Wall::Wall(int arow, int acol) : Object(arow, acol) {
 
 }

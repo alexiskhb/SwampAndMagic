@@ -7,8 +7,7 @@
 #include <memory>
 #include <ctime>
 
-
-#define chance(a) (rand()%1000 + 1 <= 10*a)
+extern bool chance(int a, std::string s);
 
 // map is 4-connected area
 
@@ -38,23 +37,28 @@ static const int DMG_FIRE     = 4;
 static const int DMG_ZOMBIE   = 3;
 
 
-
 class Map;
+class BaseObject;
+class Object;
+class Character;
+
+typedef std::shared_ptr<BaseObject> BaseObjectPtr;
+typedef std::shared_ptr<Object> ObjectPtr;
+typedef std::shared_ptr<Character> CharacterPtr;
 
 
-
-class Object {
+class BaseObject {
 public:
-	Object();
+	BaseObject();
 
-	Object(int arow, int acol);
+	BaseObject(int arow, int acol);
 
-	virtual ~Object();
+	virtual ~BaseObject();
 
 	// if two objects are NEAR but do not match
-	bool operator%(const Object& obj);
+	bool operator%(const BaseObject& obj);
 
-	bool operator==(const Object& obj);
+	bool operator==(const BaseObject& obj);
 
 	int getrow();
 
@@ -85,15 +89,11 @@ protected:
 
 
 
-typedef std::shared_ptr<Object> ObjectPtr;
-
-
-
 class Map {
 public:
-	ObjectPtr operator<<(ObjectPtr obj);
+	BaseObjectPtr operator<<(BaseObjectPtr obj);
 
-	std::list<ObjectPtr>* operator[](int index);
+	std::list<BaseObjectPtr>* operator[](int index);
 
 	bool is_penetrable(int arow, int acol);
 
@@ -103,7 +103,7 @@ public:
 private:
 	int height = MAP_HEIGHT;
 	int width  = MAP_WIDTH;
-	std::list<ObjectPtr> map[MAP_HEIGHT][MAP_WIDTH];
+	std::list<BaseObjectPtr> map[MAP_HEIGHT][MAP_WIDTH];
 };
 
 std::ostream& operator<<(std::ostream& display, Map& m);

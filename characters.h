@@ -3,13 +3,7 @@
 #include "base_objects.h"
 
 
-class Character;
-
-typedef std::shared_ptr<Character> CharacterPtr;
-
-
-
-class Character : public Object {
+class Character : public BaseObject {
 public:
 	Character(int arow, int acol);
 
@@ -33,8 +27,6 @@ public:
 protected:
 	int health = 1;
 };
-
-
 
 
 

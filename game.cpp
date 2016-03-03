@@ -21,7 +21,7 @@ struct {
 	// [3+]: zombies and other(if any)
 	std::list<CharacterPtr> characters;
 	std::list<ObjectPtr> objects;
-	std::list<ObjectPtr> empties;
+	std::list<BaseObjectPtr> empties;
 	CharacterPtr knight   = CharacterPtr(new Knight(4, MAP_WIDTH-3, HP_KNIGHT, DMG_KN_SWORD));
 	CharacterPtr princess = CharacterPtr(new Princess(1, MAP_WIDTH-2, HP_PRINCESS, DMG_PRINCESS));
 	Map map;

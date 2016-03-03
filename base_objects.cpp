@@ -3,61 +3,68 @@
 
 using namespace std;
 
+bool chance(int a, std::string s) {
+	a = 101 - a;
+	int result = rand()%1000 + 1;
+	if (s.size() > 0) {
+		cout << "result of " << s << " is " << result/10 << ". need " << a << endl;
+	}
+	return result >= 10*a;
+}
 
-
-Object::Object() {
+BaseObject::BaseObject() {
 
 }
 
-Object::Object(int arow, int acol) : row(arow), col(acol), prev_row(arow), prev_col(acol) {
+BaseObject::BaseObject(int arow, int acol) : row(arow), col(acol), prev_row(arow), prev_col(acol) {
 	
 }
 
-Object::~Object() {
+BaseObject::~BaseObject() {
 
 }
 
 // if two objects are NEAR but do not match
-bool Object::operator%(const Object& obj) {
+bool BaseObject::operator%(const BaseObject& obj) {
 	return 
 		(abs(row - obj.row) == 1 && abs(col - obj.col) == 0) ||
 		(abs(row - obj.row) == 0 && abs(col - obj.col) == 1);
 }
 
-bool Object::operator==(const Object& obj) {
+bool BaseObject::operator==(const BaseObject& obj) {
 	return row == obj.row && col == obj.col;
 }
 
-int Object::getrow() {
+int BaseObject::getrow() {
 	return row;
 }
 
-int Object::getcol() {
+int BaseObject::getcol() {
 	return col;
 }
 
-int Object::prevrow() {
+int BaseObject::prevrow() {
 	return prev_row;
 }
 
-int Object::prevcol() {
+int BaseObject::prevcol() {
 	return prev_col;
 }
 
-void Object::move_to_prev() {
+void BaseObject::move_to_prev() {
 	row = prev_row;
 	col = prev_col;
 }
 
-char Object::symbol() {
+char BaseObject::symbol() {
 	return SYM_EMPTY;
 }	
 
-bool Object::is_penetrable() {
+bool BaseObject::is_penetrable() {
 	return true;
 }
 
-bool Object::is_evil() {
+bool BaseObject::is_evil() {
 	return true;
 }
 
@@ -65,7 +72,7 @@ bool Object::is_evil() {
 
 
 
-ObjectPtr Map::operator<<(ObjectPtr obj) {
+BaseObjectPtr Map::operator<<(BaseObjectPtr obj) {
 	int row = obj->getrow();
 	int col = obj->getcol();
 	map[row][col].push_back(obj);
@@ -82,7 +89,7 @@ ostream& operator<<(ostream& display, Map& m) {
 	return display;
 }
 
-list<ObjectPtr>* Map::operator[](int index) {
+list<BaseObjectPtr>* Map::operator[](int index) {
 	return map[index];
 }
 

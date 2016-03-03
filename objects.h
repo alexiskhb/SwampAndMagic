@@ -2,6 +2,14 @@
 
 #include "base_objects.h"
 
+
+class Object : public BaseObject {
+public:
+	Object(int arow, int acol);
+};
+
+
+
 class Wall : public Object {
 public:
 	Wall(int arow, int acol);

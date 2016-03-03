@@ -13,11 +13,13 @@ static const char CMD_QUIT   = 'Q';
 
 using namespace std;
 
+int dz_1[2] = {1, -1};
 
-Character::Character(int arow, int acol) : Object(arow, acol) {
+
+Character::Character(int arow, int acol) : BaseObject(arow, acol) {
 }
 
-Character::Character(int arow, int acol, int hp, int dmg) : Object(arow, acol), health(hp) {
+Character::Character(int arow, int acol, int hp, int dmg) : BaseObject(arow, acol), health(hp) {
 	damage = dmg;
 }
 
@@ -216,7 +218,7 @@ bool Dragon::attack(list<CharacterPtr>& characters, list<ObjectPtr>& objects, Ch
 	}
 	if (abs(knight->getrow() - row) < 10 && abs(knight->getcol() - col) < 10) {
 		magic();
-		return chance(40);
+		return false;
 	}
 	return false;
 }
@@ -232,7 +234,11 @@ bool Dragon::suffer(int dmg) {
 bool Dragon::move() {
 	prev_row = row;
 	prev_col = col;
-	return true;
+	if (chance(100, "dragon")) {
+		row += dz_1[rand()%2];
+		col += dz_1[rand()%2];
+	}
+	return false;
 }
 
 

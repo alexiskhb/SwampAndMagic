@@ -17,7 +17,7 @@ static const char CMD_QUIT   = 'Q';
 
 using namespace std;
 
-int dz_1[2] = {1, -1};
+int dz_1[3] = {0, 1, -1};
 
 
 Character::Character(int arow, int acol) : BaseObject(arow, acol) {
@@ -262,8 +262,8 @@ bool Dragon::move(Map& m, std::list<CharacterPtr>& characters) {
 	prev_row = row;
 	prev_col = col;
 	if (chance(65, "")) {
-		row += dz_1[rand()%2];
-		col += dz_1[rand()%2];
+		row += dz_1[rand()%3];
+		col += dz_1[rand()%3];
 	}
 	return false;
 }
@@ -300,6 +300,10 @@ bool Zombie::move(Map& m, std::list<CharacterPtr>& characters) {
 		row = way.front().first;
 		col = way.front().second;
 		way.pop_front();
+	}
+	else {
+		row += dz_1[rand()%3];
+		col += dz_1[rand()%3];
 	}
 	return true;
 }

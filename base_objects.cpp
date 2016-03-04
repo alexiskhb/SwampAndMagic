@@ -56,6 +56,10 @@ void BaseObject::move_to_prev() {
 	col = prev_col;
 }
 
+bool BaseObject::is_alive() {
+	return health > 0;
+}
+
 char BaseObject::symbol() {
 	return SYM_EMPTY;
 }
@@ -77,7 +81,7 @@ BaseObjectPtr Map::operator<<(BaseObjectPtr obj) {
 	int col = obj->getcol();
 	// impenetrable objects should be in the back of the list
 	if (obj->is_penetrable()) {
-		map[row][col].push_front(obj);
+		map[row][col].insert(next(map[row][col].begin()), obj);
 	}
 	else {
 		map[row][col].push_back(obj);
@@ -130,92 +134,39 @@ IntIntPairList Map::shortest_way(IntIntPair from, IntIntPair to) {
 		}
 		d = get_distance(r, c);
 		temp_way.pop_front();
-		if (get_distance(r - 1, c) == 0 && is_on_the_map(r - 1, c) && is_penetrable(r - 1, c)) {
-			temp_way.push_back(IntIntPair(r - 1, c));
-			set_distance(r - 1, c, d + 1);
+		for(int i = -1; i <= 1; i++) {
+			for(int j = -1; j <= 1; j++) {
+				if (i == 0 && j == 0) {
+					continue;
+				}
+				if (get_distance(r + i, c + j) == 0 && is_on_the_map(r + i, c + j) && is_penetrable(r + i, c + j)) {
+					temp_way.push_back(IntIntPair(r + i, c + j));
+					set_distance(r + i, c + j, d + 1);
+				}
+			}
 		}
-		if (get_distance(r, c + 1) == 0 && is_on_the_map(r, c + 1) && is_penetrable(r, c + 1)) {
-			temp_way.push_back(IntIntPair(r, c + 1));
-			set_distance(r, c + 1, d + 1);
-		}
-		if (get_distance(r + 1, c) == 0 && is_on_the_map(r + 1, c) && is_penetrable(r + 1, c)) {
-			temp_way.push_back(IntIntPair(r + 1, c));
-			set_distance(r + 1, c, d + 1);
-		}
-		if (get_distance(r, c - 1) == 0 && is_on_the_map(r, c - 1) && is_penetrable(r, c - 1)) {
-			temp_way.push_back(IntIntPair(r, c - 1));
-			set_distance(r, c - 1, d + 1);
-		}
-
-		if (get_distance(r - 1, c - 1) == 0 && is_on_the_map(r - 1, c - 1) && is_penetrable(r - 1, c - 1)) {
-			temp_way.push_back(IntIntPair(r - 1, c - 1));
-			set_distance(r - 1, c - 1, d + 1);
-		}
-		if (get_distance(r - 1, c + 1) == 0 && is_on_the_map(r - 1, c + 1) && is_penetrable(r - 1, c + 1)) {
-			temp_way.push_back(IntIntPair(r - 1, c + 1));
-			set_distance(r - 1, c + 1, d + 1);
-		}
-		if (get_distance(r + 1, c + 1) == 0 && is_on_the_map(r + 1, c + 1) && is_penetrable(r + 1, c + 1)) {
-			temp_way.push_back(IntIntPair(r + 1, c + 1));
-			set_distance(r + 1, c + 1, d + 1);
-		}
-		if (get_distance(r + 1, c - 1) == 0 && is_on_the_map(r + 1, c - 1) && is_penetrable(r + 1, c - 1)) {
-			temp_way.push_back(IntIntPair(r + 1, c - 1));
-			set_distance(r + 1, c - 1, d + 1);
-		}
+		
 	}
 	if (found) {
 		r = target.first;
 		c = target.second;
 		d = get_distance(r, c);
 		while (d > 0) {
+			bool continue_ij = true;
 			way.push_front(IntIntPair(r, c));
-			if (get_distance(r - 1, c) == d - 1) {
-				r = r - 1;
-				--d;
-				continue;
+			for(int i = -1; i <= 1 && continue_ij; i++) {
+				for(int j = -1; j <= 1 && continue_ij; j++) {
+					if (i == 0 && j == 0) {
+						continue;
+					}
+					if (get_distance(r + i, c + j) == d - 1) {
+						r = r + i;
+						c = c + j;
+						--d;
+						continue_ij = false;
+					}	
+				}
 			}
-			if (get_distance(r, c + 1) == d - 1) {
-				c = c + 1;
-				--d;
-				continue;
-			}
-			if (get_distance(r + 1, c) == d - 1) {
-				r = r + 1;
-				--d;
-				continue;
-			}
-			if (get_distance(r, c - 1) == d - 1) {
-				c = c - 1;
-				--d;
-				continue;
-			}
-
-			if (get_distance(r - 1, c - 1) == d - 1) {
-				r = r - 1;
-				c = c - 1;
-				--d;
-				continue;
-			}
-			if (get_distance(r - 1, c + 1) == d - 1) {
-				r = r - 1;
-				c = c + 1;
-				--d;
-				continue;
-			}
-			if (get_distance(r + 1, c + 1) == d - 1) {
-				r = r + 1;
-				c = c + 1;
-				--d;
-				continue;
-			}
-			if (get_distance(r + 1, c - 1) == d - 1) {
-				r = r + 1;
-				c = c - 1;
-				--d;
-				continue;
-			}
-			--d;
 		}
 	}
 	clear_distances();
@@ -225,6 +176,56 @@ IntIntPairList Map::shortest_way(IntIntPair from, IntIntPair to) {
 bool Map::is_penetrable(int arow, int acol) {
 	// we know that impenetrable objects should be in the back of the list
 	return map[arow][acol].back()->is_penetrable();
+}
+
+void Map::generate(int achance, int steps) {
+	for(int i = 0; i < MAP_HEIGHT; i++) {
+		for(int j = 0; j < MAP_WIDTH; j++) {
+			map_stencil[i][j] = chance(achance, "");
+		}
+	}
+	for(int i = 0; i < steps; i++) {
+		gen_step();
+	}
+}
+
+bool Map::gen_is_wall(int arow, int acol) {
+	return map_stencil[arow][acol];
+}
+
+int Map::gen_alive_count(int row, int col) {
+	int result = 0;
+	for(int i = -1; i <= 1; i++) {
+		for(int j = -1; j <= 1; j++) {
+			int nr = row + i, nc = col + j;
+			if (nr == row && nc == col) {
+				continue;
+			}
+			if (nr < 0 || nc < 0 || nr >= MAP_HEIGHT || nc >= MAP_WIDTH) {
+				++result;
+				continue;
+			}
+			if (map_stencil[nr][nc]) {
+				++result;
+			}			
+		}
+	}
+	return result;
+}
+
+void Map::gen_step() {
+	bool newmap[MAP_HEIGHT][MAP_WIDTH];
+	for(int i = 0; i < MAP_HEIGHT; i++) {
+		for(int j = 0; j < MAP_WIDTH; j++) {
+			int alive_cnt = gen_alive_count(i, j);
+			newmap[i][j] = map_stencil[i][j] ? (alive_cnt >= 4) : (alive_cnt > 4);
+		}
+	}
+	for(int i = 0; i < MAP_HEIGHT; i++) {
+		for(int j = 0; j < MAP_WIDTH; j++) {
+			map_stencil[i][j] = newmap[i][j];
+		}
+	}
 }
 
 inline void Map::set_distance(int arow, int acol, int value) {

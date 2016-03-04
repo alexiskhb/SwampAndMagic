@@ -8,6 +8,8 @@ public:
 	Object(int arow, int acol);
 
 	virtual bool is_penetrable();
+
+	virtual bool is_alive();
 };
 
 

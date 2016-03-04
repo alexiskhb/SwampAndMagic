@@ -22,7 +22,7 @@ struct {
 	std::list<CharacterPtr> characters;
 	std::list<ObjectPtr> objects;
 	std::list<BaseObjectPtr> empties;
-	CharacterPtr knight   = CharacterPtr(new Knight(4, MAP_WIDTH-3, HP_KNIGHT, DMG_KN_SWORD));
+	CharacterPtr knight   = CharacterPtr(new Knight(4, 3, HP_KNIGHT, DMG_KN_SWORD));
 	CharacterPtr princess = CharacterPtr(new Princess(1, MAP_WIDTH-2, HP_PRINCESS, DMG_PRINCESS));
 	Map map;
 	unsigned int counter = 0;
@@ -48,7 +48,6 @@ struct {
 
 	void next_turn() {
 		++counter;
-
 		CharacterBoolMap did_attack;
 		for(auto ch: characters) {
 			did_attack.insert(CharacterBoolPair(ch, ch->attack(characters, objects, ch)));
@@ -69,6 +68,10 @@ struct {
 				}
 			}
 		}
+		for(auto obj: objects) {
+			map[obj->getrow()][obj->getcol()].remove(obj);
+			map << obj;
+		}
 		refresh_characters_objects();
 	}
 
@@ -79,12 +82,7 @@ struct {
 	}
 
 	void generate_level() {
-		objects.push_back(ObjectPtr(new Wall(MAP_HEIGHT/2, MAP_WIDTH/2)));
-		map << objects.back();
-	}
-
-	void init() {
-		srand(time(0));
+		map.generate(45, 8);
 		for(int i = 0; i < MAP_HEIGHT; i++) {
 			for(int j = 0; j < MAP_WIDTH; j++) {
 				empties.push_back(ObjectPtr(new Object(i, j)));
@@ -103,6 +101,19 @@ struct {
 			objects.push_back(ObjectPtr(new Wall(MAP_HEIGHT-1, j)));
 			map << objects.back();
 		}
+		for(int i = 0; i < MAP_HEIGHT; i++) {
+			for(int j = 0; j < MAP_WIDTH; j++) {
+				if (map.gen_is_wall(i, j)) {
+					objects.push_back(ObjectPtr(new Wall(i, j)));
+					map << objects.back(); 
+				}
+			}
+		}
+	}
+
+	void init() {
+		srand(time(0));
+		
 		generate_level();
 
 		characters.push_back(knight);
@@ -111,7 +122,7 @@ struct {
 		map << characters.back();
 		characters.push_back(CharacterPtr(new Dragon(4, MAP_WIDTH-4, HP_DRAGON, DMG_DRAGON)));
 		map << characters.back();
-		for(int i = 1; i < 20; i++) {
+		for(int i = 1; i < 15; i++) {
 			characters.push_back(CharacterPtr(new Zombie(MAP_HEIGHT-4, i, HP_ZOMBIE, DMG_ZOMBIE)));
 			map << characters.back();
 		}

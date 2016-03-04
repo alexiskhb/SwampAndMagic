@@ -1,6 +1,7 @@
 #pragma once
 
 #include "base_objects.h"
+#include "objects.h"
 #include <list>
 
 
@@ -16,7 +17,7 @@ public:
 
 	virtual bool attack(std::list<CharacterPtr>& characters, std::list<ObjectPtr>& objects, CharacterPtr self);
 
-	virtual int hitpoints();
+	int hitpoints();
 
 	// returns True if character died
 	virtual bool suffer(int dmg);
@@ -25,8 +26,6 @@ public:
 
 	// all characters are impenetrable
 	virtual bool is_penetrable();
-protected:
-	int health = 1;
 };
 
 
@@ -128,6 +127,8 @@ public:
 	virtual char symbol();
 
 	virtual bool suffer(int dmg);
+
+	virtual bool attack(std::list<CharacterPtr>& characters, std::list<ObjectPtr>& objects, CharacterPtr self);
 
 	virtual bool move(Map& m, std::list<CharacterPtr>& characters);
 };

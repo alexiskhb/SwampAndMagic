@@ -17,14 +17,16 @@ static const char CMD_QUIT   = 'Q';
 
 using namespace std;
 
-int dz_1[3] = {0, 1, -1};
+int dz_1[3] = {-1, 0, 1};
+int dz_3[7] = {-3, -2, -1, 0, 1, 2, 3};
 
 
 Character::Character(int arow, int acol) : BaseObject(arow, acol) {
 }
 
-Character::Character(int arow, int acol, int hp, int dmg) : BaseObject(arow, acol), health(hp) {
+Character::Character(int arow, int acol, int hp, int dmg) : BaseObject(arow, acol) {
 	damage = dmg;
+	health = hp;
 }
 
 Character::~Character() {
@@ -221,6 +223,8 @@ IntIntPairList Monster::shortest_way_to(BaseObjectPtr obj, Map& m) {
 }
 
 
+
+
 Dragon::Dragon(int arow, int acol) : Monster(arow, acol) {
 
 }
@@ -261,9 +265,17 @@ bool Dragon::suffer(int dmg) {
 bool Dragon::move(Map& m, std::list<CharacterPtr>& characters) {
 	prev_row = row;
 	prev_col = col;
-	if (chance(65, "")) {
+	if (chance(50, "")) {
 		row += dz_1[rand()%3];
 		col += dz_1[rand()%3];
+	}
+	else {
+		way = shortest_way_to(characters.front(), m);
+		if (way.size() > 0) {
+			row = way.front().first;
+			col = way.front().second;
+			way.pop_front();
+		}
 	}
 	return false;
 }
@@ -290,6 +302,16 @@ char Zombie::symbol() {
 
 bool Zombie::suffer(int dmg) {
 	return (health -= dmg) <= 0;
+}
+
+bool Zombie::attack(list<CharacterPtr>& characters, list<ObjectPtr>& objects, CharacterPtr self) {
+	CharacterPtr knight = characters.front();
+	if (*self % *knight) {
+		slash(characters, self);
+		return true;
+	}
+	objects.push_back(ObjectPtr(new Swamp(this->row, this->col)));
+	return false;
 }
 
 bool Zombie::move(Map& m, std::list<CharacterPtr>& characters) {

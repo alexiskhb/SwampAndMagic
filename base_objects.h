@@ -13,7 +13,7 @@ extern bool chance(int a, std::string s);
 // map is 8-connected area
 
 static const char SYM_EMPTY    = ' ';
-static const char SYM_WALL     = '#';
+static const char SYM_WALL     = '.';
 static const char SYM_KNIGHT   = 'K';
 static const char SYM_PRINCESS = 'P';
 static const char SYM_DRAGON   = 'D';
@@ -35,7 +35,7 @@ static const int DMG_KN_MAGIC = 6*10;
 static const int DMG_PRINCESS = 0; 
 static const int DMG_DRAGON   = 15;
 static const int DMG_FIRE     = 4; 
-static const int DMG_ZOMBIE   = 3;
+static const int DMG_ZOMBIE   = 2;
 
 
 class Map;
@@ -73,6 +73,8 @@ public:
 
 	void move_to_prev();
 
+	virtual bool is_alive();
+
 	virtual char symbol();
 
 	virtual bool is_penetrable();
@@ -86,7 +88,7 @@ protected:
 	int prev_row = -1;
 	int prev_col = -1;
 	// for lifetime -1 means infinity
-	int lifetime = -1;
+	int health = 1;
 	int damage = 0;
 };
 
@@ -104,8 +106,14 @@ public:
 
 	int get_width();
 
+	void generate(int achance, int steps);
+
+	bool gen_is_wall(int arow, int acol);
+
 	IntIntPairList shortest_way(IntIntPair from, IntIntPair to);
 private:
+	int  gen_alive_count(int row, int col);
+	void gen_step();
 	void clear_distances();
 	inline void set_distance(int arow, int acol, int value);
 	inline int  get_distance(int arow, int acol);
@@ -114,6 +122,7 @@ private:
 	int width  = MAP_WIDTH;
 	std::list<BaseObjectPtr> map[MAP_HEIGHT][MAP_WIDTH];
 	int distance[MAP_HEIGHT * MAP_WIDTH];
+	bool map_stencil[MAP_HEIGHT][MAP_WIDTH];
 };
 
 std::ostream& operator<<(std::ostream& display, Map& m);

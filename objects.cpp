@@ -4,6 +4,10 @@
 using namespace std;
 
 
+static const int TIME_SWAMP = 5;
+static const int TIME_MAGIC = 5;
+static const int TIME_FLAME = 6;
+static const int TIME_INFTY = -10000;
 
 Object::Object(int arow, int acol) : BaseObject(arow, acol) {
 }
@@ -11,6 +15,11 @@ Object::Object(int arow, int acol) : BaseObject(arow, acol) {
 bool Object::is_penetrable() {
 	return true;
 }
+
+bool Object::is_alive() {
+	return health > 0 || health == TIME_INFTY;
+}
+
 
 
 
@@ -35,7 +44,7 @@ bool Wall::is_penetrable() {
 
 
 Flame::Flame(int arow, int acol) : Object(arow, acol) {
-	lifetime = 6;
+	health = TIME_FLAME;
 }
 
 Flame::~Flame() {
@@ -51,6 +60,7 @@ char Flame::symbol() {
 
 
 Swamp::Swamp(int arow, int acol) : Object(arow, acol) {
+	health = TIME_SWAMP;
 
 }
 
@@ -68,7 +78,7 @@ char Swamp::symbol() {
 
 // magic can heal knight
 Magic::Magic(int arow, int acol) : Object(arow, acol) {
-	lifetime = 5;
+	health = TIME_MAGIC;
 }
 
 Magic::~Magic() {

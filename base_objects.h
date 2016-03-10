@@ -8,6 +8,7 @@
 #include <ctime>
 #include <algorithm>
 #include <map>
+#include <string>
 #include "colored_text.h"
 
 extern bool chance(int a, std::string s);
@@ -20,7 +21,7 @@ static const char SYM_KNIGHT   = 'K';
 static const char SYM_PRINCESS = 'P';
 static const char SYM_DRAGON   = 'D';
 static const char SYM_ZOMBIE   = 'z';
-static const char SYM_SWAMP    = ',';
+static const char SYM_SWAMP    = '~';
 static const char SYM_FLAME    = '*';
 static const char SYM_MAGIC    = '%';
 
@@ -68,9 +69,13 @@ public:
 
 	virtual char symbol();
 
+	virtual std::string& color();
+
 	virtual bool is_penetrable();
 
 	virtual bool is_evil();
+
+	std::string fcolor;
 protected:
 	int row = 0;
 	int col = 0;

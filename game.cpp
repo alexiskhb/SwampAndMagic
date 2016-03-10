@@ -143,7 +143,7 @@ struct {
 
 
 int main(int argc, char** argv) {
-	cout << Colored(BG_BLACK, FG_B_YELLOW) << "aAADFDasFDSFas" << Colored() << std::endl;
+	cout << Colored(BG_BLACK, FG_B_YELLOW) << "Hello" << Colored() << std::endl;
 	Game.init();
 	Game.render();
  	while (!Game.is_over()) {

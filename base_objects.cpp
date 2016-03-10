@@ -13,11 +13,11 @@ bool chance(int a, std::string s) {
 }
 
 BaseObject::BaseObject() {
-
+	fcolor = Colored(BG_WHITE, FG_BLACK).to_string();
 }
 
 BaseObject::BaseObject(int arow, int acol) : row(arow), col(acol), prev_row(arow), prev_col(acol) {
-	
+	fcolor = Colored(BG_WHITE, FG_BLACK).to_string();	
 }
 
 BaseObject::~BaseObject() {
@@ -64,6 +64,10 @@ char BaseObject::symbol() {
 	return SYM_EMPTY;
 }
 
+std::string& BaseObject::color() {
+	return fcolor;
+}
+
 bool BaseObject::is_penetrable() {
 	return true;
 }
@@ -92,9 +96,10 @@ BaseObjectPtr Map::operator<<(BaseObjectPtr obj) {
 ostream& operator<<(ostream& display, Map& m) {
 	for(int i = 0; i < m.get_height(); i++) {
 		for(int j = 0; j < m.get_width(); j++) {
+			printf("%s", m[i][j].back()->fcolor.c_str());
 			display << m[i][j].back()->symbol();
 		}
-		display << endl;
+		display << Colored() << endl;
 	}
 	return display;
 }

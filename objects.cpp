@@ -7,6 +7,7 @@ using namespace std;
 
 
 Object::Object(int arow, int acol) : BaseObject(arow, acol) {
+	
 }
 
 void Object::destroy() {
@@ -35,7 +36,7 @@ void Object::impact(list<CharacterPtr>& characters, std::list<ObjectPtr>& object
 
 
 Wall::Wall(int arow, int acol) : Object(arow, acol) {
-
+	fcolor = Colored(BG_GRAY, FG_DARK_GRAY).to_string();
 }
 
 Wall::~Wall() {
@@ -61,6 +62,7 @@ void Wall::impact(list<CharacterPtr>& characters, std::list<ObjectPtr>& objects)
 Flame::Flame(int arow, int acol) : Object(arow, acol) {
 	health = TIME_FLAME;
 	damage = DMG_FLAME;
+	fcolor = Colored(BG_WHITE, FG_B_RED).to_string();
 }
 
 Flame::~Flame() {
@@ -86,7 +88,7 @@ void Flame::impact(list<CharacterPtr>& characters, std::list<ObjectPtr>& objects
 
 Swamp::Swamp(int arow, int acol) : Object(arow, acol) {
 	health = TIME_SWAMP;
-
+	fcolor = Colored(BG_WHITE, FG_YELLOW).to_string();
 }
 
 Swamp::~Swamp() {
@@ -109,11 +111,13 @@ void Swamp::impact(list<CharacterPtr>& characters, std::list<ObjectPtr>& objects
 Magic::Magic(int arow, int acol) : Object(arow, acol) {
 	health = TIME_MAGIC;
 	damage = DMG_MAGIC;
+	fcolor = Colored(BG_WHITE, FG_B_BLUE).to_string();
 }
 
 Magic::Magic(int arow, int acol, int timelife) : Object(arow, acol) {
 	health = timelife;
 	damage = DMG_MAGIC;
+	fcolor = Colored(BG_WHITE, FG_B_BLUE).to_string();
 }
 
 Magic::~Magic() {

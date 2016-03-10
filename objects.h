@@ -1,6 +1,8 @@
 #pragma once
 
 #include "base_objects.h"
+#include <string>
+#include "colored_text.h"
 
 static const int DMG_FLAME = 4;
 static const int DMG_MAGIC = 6;
@@ -24,6 +26,8 @@ public:
 
 	virtual void impact(std::list<CharacterPtr>& characters, std::list<ObjectPtr>& objects);
 };
+
+
 
 
 

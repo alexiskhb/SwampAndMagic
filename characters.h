@@ -2,6 +2,8 @@
 
 #include "base_objects.h"
 #include <list>
+#include <string>
+#include "colored_text.h"
 
 
 static const int HP_KNIGHT   = 70*100; 

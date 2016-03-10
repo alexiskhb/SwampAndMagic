@@ -11,11 +11,13 @@ int dz_3[7] = {-3, -2, -1, 0, 1, 2, 3};
 
 
 Character::Character(int arow, int acol) : BaseObject(arow, acol) {
+	fcolor = Colored(BG_BLACK, FG_WHITE).to_string();
 }
 
 Character::Character(int arow, int acol, int hp, int dmg) : BaseObject(arow, acol) {
 	damage = dmg;
 	health = hp;
+	fcolor = Colored(BG_BLACK, FG_WHITE).to_string();
 }
 
 Character::~Character() {
@@ -57,7 +59,7 @@ Knight::Knight(int arow, int acol) : Character(arow, acol) {
 }
 
 Knight::Knight(int arow, int acol, int hp, int dmg) : Character(arow, acol, hp, dmg) {
-
+	fcolor = Colored(BG_GREEN, FG_WHITE).to_string();
 }
 
 Knight::~Knight() {
@@ -234,7 +236,7 @@ Princess::Princess(int arow, int acol) : Character(arow, acol) {
 }
 
 Princess::Princess(int arow, int acol, int hp, int dmg) : Character(arow, acol, hp, dmg) {
-
+	fcolor = Colored(BG_AQUA, FG_WHITE).to_string();
 }
 
 Princess::~Princess() {
@@ -260,11 +262,11 @@ bool Princess::move(Map& m, std::list<CharacterPtr>& characters) {
 
 
 Monster::Monster(int arow, int acol) : Character(arow, acol) {
-
+	fcolor = Colored(BG_RED, FG_WHITE).to_string();
 }
 
 Monster::Monster(int arow, int acol, int hp, int dmg) : Character(arow, acol, hp, dmg) {
-
+	fcolor = Colored(BG_RED, FG_WHITE).to_string();
 }
 
 Monster::~Monster() {
@@ -299,11 +301,11 @@ IntIntPairList Monster::shortest_way_to(BaseObjectPtr obj, Map& m) {
 
 
 Dragon::Dragon(int arow, int acol) : Monster(arow, acol) {
-
+	fcolor = Colored(BG_BLACK, FG_WHITE).to_string();
 }
 
 Dragon::Dragon(int arow, int acol, int hp, int dmg) : Monster(arow, acol, hp, dmg) {
-
+	fcolor = Colored(BG_BLACK, FG_WHITE).to_string();
 }
 
 Dragon::~Dragon() {
@@ -350,7 +352,7 @@ Zombie::Zombie(int arow, int acol) : Monster(arow, acol) {
 }
 
 Zombie::Zombie(int arow, int acol, int hp, int dmg) : Monster(arow, acol, hp, dmg) {
-
+	fcolor = Colored(BG_RED, FG_WHITE).to_string();
 }
 
 Zombie::~Zombie() {

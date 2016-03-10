@@ -1,5 +1,7 @@
 #include "colored_text.h"
 
+using namespace std;
+
 Colored::Colored() : fg_code(FG_DEFAULT), bg_code(BG_DEFAULT) {
 
 }
@@ -18,6 +20,12 @@ Colored::Colored(const FGColorCode afg_code, const BGColorCode abg_code) : fg_co
 
 Colored::Colored(const BGColorCode abg_code, const FGColorCode afg_code) : fg_code(afg_code), bg_code(abg_code) {
 
+}
+
+std::string Colored::to_string() {
+	return 
+		string("\033[") + std::to_string(fg_code) + string(";") + 
+		std::to_string(bg_code) + string("m");
 }
 
 std::ostream& operator<<(std::ostream& out, Colored color) {

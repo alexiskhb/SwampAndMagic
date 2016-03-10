@@ -33,6 +33,7 @@ void Object::impact(list<CharacterPtr>& characters, std::list<ObjectPtr>& object
 
 
 
+
 Wall::Wall(int arow, int acol) : Object(arow, acol) {
 
 }
@@ -126,15 +127,13 @@ char Magic::symbol() {
 void Magic::impact(list<CharacterPtr>& characters, std::list<ObjectPtr>& objects) {
 	for(auto ch: characters) {
 		if (*ch == *this) {
-			ch->suffer(ch->symbol() == SYM_KNIGHT ? -damage : damage);
-			cout << ch->symbol() << " ON MAGIC\n";
+			ch->suffer(ch->symbol() == SYM_KNIGHT ? -damage*1.5 : damage);
 		}
 	}
 	for(auto obj: objects) {
 		if (*obj == *this && obj->symbol() == SYM_FLAME) {
 			obj->destroy();
-			health = TIME_FLAME;
-			cout << "magic!\n";
+			health = TIME_MAGIC;
 		}
 	}
 }

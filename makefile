@@ -9,7 +9,7 @@ DBGFLAGS= -g -O3
 
 LIBS=
 
-SRC=$(NAME).cpp base_objects.cpp objects.cpp characters.cpp
+SRC=$(NAME).cpp base_objects.cpp objects.cpp characters.cpp colored_text.cpp
 
 OBJ=$(SRC:.cpp=.o)
 

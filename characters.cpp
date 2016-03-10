@@ -6,6 +6,7 @@ static const char* STR_MOVES  = "wasdqezcx";
 using namespace std;
 
 int dz_1[3] = {-1, 0, 1};
+int dz_2[5] = {-2, -1, 0, 1, 2};
 int dz_3[7] = {-3, -2, -1, 0, 1, 2, 3};
 
 
@@ -273,7 +274,7 @@ Monster::~Monster() {
 bool Monster::move(Map& m, std::list<CharacterPtr>& characters) {
 	prev_row = row;
 	prev_col = col;
-	if (chance(50, "")) {
+	if (chance(30, "")) {
 		row += dz_1[rand()%3];
 		col += dz_1[rand()%3];
 	}
@@ -310,15 +311,15 @@ Dragon::~Dragon() {
 }
 
 void Dragon::magic(list<ObjectPtr>& objects) {
-	objects.push_back(ObjectPtr(new Flame(row - 1, col - 1)));
-	objects.push_back(ObjectPtr(new Flame(row - 1, col + 1)));
-	objects.push_back(ObjectPtr(new Flame(row + 1, col + 1)));
-	objects.push_back(ObjectPtr(new Flame(row + 1, col - 1)));
+	int flames_cnt = rand()%30 + 1;
+	for(int i = 0; i < flames_cnt; i++) {
+		objects.push_back(ObjectPtr(new Flame( row+(rand()%10 - 5), col+(rand()%10 - 5) )));	
+	}
 }
 
 bool Dragon::attack(list<CharacterPtr>& characters, list<ObjectPtr>& objects, CharacterPtr self) {
 	CharacterPtr knight = characters.front();
-	if (*self % *knight) {
+	if (*self % *knight && chance(80, "")) {
 		slash(characters, self);
 		return true;
 	}

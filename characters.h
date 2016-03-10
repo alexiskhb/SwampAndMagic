@@ -4,7 +4,7 @@
 #include <list>
 
 
-static const int HP_KNIGHT   = 70; 
+static const int HP_KNIGHT   = 70*100; 
 static const int HP_PRINCESS = 2;  
 static const int HP_DRAGON   = 200;
 static const int HP_ZOMBIE   = 20; 
@@ -14,6 +14,7 @@ static const int DMG_KN_SWORD = 8;
 static const int DMG_PRINCESS = 0; 
 static const int DMG_DRAGON   = 15;
 static const int DMG_ZOMBIE   = 2;
+
 
 static const char CMD_UP     = 'w';
 static const char CMD_DOWN   = 'x';

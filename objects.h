@@ -4,9 +4,9 @@
 
 static const int DMG_FLAME = 4;
 static const int DMG_MAGIC = 6;
-static const int TIME_SWAMP = 10;
-static const int TIME_MAGIC = 6;
-static const int TIME_FLAME = 6;
+static const int TIME_SWAMP = 15;
+static const int TIME_MAGIC = 5;
+static const int TIME_FLAME = 4;
 static const int TIME_INFTY = -10000;
 
 

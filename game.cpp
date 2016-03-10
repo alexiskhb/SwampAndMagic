@@ -4,6 +4,7 @@
 #include <iostream>
 #include <map>
 #include <ctime>
+#include "colored_text.h"
 
 
 using std::cout;
@@ -129,15 +130,20 @@ struct {
 		map << characters.back();
 		characters.push_back(CharacterPtr(new Dragon(4, MAP_WIDTH-4, HP_DRAGON, DMG_DRAGON)));
 		map << characters.back();
-		for(int i = 1; i < 5; i++) {
-			characters.push_back(CharacterPtr(new Zombie(MAP_HEIGHT-4, i, HP_ZOMBIE, DMG_ZOMBIE)));
-			map << characters.back();
+		for(int i = 0; i < MAP_HEIGHT; i++) {
+			for(int j = 0; j < MAP_WIDTH; j++) {
+				if (map.is_penetrable(i, j) && chance(2, "")) {
+					characters.push_back(CharacterPtr(new Zombie(i, j, HP_ZOMBIE, DMG_ZOMBIE)));
+					map << characters.back();
+				}
+			}
 		}
 	}
 } Game;
 
 
 int main(int argc, char** argv) {
+	cout << Colored(BG_BLACK, FG_B_YELLOW) << "aAADFDasFDSFas" << Colored() << std::endl;
 	Game.init();
 	Game.render();
  	while (!Game.is_over()) {

@@ -60,7 +60,6 @@ struct Colored {
 	
 	FGColorCode fg_code;
 	BGColorCode bg_code;
-	bool is_bold;
 };
 
 std::ostream& operator<<(std::ostream& os, Colored code);

@@ -62,7 +62,7 @@ void Wall::impact(list<CharacterPtr>& characters, std::list<ObjectPtr>& objects)
 Flame::Flame(int arow, int acol) : Object(arow, acol) {
 	health = TIME_FLAME;
 	damage = DMG_FLAME;
-	fcolor = Colored(BG_WHITE, FG_B_RED).to_string();
+	fcolor = Colored(BG_WHITE, FG_RED).to_string();
 }
 
 Flame::~Flame() {

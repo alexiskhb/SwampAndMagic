@@ -63,6 +63,8 @@ public:
 
 	int prevcol();
 
+	int hitpoints();
+
 	void move_to_prev();
 
 	virtual bool is_alive();
@@ -108,6 +110,8 @@ public:
 	bool is_on_the_map(int arow, int acol);
 
 	IntIntPairList shortest_way(IntIntPair from, IntIntPair to);
+
+	BaseObjectPtr nearest_symb(IntIntPair from, std::string targets);
 private:
 	int  gen_alive_count(int row, int col);
 
@@ -124,6 +128,7 @@ private:
 	std::list<BaseObjectPtr> map[MAP_HEIGHT][MAP_WIDTH];
 	int distance[MAP_HEIGHT * MAP_WIDTH];
 	bool map_stencil[MAP_HEIGHT][MAP_WIDTH];
+	int shortest_distance = MAP_WIDTH*MAP_WIDTH + MAP_HEIGHT*MAP_HEIGHT;
 };
 
 std::ostream& operator<<(std::ostream& display, Map& m);

@@ -36,10 +36,6 @@ bool Character::attack(list<CharacterPtr>& characters, list<ObjectPtr>& objects,
 	return false;
 }
 
-int Character::hitpoints() {
-	return health;
-}
-
 // returns True if character died
 bool Character::suffer(int dmg) {
 	return (health -= dmg) <= 0;

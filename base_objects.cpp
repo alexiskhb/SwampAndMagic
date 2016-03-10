@@ -51,6 +51,10 @@ int BaseObject::prevcol() {
 	return prev_col;
 }
 
+int BaseObject::hitpoints() {
+	return health;
+}
+
 void BaseObject::move_to_prev() {
 	row = prev_row;
 	col = prev_col;
@@ -96,7 +100,8 @@ BaseObjectPtr Map::operator<<(BaseObjectPtr obj) {
 ostream& operator<<(ostream& display, Map& m) {
 	for(int i = 0; i < m.get_height(); i++) {
 		for(int j = 0; j < m.get_width(); j++) {
-			printf("%s", m[i][j].back()->fcolor.c_str());
+			// printf("%s", m[i][j].back()->fcolor.c_str());
+			display << m[i][j].back()->fcolor;
 			display << m[i][j].back()->symbol();
 		}
 		display << Colored() << endl;
@@ -144,7 +149,7 @@ IntIntPairList Map::shortest_way(IntIntPair from, IntIntPair to) {
 				if (i == 0 && j == 0) {
 					continue;
 				}
-				if (get_distance(r + i, c + j) == 0 && is_on_the_map(r + i, c + j) && is_penetrable(r + i, c + j)) {
+				if (is_on_the_map(r + i, c + j) && get_distance(r + i, c + j) == 0 && is_penetrable(r + i, c + j)) {
 					temp_way.push_back(IntIntPair(r + i, c + j));
 					set_distance(r + i, c + j, d + 1);
 				}
@@ -176,6 +181,48 @@ IntIntPairList Map::shortest_way(IntIntPair from, IntIntPair to) {
 	}
 	clear_distances();
 	return way;
+}
+
+BaseObjectPtr Map::nearest_symb(IntIntPair from, std::string targets) {
+	IntIntPairList deque;
+	int r = from.first;
+	int c = from.second;
+	int d = 0;
+	bool found = false;
+	IntIntPair target;
+	deque.push_back(IntIntPair(r, c));
+	while (deque.size() > 0) {
+		r = deque.front().first;
+		c = deque.front().second;
+		char p = map[r][c].back()->symbol();
+		for(unsigned int i = 0; i < targets.size() && !found; i++) {
+			found |= targets.find(p) != std::string::npos;
+		}
+		if (found) {
+			target = IntIntPair(r, c);
+			break;
+		}
+		d = get_distance(r, c);
+		deque.pop_front();
+		for(int i = -1; i <= 1; i++) {
+			for(int j = -1; j <= 1; j++) {
+				if (i == 0 && j == 0) {
+					continue;
+				}
+				if (is_on_the_map(r + i, c + j) && get_distance(r + i, c + j) == 0) {
+					deque.push_back(IntIntPair(r + i, c + j));
+					set_distance(r + i, c + j, d + 1);
+				}
+			}
+		}
+	}
+	clear_distances();
+	if (found) {
+		return map[r][c].back();
+	}
+	else {
+		return map[from.first][from.second].back();
+	}
 }
 
 bool Map::is_penetrable(int arow, int acol) {

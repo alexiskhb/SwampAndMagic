@@ -5,6 +5,7 @@
 #include <map>
 #include <ctime>
 #include "colored_text.h"
+#include <string>
 
 
 using std::cout;
@@ -99,7 +100,9 @@ struct {
 
 	inline void render() {
 		cout << map;
-		cout << "HP: " << characters.front()->hitpoints() << "	DRAGON: " << (*next(next(characters.begin())))->hitpoints() << "\n"; 
+		cout << "HP: " << characters.front()->hitpoints() << "	NEAREST_ENEMY: ";
+		BaseObjectPtr obj = map.nearest_symb(IntIntPair(knight->getrow(), knight->getcol()), std::string("zD"));
+		cout << obj->hitpoints() << "\n"; 
 		cout << "enemies cnt: " << characters.size()-2 << "\n\n";
 	}
 

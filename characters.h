@@ -45,8 +45,6 @@ public:
 
 	virtual bool attack(std::list<CharacterPtr>& characters, std::list<ObjectPtr>& objects, CharacterPtr self);
 
-	int hitpoints();
-
 	// returns True if character died
 	virtual bool suffer(int dmg);
 

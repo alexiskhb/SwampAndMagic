@@ -20,8 +20,8 @@ struct {
 	// [2] : dragon
 	// [3+]: zombies and other(if any)
 	std::list<CharacterPtr> characters;
-	std::list<ObjectPtr> objects;
-	std::list<BaseObjectPtr> empties;
+	std::list<ObjectPtr> dyn_objects;
+	std::list<BaseObjectPtr> relief;
 	CharacterPtr knight   = CharacterPtr(new Knight(4, 3, HP_KNIGHT, DMG_KN_SWORD));
 	CharacterPtr princess = CharacterPtr(new Princess(1, MAP_WIDTH-2, HP_PRINCESS, DMG_PRINCESS));
 	Map map;
@@ -32,9 +32,13 @@ struct {
 	}
 
 	void refresh_characters_objects() {
-		for(auto obj: objects) {
-			map[obj->prevrow()][obj->prevcol()].remove(obj);
-			map << obj;	
+		for(auto obj: dyn_objects) {
+			if (map.is_on_the_map(obj->getrow(), obj->getcol())) {
+				map[obj->prevrow()][obj->prevcol()].remove(obj);
+			}
+			if (obj->is_alive()) {
+				map << obj;
+			}
 		}
 		for(auto ch: characters) {
 			if (ch->hitpoints() <= 0) {
@@ -44,17 +48,38 @@ struct {
 		characters.remove_if([&](CharacterPtr ch) {
 			return ch->hitpoints() <= 0 && ch != knight;
 		});
+		dyn_objects.remove_if([&](ObjectPtr obj) {
+			return !obj->is_alive();
+		});
 	}
 
 	void next_turn() {
 		++counter;
 		CharacterBoolMap did_attack;
 		for(auto ch: characters) {
-			did_attack.insert(CharacterBoolPair(ch, ch->attack(characters, objects, ch)));
+			did_attack.insert(CharacterBoolPair(ch, ch->attack(characters, dyn_objects, ch)));
+		}
+		for(auto obj: dyn_objects) {
+			if (map.is_on_the_map(obj->getrow(), obj->getcol())) {
+				obj->impact(characters, dyn_objects);
+				map[obj->getrow()][obj->getcol()].remove(obj);
+				map << obj;
+				obj->turn();
+			}
+			else {
+				obj->move_to_prev();
+				obj->destroy();
+			}
 		}
 		for(auto ch: characters) {
 			if (!did_attack[ch]) {
 				ch->move(map, characters);
+				if (!map.is_on_the_map(ch->getrow(), ch->getcol())) {
+					ch->move_to_prev();
+					ch->suffer(ch->hitpoints());
+					cout << "AHAHAHAAAHAA\n";
+				}
+				else
 				// changes will be accepted after calling refresh_characters_objects()
 				// so we can cancel try to move on wall here. prev_coords now match with actual.
 				if (!map.is_penetrable(ch->getrow(), ch->getcol())) {
@@ -68,44 +93,28 @@ struct {
 				}
 			}
 		}
-		for(auto obj: objects) {
-			map[obj->getrow()][obj->getcol()].remove(obj);
-			map << obj;
-		}
 		refresh_characters_objects();
 	}
 
 	inline void render() {
 		cout << map;
-		cout << "HP: " << characters.front()->hitpoints() << "\n"; 
+		cout << "HP: " << characters.front()->hitpoints() << "	DRAGON: " << (*next(next(characters.begin())))->hitpoints() << "\n"; 
 		cout << "enemies cnt: " << characters.size()-2 << "\n\n";
 	}
 
 	void generate_level() {
-		map.generate(45, 8);
+		map.generate(42, 7);
 		for(int i = 0; i < MAP_HEIGHT; i++) {
 			for(int j = 0; j < MAP_WIDTH; j++) {
-				empties.push_back(ObjectPtr(new Object(i, j)));
-				map << empties.back();
+				relief.push_back(ObjectPtr(new Object(i, j)));
+				map << relief.back();
 			}
-		}
-		for(int i = 0; i < MAP_HEIGHT; i++) {
-			objects.push_back(ObjectPtr(new Wall(i, 0)));
-			map << objects.back();
-			objects.push_back(ObjectPtr(new Wall(i, MAP_WIDTH-1)));
-			map << objects.back();
-		}
-		for(int j = 0; j < MAP_WIDTH; j++) {
-			objects.push_back(ObjectPtr(new Wall(0, j)));
-			map << objects.back();
-			objects.push_back(ObjectPtr(new Wall(MAP_HEIGHT-1, j)));
-			map << objects.back();
 		}
 		for(int i = 0; i < MAP_HEIGHT; i++) {
 			for(int j = 0; j < MAP_WIDTH; j++) {
 				if (map.gen_is_wall(i, j)) {
-					objects.push_back(ObjectPtr(new Wall(i, j)));
-					map << objects.back(); 
+					relief.push_back(BaseObjectPtr(new Wall(i, j)));
+					map << relief.back(); 
 				}
 			}
 		}
@@ -113,16 +122,14 @@ struct {
 
 	void init() {
 		srand(time(0));
-		
 		generate_level();
-
 		characters.push_back(knight);
 		map << characters.back();
 		characters.push_back(princess);
 		map << characters.back();
 		characters.push_back(CharacterPtr(new Dragon(4, MAP_WIDTH-4, HP_DRAGON, DMG_DRAGON)));
 		map << characters.back();
-		for(int i = 1; i < 15; i++) {
+		for(int i = 1; i < 5; i++) {
 			characters.push_back(CharacterPtr(new Zombie(MAP_HEIGHT-4, i, HP_ZOMBIE, DMG_ZOMBIE)));
 			map << characters.back();
 		}

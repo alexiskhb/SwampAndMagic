@@ -27,8 +27,8 @@ BaseObject::~BaseObject() {
 // if two objects are NEAR but do not match
 bool BaseObject::operator%(const BaseObject& obj) {
 	return 
-		(abs(row - obj.row) == 1 && abs(col - obj.col) == 0) ||
-		(abs(row - obj.row) == 0 && abs(col - obj.col) == 1);
+		(abs(row - obj.row) <= 1 && abs(col - obj.col) <= 1) &&
+		!(row == obj.row && col == obj.col);
 }
 
 bool BaseObject::operator==(const BaseObject& obj) {
@@ -236,9 +236,6 @@ inline int Map::get_distance(int arow, int acol) {
 	return distance[arow*width + acol];
 }
 
-inline bool Map::is_on_the_map(int arow, int acol) {
-	// TODO
-	// remove this line to get an opportunity to throw off monsters
-	return true;
+bool Map::is_on_the_map(int arow, int acol) {
 	return arow >= 0 && acol >= 0 && arow < height && acol < width;
 }

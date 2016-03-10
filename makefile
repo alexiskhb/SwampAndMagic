@@ -5,6 +5,7 @@ NAME=game
 CC=g++
 
 CFLAGS=-c -Wall -std=c++11
+DBGFLAGS= -g -O3
 
 LIBS=
 

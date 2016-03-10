@@ -1,19 +1,7 @@
 #include "characters.h"
+#include "objects.h"
 
-static const char*STR_MOVES  = "wasdqezc"; 
-static const char CMD_UP     = 'w';
-static const char CMD_DOWN   = 's';
-static const char CMD_LEFT   = 'a';
-static const char CMD_RIGHT  = 'd';
-static const char CMD_LUP    = 'q';
-static const char CMD_LDOWN  = 'z';
-static const char CMD_RUP    = 'e';
-static const char CMD_RDOWN  = 'c';
-static const char CMD_ATTACK = 'f';
-static const char CMD_MAGIC  = 'r';
-static const char CMD_NONE   = 'n';
-static const char CMD_QUIT   = 'Q';
-
+static const char* STR_MOVES  = "wasdqezcx"; 
 
 using namespace std;
 
@@ -83,8 +71,70 @@ bool Knight::is_evil() {
 	return false;
 }
 
-void Knight::magic(char direction) {
+void Knight::magic(list<ObjectPtr>& objects, char direction) {
+	int consts[5] = {0, 0, 0, 0, 0};
+	int di_inc[5] = {1, 2, 3, 4, 5};
+	int di_dec[5] = {-1, -2, -3, -4, -5};
+	int dj_inc[5] = {1, 2, 3, 4, 5};
+	int dj_dec[5] = {-1, -2, -3, -4, -5};
+	int di_around[12] = {-2, -2, -2, -1, 0, 1, 2, 2, 2, 1, 0, -1};
+	int dj_around[12] = {-1, 0, 1, 2, 2, 2, 1, 0, -1, -2, -2, -2};
+	int* di = di_around;
+	int* dj = dj_around;
+	switch (direction) {
+		case CMD_UP: {
+			di = di_dec;
+			dj = consts;
+			break;	
+		}
+		case CMD_DOWN: {
+			di = di_inc;
+			dj = consts;
+			break;
+		}
+		case CMD_LEFT: {
+			di = consts;
+			dj = dj_dec;
+			break;
+		}
+		case CMD_RIGHT: {
+			di = consts;
+			dj = dj_inc;
+			break;
+		}
+		case CMD_LUP: {
+			di = di_dec;
+			dj = dj_dec;
+			break;	
+		}
+		case CMD_LDOWN: {
+			di = di_inc;
+			dj = dj_dec;
+			break;
+		}
+		case CMD_RUP: {
+			di = di_dec;
+			dj = dj_inc;
+			break;
+		}
+		case CMD_RDOWN: {
+			di = di_inc;
+			dj = dj_inc;
+			break;
+		}
+		case CMD_AROUND: {
+			di = di_around;
+			dj = dj_around;
+			for(unsigned int t = 0; t < 12; t++) {
+				objects.push_back(ObjectPtr(new Magic(row + di[t], col + dj[t], 2)));
+			}
+			return;
+		}
 
+	}
+	for(unsigned int t = 1; t < 5; t++) {
+		objects.push_back(ObjectPtr(new Magic(row + di[t], col + dj[t], 2)));
+	}
 }
 
 bool Knight::attack(list<CharacterPtr>& characters, list<ObjectPtr>& objects, CharacterPtr self) {
@@ -105,7 +155,7 @@ bool Knight::attack(list<CharacterPtr>& characters, list<ObjectPtr>& objects, Ch
 		case CMD_MAGIC: {
 			char direction;
 			cin >> direction;
-			magic(direction);
+			magic(objects, direction);
 			return true;
 		}
 		case CMD_QUIT: {
@@ -131,6 +181,10 @@ bool Knight::move(Map& m, std::list<CharacterPtr>& characters) {
 			return true;	
 		}
 		case CMD_DOWN: {
+			++row;
+			return true;
+		}
+		case CMD_AROUND: {
 			++row;
 			return true;
 		}
@@ -216,6 +270,24 @@ Monster::~Monster() {
 
 }
 
+bool Monster::move(Map& m, std::list<CharacterPtr>& characters) {
+	prev_row = row;
+	prev_col = col;
+	if (chance(50, "")) {
+		row += dz_1[rand()%3];
+		col += dz_1[rand()%3];
+	}
+	else {
+		way = shortest_way_to(characters.front(), m);
+		if (way.size() > 0) {
+			row = way.front().first;
+			col = way.front().second;
+			way.pop_front();
+		}
+	}
+	return false;
+}
+
 IntIntPairList Monster::shortest_way_to(BaseObjectPtr obj, Map& m) {
 	return m.shortest_way(
 		IntIntPair(this->getrow(), this->getcol()), 
@@ -237,8 +309,11 @@ Dragon::~Dragon() {
 	cout << "Dragon died\n";
 }
 
-void Dragon::magic() {
-
+void Dragon::magic(list<ObjectPtr>& objects) {
+	objects.push_back(ObjectPtr(new Flame(row - 1, col - 1)));
+	objects.push_back(ObjectPtr(new Flame(row - 1, col + 1)));
+	objects.push_back(ObjectPtr(new Flame(row + 1, col + 1)));
+	objects.push_back(ObjectPtr(new Flame(row + 1, col - 1)));
 }
 
 bool Dragon::attack(list<CharacterPtr>& characters, list<ObjectPtr>& objects, CharacterPtr self) {
@@ -248,7 +323,9 @@ bool Dragon::attack(list<CharacterPtr>& characters, list<ObjectPtr>& objects, Ch
 		return true;
 	}
 	if (abs(knight->getrow() - row) < 10 && abs(knight->getcol() - col) < 10) {
-		magic();
+		if (chance(45, "")) {
+			magic(objects);
+		}
 		return false;
 	}
 	return false;
@@ -262,23 +339,6 @@ bool Dragon::suffer(int dmg) {
 	return (health -= dmg) <= 0;
 }
 
-bool Dragon::move(Map& m, std::list<CharacterPtr>& characters) {
-	prev_row = row;
-	prev_col = col;
-	if (chance(50, "")) {
-		row += dz_1[rand()%3];
-		col += dz_1[rand()%3];
-	}
-	else {
-		way = shortest_way_to(characters.front(), m);
-		if (way.size() > 0) {
-			row = way.front().first;
-			col = way.front().second;
-			way.pop_front();
-		}
-	}
-	return false;
-}
 
 
 
@@ -312,20 +372,4 @@ bool Zombie::attack(list<CharacterPtr>& characters, list<ObjectPtr>& objects, Ch
 	}
 	objects.push_back(ObjectPtr(new Swamp(this->row, this->col)));
 	return false;
-}
-
-bool Zombie::move(Map& m, std::list<CharacterPtr>& characters) {
-	prev_row = row;
-	prev_col = col;
-	way = shortest_way_to(characters.front(), m);
-	if (way.size() > 0) {
-		row = way.front().first;
-		col = way.front().second;
-		way.pop_front();
-	}
-	else {
-		row += dz_1[rand()%3];
-		col += dz_1[rand()%3];
-	}
-	return true;
 }

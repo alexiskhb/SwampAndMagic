@@ -41,9 +41,9 @@ public:
 
 	~Character() override;
 
-	void slash(std::list<CharacterPtr>& characters, CharacterPtr self);
+	void slash(std::list<CharacterPtr>& characters);
 
-	virtual bool attack(std::list<CharacterPtr>& characters, std::list<ObjectPtr>& objects, CharacterPtr self);
+	virtual bool attack(std::list<CharacterPtr>& characters, std::list<ObjectPtr>& objects, Map& m);
 
 	// returns True if character died
 	virtual bool suffer(int dmg);
@@ -70,7 +70,7 @@ public:
 
 	void magic(std::list<ObjectPtr>& objects, char direction);
 
-	bool attack(std::list<CharacterPtr>& characters, std::list<ObjectPtr>& objects, CharacterPtr self) override;
+	bool attack(std::list<CharacterPtr>& characters, std::list<ObjectPtr>& objects, Map& m) override;
 
 	bool move(Map& m, std::list<CharacterPtr>& characters) override;
 
@@ -112,6 +112,8 @@ public:
 
 	bool move(Map& m, std::list<CharacterPtr>& characters) override;
 
+	void refresh_way(Map& m, std::list<CharacterPtr>& characters);
+
 	IntIntPairList shortest_way_to(BaseObjectPtr obj, Map& m);
 protected:
 	IntIntPairList way;
@@ -131,7 +133,7 @@ public:
 
 	void magic(std::list<ObjectPtr>& objects);
 
-	bool attack(std::list<CharacterPtr>& characters, std::list<ObjectPtr>& objects, CharacterPtr self) override;
+	bool attack(std::list<CharacterPtr>& characters, std::list<ObjectPtr>& objects, Map& m) override;
 
 	char symbol() override;
 
@@ -154,5 +156,5 @@ public:
 
 	bool suffer(int dmg) override;
 
-	bool attack(std::list<CharacterPtr>& characters, std::list<ObjectPtr>& objects, CharacterPtr self) override;
+	bool attack(std::list<CharacterPtr>& characters, std::list<ObjectPtr>& objects, Map& m) override;
 };

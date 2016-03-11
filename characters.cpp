@@ -24,15 +24,15 @@ Character::~Character() {
 
 }
 
-void Character::slash(list<CharacterPtr>& characters, CharacterPtr self) {
+void Character::slash(list<CharacterPtr>& characters) {
 	for(auto ch: characters) {
-		if (ch != self && *ch % *self) {
+		if (!(*ch == *this) && *ch % *this) {
 			ch->suffer(damage);
 		}
 	}
 }
 
-bool Character::attack(list<CharacterPtr>& characters, list<ObjectPtr>& objects, CharacterPtr self) {
+bool Character::attack(list<CharacterPtr>& characters, list<ObjectPtr>& objects, Map& m) {
 	return false;
 }
 
@@ -136,7 +136,7 @@ void Knight::magic(list<ObjectPtr>& objects, char direction) {
 	}
 }
 
-bool Knight::attack(list<CharacterPtr>& characters, list<ObjectPtr>& objects, CharacterPtr self) {
+bool Knight::attack(list<CharacterPtr>& characters, list<ObjectPtr>& objects, Map& m) {
 	std::string moves(STR_MOVES);
 	moved_on_attack = CMD_NONE;
 	char action;
@@ -148,7 +148,7 @@ bool Knight::attack(list<CharacterPtr>& characters, list<ObjectPtr>& objects, Ch
 	}	
 	switch (action) {
 		case CMD_ATTACK: {
-			slash(characters, self);
+			slash(characters);
 			return true;	
 		}
 		case CMD_MAGIC: {
@@ -277,7 +277,6 @@ bool Monster::move(Map& m, std::list<CharacterPtr>& characters) {
 		col += dz_1[rand()%3];
 	}
 	else {
-		way = shortest_way_to(characters.front(), m);
 		if (way.size() > 0) {
 			row = way.front().first;
 			col = way.front().second;
@@ -285,6 +284,10 @@ bool Monster::move(Map& m, std::list<CharacterPtr>& characters) {
 		}
 	}
 	return false;
+}
+
+void Monster::refresh_way(Map& m, std::list<CharacterPtr>& characters) {
+	way = shortest_way_to(characters.front(), m);
 }
 
 IntIntPairList Monster::shortest_way_to(BaseObjectPtr obj, Map& m) {
@@ -315,10 +318,11 @@ void Dragon::magic(list<ObjectPtr>& objects) {
 	}
 }
 
-bool Dragon::attack(list<CharacterPtr>& characters, list<ObjectPtr>& objects, CharacterPtr self) {
+bool Dragon::attack(list<CharacterPtr>& characters, list<ObjectPtr>& objects, Map& m) {
 	CharacterPtr knight = characters.front();
-	if (*self % *knight && chance(80, "")) {
-		slash(characters, self);
+	refresh_way(m, characters);
+	if (*this % *knight && chance(80, "")) {
+		slash(characters);
 		return true;
 	}
 	if (abs(knight->getrow() - row) < 10 && abs(knight->getcol() - col) < 10) {
@@ -363,10 +367,11 @@ bool Zombie::suffer(int dmg) {
 	return (health -= dmg) <= 0;
 }
 
-bool Zombie::attack(list<CharacterPtr>& characters, list<ObjectPtr>& objects, CharacterPtr self) {
+bool Zombie::attack(list<CharacterPtr>& characters, list<ObjectPtr>& objects, Map& m) {
 	CharacterPtr knight = characters.front();
-	if (*self % *knight) {
-		slash(characters, self);
+	refresh_way(m, characters);
+	if (*this % *knight) {
+		slash(characters);
 		return true;
 	}
 	objects.push_back(ObjectPtr(new Swamp(this->row, this->col)));

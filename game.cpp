@@ -58,9 +58,11 @@ struct {
 	void next_turn() {
 		++counter;
 		CharacterBoolMap did_attack;
-		for(auto ch: characters) {
-			did_attack.insert(CharacterBoolPair(ch, ch->attack(characters, dyn_objects, ch)));
+		for(auto ch_iter = std::next(characters.begin()); ch_iter != characters.end(); ch_iter++) {
+			auto ch = *ch_iter;
+			did_attack.insert(CharacterBoolPair(ch, ch->attack(characters, dyn_objects, map)));
 		}
+		did_attack.insert(CharacterBoolPair(knight, knight->attack(characters, dyn_objects, map)));
 		for(auto obj: dyn_objects) {
 			if (map.is_on_the_map(obj->getrow(), obj->getcol())) {
 				obj->impact(characters, dyn_objects);
@@ -95,6 +97,7 @@ struct {
 				}
 			}
 		}
+		
 		refresh_characters_objects();
 	}
 
@@ -135,7 +138,7 @@ struct {
 		map << characters.back();
 		for(int i = 0; i < MAP_HEIGHT; i++) {
 			for(int j = 0; j < MAP_WIDTH; j++) {
-				if (map.is_penetrable(i, j) && chance(50, "")) {
+				if (map.is_penetrable(i, j) && chance(2, "")) {
 					characters.push_back(CharacterPtr(new Zombie(i, j, HP_ZOMBIE, DMG_ZOMBIE)));
 					map << characters.back();
 				}

@@ -103,7 +103,7 @@ struct {
 		cout << "HP: " << characters.front()->hitpoints() << "	NEAREST_ENEMY: ";
 		BaseObjectPtr obj = map.nearest_symb(IntIntPair(knight->getrow(), knight->getcol()), std::string("zD"));
 		cout << obj->hitpoints() << "\n"; 
-		cout << "enemies cnt: " << characters.size()-2 << "\n\n";
+		// cout << "enemies cnt: " << characters.size()-2 << "\n\n";
 	}
 
 	void generate_level() {
@@ -135,7 +135,7 @@ struct {
 		map << characters.back();
 		for(int i = 0; i < MAP_HEIGHT; i++) {
 			for(int j = 0; j < MAP_WIDTH; j++) {
-				if (map.is_penetrable(i, j) && chance(2, "")) {
+				if (map.is_penetrable(i, j) && chance(50, "")) {
 					characters.push_back(CharacterPtr(new Zombie(i, j, HP_ZOMBIE, DMG_ZOMBIE)));
 					map << characters.back();
 				}
@@ -146,7 +146,7 @@ struct {
 
 
 int main(int argc, char** argv) {
-	cout << Colored(BG_BLACK, FG_B_YELLOW) << "Hello" << Colored() << std::endl;
+	cout << "\033[40;0m" << "Hello" << std::endl;
 	Game.init();
 	Game.render();
  	while (!Game.is_over()) {

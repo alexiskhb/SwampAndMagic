@@ -10,6 +10,10 @@ Object::Object(int arow, int acol) : BaseObject(arow, acol) {
 	
 }
 
+Object::~Object() {
+
+}
+
 void Object::destroy() {
 	health = 0;
 }

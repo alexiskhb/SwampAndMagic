@@ -38,7 +38,7 @@ enum BGColorCode {
 	BG_B_GRAY     = 100,
 	BG_B_RED      = 101,
 	BG_B_GREEN    = 102,
-	BG_YELLOW   = 103,
+	BG_YELLOW     = 103,
 	BG_B_BLUE     = 104,
 	BG_B_PINK     = 105,
 	BG_B_AQUA     = 106,

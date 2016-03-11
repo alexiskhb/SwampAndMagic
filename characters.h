@@ -39,7 +39,7 @@ public:
 
 	Character(int arow, int acol, int hp, int dmg);
 
-	virtual ~Character();
+	~Character() override;
 
 	void slash(std::list<CharacterPtr>& characters, CharacterPtr self);
 
@@ -51,7 +51,7 @@ public:
 	virtual bool move(Map& m, std::list<CharacterPtr>& characters) = 0;
 
 	// all characters are impenetrable
-	virtual bool is_penetrable();
+	bool is_penetrable() override;
 };
 
 
@@ -62,19 +62,19 @@ public:
 
 	Knight(int arow, int acol, int hp, int dmg);
 
-	virtual ~Knight();
+	~Knight() override;
 
-	virtual char symbol();
+	char symbol() override;
 
-	virtual bool is_evil();
+	bool is_evil() override;
 
 	void magic(std::list<ObjectPtr>& objects, char direction);
 
-	virtual bool attack(std::list<CharacterPtr>& characters, std::list<ObjectPtr>& objects, CharacterPtr self);
+	bool attack(std::list<CharacterPtr>& characters, std::list<ObjectPtr>& objects, CharacterPtr self) override;
 
-	virtual bool move(Map& m, std::list<CharacterPtr>& characters);
+	bool move(Map& m, std::list<CharacterPtr>& characters) override;
 
-	virtual bool suffer(int dmg);
+	bool suffer(int dmg) override;
 private:
 	char moved_on_attack;
 };
@@ -89,13 +89,13 @@ public:
 
 	Princess(int arow, int acol, int hp, int dmg);
 
-	virtual ~Princess();
+	~Princess() override;
 
-	virtual char symbol();
+	char symbol() override;
 	
-	virtual bool suffer(int dmg);
+	bool suffer(int dmg) override;
 
-	virtual bool move(Map& m, std::list<CharacterPtr>& characters);
+	bool move(Map& m, std::list<CharacterPtr>& characters) override;
 };
 
 
@@ -108,11 +108,11 @@ public:
 
 	Monster(int arow, int acol, int hp, int dmg);
 
-	virtual bool move(Map& m, std::list<CharacterPtr>& characters);
+	~Monster() override;
+
+	bool move(Map& m, std::list<CharacterPtr>& characters) override;
 
 	IntIntPairList shortest_way_to(BaseObjectPtr obj, Map& m);
-
-	virtual ~Monster();
 protected:
 	IntIntPairList way;
 };
@@ -127,15 +127,15 @@ public:
 
 	Dragon(int arow, int acol, int hp, int dmg);
 
-	virtual ~Dragon();
+	~Dragon() override;
 
 	void magic(std::list<ObjectPtr>& objects);
 
-	virtual bool attack(std::list<CharacterPtr>& characters, std::list<ObjectPtr>& objects, CharacterPtr self);
+	bool attack(std::list<CharacterPtr>& characters, std::list<ObjectPtr>& objects, CharacterPtr self) override;
 
-	virtual char symbol();
+	char symbol() override;
 
-	virtual bool suffer(int dmg);
+	bool suffer(int dmg) override;
 };
 
 
@@ -148,11 +148,11 @@ public:
 
 	Zombie(int arow, int acol, int hp, int dmg);
 
-	virtual ~Zombie();
+	~Zombie() override;
 
-	virtual char symbol();
+	char symbol() override;
 
-	virtual bool suffer(int dmg);
+	bool suffer(int dmg) override;
 
-	virtual bool attack(std::list<CharacterPtr>& characters, std::list<ObjectPtr>& objects, CharacterPtr self);
+	bool attack(std::list<CharacterPtr>& characters, std::list<ObjectPtr>& objects, CharacterPtr self) override;
 };

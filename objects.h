@@ -16,15 +16,17 @@ class Object : public BaseObject {
 public:
 	Object(int arow, int acol);
 
+	~Object() override;
+	
 	virtual void destroy();
 
 	virtual void turn();
 
-	virtual bool is_penetrable();
-
-	virtual bool is_alive();
-
 	virtual void impact(std::list<CharacterPtr>& characters, std::list<ObjectPtr>& objects);
+
+	bool is_penetrable() override;
+
+	bool is_alive() override;
 };
 
 
@@ -35,13 +37,13 @@ class Wall : public Object {
 public:
 	Wall(int arow, int acol);
 
-	virtual ~Wall();
+	~Wall() override;
 
-	virtual char symbol();
+	char symbol() override;
 
-	virtual bool is_penetrable();
+	bool is_penetrable() override;
 
-	virtual void impact(std::list<CharacterPtr>& characters, std::list<ObjectPtr>& objects);
+	void impact(std::list<CharacterPtr>& characters, std::list<ObjectPtr>& objects) override;
 };
 
 
@@ -52,11 +54,11 @@ class Flame : public Object {
 public:
 	Flame(int arow, int acol);
 
-	virtual ~Flame();
+	~Flame() override;
 
-	virtual char symbol();
+	char symbol() override;
 
-	virtual void impact(std::list<CharacterPtr>& characters, std::list<ObjectPtr>& objects);
+	void impact(std::list<CharacterPtr>& characters, std::list<ObjectPtr>& objects) override;
 };
 
 
@@ -67,11 +69,11 @@ class Swamp : public Object {
 public:
 	Swamp(int arow, int acol);
 
-	virtual ~Swamp();
+	~Swamp() override;
 
-	virtual char symbol();
+	char symbol() override;
 
-	virtual void impact(std::list<CharacterPtr>& characters, std::list<ObjectPtr>& objects);
+	void impact(std::list<CharacterPtr>& characters, std::list<ObjectPtr>& objects) override;
 };
 
 
@@ -84,9 +86,9 @@ public:
 
 	Magic(int arow, int acol, int timelife);
 
-	virtual ~Magic();
+	~Magic() override;
 
-	virtual char symbol();
+	char symbol() override;
 
-	virtual void impact(std::list<CharacterPtr>& characters, std::list<ObjectPtr>& objects);
+	void impact(std::list<CharacterPtr>& characters, std::list<ObjectPtr>& objects) override;
 };

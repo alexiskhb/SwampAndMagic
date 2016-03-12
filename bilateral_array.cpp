@@ -10,16 +10,10 @@ BilateralArray<Type>::BilateralArray() {
 
 
 template <typename Type>
-void BilateralArray<Type>::insert(int index, Type element) {
+void BilateralArray<Type>::insert(const int index, Type element) {
+	expand_for(index);
 	vector<Type>& semiaxis = index >= 0 ? positive : negative;
-	index = abs(index);
-	if (index > semiaxis.size()) {
-		semiaxis.resize(index);
-		semiaxis.push_back(element);
-	}
-	else {
-		semiaxis.at(index) = element;
-	}
+	semiaxis.at(abs(index)) = element;
 }
 
 template <typename Type>
@@ -28,9 +22,25 @@ unsigned int BilateralArray<Type>::size() {
 }
 
 template <typename Type>
-bool BilateralArray<Type>::includes(int index) {
+bool BilateralArray<Type>::includes(const int index) {
 	vector<Type>& semiaxis = index >= 0 ? positive : negative;
 	return semiaxis.size() > abs(index);
+}
+
+template <typename Type>
+Type& BilateralArray<Type>::operator[](const int index) {
+	expand_for(index);
+	vector<Type>& semiaxis = index >= 0 ? positive : negative;
+	return semiaxis.at(abs(index));
+}
+
+template <typename Type>
+void BilateralArray<Type>::expand_for(const int index) {
+	vector<Type>& semiaxis = index >= 0 ? positive : negative;
+	index = abs(index);
+	if (index >= semiaxis.size()) {
+		semiaxis.resize(index + 1);
+	}
 }
 
 
@@ -43,7 +53,7 @@ BilateralArray2D<Type>::BilateralArray2D() {
 
 template <typename Type>
 void BilateralArray2D<Type>::insert(int x, int y, Type element) {
-	if (abs(x) > area.size()) {
-
-	}
+	area.expand_for(x);
+	area[x].expand_for(y);
+	area[x][y] = element;
 }

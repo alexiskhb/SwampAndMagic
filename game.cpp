@@ -7,6 +7,7 @@
 #include "colored_text.h"
 #include <string>
 #include <curses.h>
+#include "bilateral_array.h"
 
 
 using std::cout;

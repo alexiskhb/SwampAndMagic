@@ -7,11 +7,15 @@ class BilateralArray {
 public:
 	BilateralArray();
 
-	void insert(int index, Type element);
+	void insert(const int index, Type element);
 
 	unsigned int size();
 
-	bool includes(int index);
+	bool includes(const int index);
+
+	void expand_for(const int index);
+
+	Type& operator[](const int index);
 private:
 	// zero is in positive 
 	std::vector<Type> negative, positive;
@@ -25,7 +29,7 @@ class BilateralArray2D {
 public:
 	BilateralArray2D();
 
-	void insert(int ax, int ay, Type element);
+	void insert(int x, int y, Type element);
 private:
 	// ...-x <-|-|-|-|-|-0-|-|-|-|-|-|-> ...+x
 	BilateralArray< BilateralArray<Type> > area;

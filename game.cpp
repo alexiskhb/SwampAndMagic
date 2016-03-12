@@ -158,8 +158,11 @@ struct {
 
 
 int main(int argc, char** argv) {
-	// cout << "\033[40;0m" << "Hello" << std::endl;
-	BilateralArray<int> bl;
+
+	BilateralArray2D<int> barr2;
+	barr2[3][4] = 5;
+	barr2[-10][1] = 1;
+
 	Game.init();
 	Game.render();
  	while (!Game.is_over()) {

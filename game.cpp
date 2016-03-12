@@ -159,6 +159,7 @@ struct {
 
 int main(int argc, char** argv) {
 	// cout << "\033[40;0m" << "Hello" << std::endl;
+	BilateralArray<int> bl;
 	Game.init();
 	Game.render();
  	while (!Game.is_over()) {

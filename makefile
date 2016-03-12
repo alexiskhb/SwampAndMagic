@@ -9,7 +9,7 @@ DBGFLAGS= -g -O3
 
 LIBS=-lncursesw
 
-SRC=$(NAME).cpp base_objects.cpp objects.cpp characters.cpp colored_text.cpp
+SRC=$(NAME).cpp base_objects.cpp objects.cpp characters.cpp colored_text.cpp bilateral_array.cpp
 
 OBJ=$(SRC:.cpp=.o)
 

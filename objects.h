@@ -4,14 +4,16 @@
 #include <string>
 #include "colored_text.h"
 
-static const int DMG_FLAME = 7;
-static const int DMG_CURSE = 15;
-static const int DMG_MAGIC = 8;
-static const int TIME_SWAMP = 15;
-static const int TIME_MAGIC = 5;
-static const int TIME_CURSE = 2;
-static const int TIME_FLAME = 4;
-static const int TIME_INFTY = -10000;
+static const int DMG_FLAME  = 7;
+static const int DMG_CURSE  = 15;
+static const int DMG_MAGIC  = 8;
+static const int DMG_MEDKIT = -20;
+static const int TIME_SWAMP  = 15;
+static const int TIME_MAGIC  = 5;
+static const int TIME_CURSE  = 2;
+static const int TIME_FLAME  = 4;
+static const int TIME_INFTY  = -10000;
+static const int TIME_MEDKIT = TIME_INFTY;
 
 
 class Object : public BaseObject {
@@ -110,6 +112,25 @@ public:
 
 	void impact(std::list<CharacterPtr>& characters, std::list<ObjectPtr>& objects) override;
 };
+
+
+
+
+class Medkit : public Object {
+public:
+	Medkit(int arow, int acol);
+
+	Medkit(int arow, int acol, int timelife);
+
+	~Medkit() override;
+
+	char symbol() override;
+
+	void impact(std::list<CharacterPtr>& characters, std::list<ObjectPtr>& objects) override;
+};
+
+
+
 
 
 class DragonNest {

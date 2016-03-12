@@ -7,6 +7,7 @@
 #include "colored_text.h"
 #include <string>
 #include <curses.h>
+#include "bilateral_array.h"
 
 
 using std::cout;
@@ -136,6 +137,11 @@ struct {
 		map << ch;
 	}
 
+	void put_dynobject(ObjectPtr obj) {
+		dyn_objects.push_back(obj);
+		map << obj;	
+	}
+
 	void init() {
 		// nodelay(stdscr, false);
 		srand(time(0));
@@ -144,6 +150,7 @@ struct {
 		put_character(princess);
 		put_character(CharacterPtr(new Dragon(4, MAP_WIDTH-4)));
 		put_character(CharacterPtr(new Warlock(10, MAP_WIDTH-10)));
+		put_dynobject(ObjectPtr(new Medkit(MAP_HEIGHT/2, MAP_WIDTH/2)));
 		for(int i = 0; i < MAP_HEIGHT; i++) {
 			for(int j = 0; j < MAP_WIDTH; j++) {
 				if (map.is_penetrable(i, j) && chance(2, "")) {

@@ -26,6 +26,7 @@ static const char SYM_SWAMP    = '~';
 static const char SYM_FLAME    = '*';
 static const char SYM_MAGIC    = '%';
 static const char SYM_CURSE    = 'X';
+static const char SYM_MEDKIT   = '+';
 
 static const int MAP_HEIGHT = 30;
 static const int MAP_WIDTH  = 60;
@@ -92,6 +93,9 @@ protected:
 };
 
 
+class Room {
+
+};
 
 class Map {
 public:

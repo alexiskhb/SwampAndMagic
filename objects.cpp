@@ -175,10 +175,37 @@ void Curse::impact(list<CharacterPtr>& characters, std::list<ObjectPtr>& objects
 			ch->suffer(ch->symbol() == SYM_KNIGHT ? -damage*1.5 : damage);
 		}
 	}
-	for(auto obj: objects) {
-		if (*obj == *this && obj->symbol() == SYM_FLAME) {
-			obj->destroy();
-			health = TIME_CURSE;
+}
+
+
+
+
+Medkit::Medkit(int arow, int acol) : Object(arow, acol) {
+	health = TIME_MEDKIT;
+	damage = DMG_MEDKIT;
+	fcolor = Colored(BG_WHITE, FG_GREEN).to_string();
+}
+
+Medkit::Medkit(int arow, int acol, int timelife) : Object(arow, acol) {
+	health = timelife;
+	damage = DMG_MEDKIT;
+	fcolor = Colored(BG_GREEN, FG_WHITE).to_string();
+}
+
+Medkit::~Medkit() {
+
+}
+
+char Medkit::symbol() {
+	return SYM_MEDKIT;
+}
+
+void Medkit::impact(list<CharacterPtr>& characters, std::list<ObjectPtr>& objects) {
+	for(auto ch: characters) {
+		if (*ch == *this) {
+			ch->suffer(damage);
+			health = 0;
+			break;
 		}
 	}
 }

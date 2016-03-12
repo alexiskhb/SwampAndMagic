@@ -4,10 +4,12 @@
 #include <string>
 #include "colored_text.h"
 
-static const int DMG_FLAME = 4;
-static const int DMG_MAGIC = 6;
+static const int DMG_FLAME = 7;
+static const int DMG_CURSE = 15;
+static const int DMG_MAGIC = 8;
 static const int TIME_SWAMP = 15;
 static const int TIME_MAGIC = 5;
+static const int TIME_CURSE = 2;
 static const int TIME_FLAME = 4;
 static const int TIME_INFTY = -10000;
 
@@ -92,3 +94,31 @@ public:
 
 	void impact(std::list<CharacterPtr>& characters, std::list<ObjectPtr>& objects) override;
 };
+
+
+
+
+class Curse : public Object {
+public:
+	Curse(int arow, int acol);
+
+	Curse(int arow, int acol, int timelife);
+
+	~Curse() override;
+
+	char symbol() override;
+
+	void impact(std::list<CharacterPtr>& characters, std::list<ObjectPtr>& objects) override;
+};
+
+
+class DragonNest {
+
+};
+
+
+class Graveyard {
+
+};
+
+

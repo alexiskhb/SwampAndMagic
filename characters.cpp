@@ -1,5 +1,6 @@
 #include "characters.h"
 #include "objects.h"
+#include <curses.h>
 
 static const char* STR_MOVES  = "wasdqezcx"; 
 
@@ -76,8 +77,8 @@ void Knight::magic(list<ObjectPtr>& objects, char direction) {
 	int di_dec[5] = {-1, -2, -3, -4, -5};
 	int dj_inc[5] = {1, 2, 3, 4, 5};
 	int dj_dec[5] = {-1, -2, -3, -4, -5};
-	int di_around[12] = {-2, -2, -2, -1, 0, 1, 2, 2, 2, 1, 0, -1};
-	int dj_around[12] = {-1, 0, 1, 2, 2, 2, 1, 0, -1, -2, -2, -2};
+	int di_around[16] = {-2, -2, -2, -2, -2, -1, 0, 1, 2, 2, 2, 2, 2, 1, 0, -1};
+	int dj_around[16] = {-2, -1, 0, 1, 2, 2, 2, 2, 2, 1, 0, -1, -2, -2, -2, -2};
 	int* di = di_around;
 	int* dj = dj_around;
 	switch (direction) {
@@ -124,7 +125,7 @@ void Knight::magic(list<ObjectPtr>& objects, char direction) {
 		case CMD_AROUND: {
 			di = di_around;
 			dj = dj_around;
-			for(unsigned int t = 0; t < 12; t++) {
+			for(unsigned int t = 0; t < 16; t++) {
 				objects.push_back(ObjectPtr(new Magic(row + di[t], col + dj[t], 2)));
 			}
 			return;
@@ -140,6 +141,7 @@ bool Knight::attack(list<CharacterPtr>& characters, list<ObjectPtr>& objects, Ma
 	std::string moves(STR_MOVES);
 	moved_on_attack = CMD_NONE;
 	char action;
+	// action = getch();
 	cin >> action;
 	// condition means player wants to move
 	if (moves.find(action) != std::string::npos) {
@@ -169,6 +171,7 @@ bool Knight::move(Map& m, std::list<CharacterPtr>& characters) {
 	prev_col = col;
 	char action;
 	if (moved_on_attack == CMD_NONE) {
+		// action = getch();
 		cin >> action;
 	}
 	else {
@@ -299,12 +302,12 @@ IntIntPairList Monster::shortest_way_to(BaseObjectPtr obj, Map& m) {
 
 
 
-Dragon::Dragon(int arow, int acol) : Monster(arow, acol) {
-	fcolor = Colored(BG_BLACK, FG_WHITE).to_string();
+Dragon::Dragon(int arow, int acol) : Monster(arow, acol, HP_DRAGON, DMG_DRAGON) {
+	fcolor = Colored(BG_RED, FG_WHITE).to_string();
 }
 
 Dragon::Dragon(int arow, int acol, int hp, int dmg) : Monster(arow, acol, hp, dmg) {
-	fcolor = Colored(BG_BLACK, FG_WHITE).to_string();
+	fcolor = Colored(BG_RED, FG_WHITE).to_string();
 }
 
 Dragon::~Dragon() {
@@ -347,16 +350,16 @@ bool Dragon::suffer(int dmg) {
 
 
 
-Zombie::Zombie(int arow, int acol) : Monster(arow, acol) {
+Zombie::Zombie(int arow, int acol) : Monster(arow, acol, HP_ZOMBIE, DMG_ZOMBIE) {
 
 }
 
 Zombie::Zombie(int arow, int acol, int hp, int dmg) : Monster(arow, acol, hp, dmg) {
-	fcolor = Colored(BG_RED, FG_WHITE).to_string();
+	fcolor = Colored(BG_ORANGE, FG_WHITE).to_string();
 }
 
 Zombie::~Zombie() {
-	cout << "Zombie died\n";
+
 }
 
 char Zombie::symbol() {
@@ -374,6 +377,41 @@ bool Zombie::attack(list<CharacterPtr>& characters, list<ObjectPtr>& objects, Ma
 		slash(characters);
 		return true;
 	}
-	objects.push_back(ObjectPtr(new Swamp(this->row, this->col)));
+	// objects.push_back(ObjectPtr(new Swamp(this->row, this->col)));
+	return false;
+}
+
+
+
+
+
+Warlock::Warlock(int arow, int acol) : Monster(arow, acol, HP_WARLOCK, DMG_WARLOCK) {
+	fcolor = Colored(BG_BLACK, FG_WHITE).to_string();
+}
+
+Warlock::Warlock(int arow, int acol, int hp, int dmg) : Monster(arow, acol, hp, dmg) {
+	fcolor = Colored(BG_BLACK, FG_WHITE).to_string();
+}
+
+Warlock::~Warlock() {
+	cout << "Warlock died\n";
+}
+
+char Warlock::symbol() {
+	return SYM_WARLOCK;
+}
+
+bool Warlock::suffer(int dmg) {
+	return (health -= dmg) <= 0;
+}
+
+bool Warlock::attack(list<CharacterPtr>& characters, list<ObjectPtr>& objects, Map& m) {
+	CharacterPtr knight = characters.front();
+	refresh_way(m, characters);
+	if (*this % *knight) {
+		slash(characters);
+		return true;
+	}
+	// objects.push_back(ObjectPtr(new Swamp(this->row, this->col)));
 	return false;
 }

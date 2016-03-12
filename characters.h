@@ -6,16 +6,18 @@
 #include "colored_text.h"
 
 
-static const int HP_KNIGHT   = 70*100; 
+static const int HP_KNIGHT   = 70; 
 static const int HP_PRINCESS = 2;  
 static const int HP_DRAGON   = 200;
 static const int HP_ZOMBIE   = 20; 
+static const int HP_WARLOCK  = 40;
 
 
-static const int DMG_KN_SWORD = 8; 
+static const int DMG_KN_SWORD = 10; 
 static const int DMG_PRINCESS = 0; 
 static const int DMG_DRAGON   = 15;
 static const int DMG_ZOMBIE   = 2;
+static const int DMG_WARLOCK  = 1;
 
 
 static const char CMD_UP     = 'w';
@@ -157,4 +159,23 @@ public:
 	bool suffer(int dmg) override;
 
 	bool attack(std::list<CharacterPtr>& characters, std::list<ObjectPtr>& objects, Map& m) override;
+};
+
+
+
+
+
+class Warlock : public Monster {
+public:
+	Warlock(int arow, int acol);
+
+	Warlock(int arow, int acol, int hp, int dmg);
+
+	~Warlock() override;
+
+	char symbol() override;
+
+	bool suffer(int dmg) override;
+
+	bool attack(std::list<CharacterPtr>& characters, std::list<ObjectPtr>& objects, Map& m) override;	
 };

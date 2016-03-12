@@ -21,9 +21,11 @@ static const char SYM_KNIGHT   = 'K';
 static const char SYM_PRINCESS = 'P';
 static const char SYM_DRAGON   = 'D';
 static const char SYM_ZOMBIE   = 'z';
+static const char SYM_WARLOCK  = 'W';
 static const char SYM_SWAMP    = '~';
 static const char SYM_FLAME    = '*';
 static const char SYM_MAGIC    = '%';
+static const char SYM_CURSE    = 'X';
 
 static const int MAP_HEIGHT = 30;
 static const int MAP_WIDTH  = 60;

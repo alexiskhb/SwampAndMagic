@@ -145,3 +145,40 @@ void Magic::impact(list<CharacterPtr>& characters, std::list<ObjectPtr>& objects
 		}
 	}
 }
+
+
+
+
+Curse::Curse(int arow, int acol) : Object(arow, acol) {
+	health = TIME_CURSE;
+	damage = DMG_CURSE;
+	fcolor = Colored(BG_WHITE, FG_B_BLUE).to_string();
+}
+
+Curse::Curse(int arow, int acol, int timelife) : Object(arow, acol) {
+	health = timelife;
+	damage = DMG_CURSE;
+	fcolor = Colored(BG_WHITE, FG_B_BLUE).to_string();
+}
+
+Curse::~Curse() {
+
+}
+
+char Curse::symbol() {
+	return SYM_CURSE;
+}
+
+void Curse::impact(list<CharacterPtr>& characters, std::list<ObjectPtr>& objects) {
+	for(auto ch: characters) {
+		if (*ch == *this) {
+			ch->suffer(ch->symbol() == SYM_KNIGHT ? -damage*1.5 : damage);
+		}
+	}
+	for(auto obj: objects) {
+		if (*obj == *this && obj->symbol() == SYM_FLAME) {
+			obj->destroy();
+			health = TIME_CURSE;
+		}
+	}
+}

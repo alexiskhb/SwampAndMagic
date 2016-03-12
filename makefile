@@ -7,7 +7,7 @@ CC=g++
 CFLAGS=-c -Wall -std=c++11
 DBGFLAGS= -g -O3
 
-LIBS=
+LIBS=-lncursesw
 
 SRC=$(NAME).cpp base_objects.cpp objects.cpp characters.cpp colored_text.cpp
 

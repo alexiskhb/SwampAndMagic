@@ -6,6 +6,7 @@
 #include <ctime>
 #include "colored_text.h"
 #include <string>
+#include <curses.h>
 
 
 using std::cout;
@@ -14,13 +15,13 @@ using std::cout;
 typedef std::map<CharacterPtr, bool> CharacterBoolMap;
 typedef std::pair<CharacterPtr, bool> CharacterBoolPair;
 
-// struct Game
+
 struct {
 	// CHARACTERS
-	// [0] : player(knight)
-	// [1] : princess
-	// [2] : dragon
-	// [3+]: zombies and other(if any)
+	// first(): player(knight)
+	// next   : princess
+	// third  : dragon
+	// >3: zombies and other(if any)
 	std::list<CharacterPtr> characters;
 	std::list<ObjectPtr> dyn_objects;
 	std::list<BaseObjectPtr> relief;
@@ -30,10 +31,14 @@ struct {
 	unsigned int counter = 0;
 
 	bool is_over() {
+		return characters.size() <= 2 || knight->hitpoints() <= 0 || princess->hitpoints() <= 0;
+	}
+
+	bool is_lose() {
 		return knight->hitpoints() <= 0 || princess->hitpoints() <= 0;
 	}
 
-	void refresh_characters_objects() {
+	void kill_died_characters_objects() {
 		for(auto obj: dyn_objects) {
 			if (map.is_on_the_map(obj->getrow(), obj->getcol())) {
 				map[obj->prevrow()][obj->prevcol()].remove(obj);
@@ -84,7 +89,7 @@ struct {
 					cout << "AHAHAHAAAHAA\n";
 				}
 				else
-				// changes will be accepted after calling refresh_characters_objects()
+				// changes will be accepted after calling kill_died_characters_objects()
 				// so we can cancel try to move on wall here. prev_coords now match with actual.
 				if (!map.is_penetrable(ch->getrow(), ch->getcol())) {
 					ch->move_to_prev();
@@ -97,8 +102,7 @@ struct {
 				}
 			}
 		}
-		
-		refresh_characters_objects();
+		kill_died_characters_objects();
 	}
 
 	inline void render() {
@@ -127,15 +131,19 @@ struct {
 		}
 	}
 
+	void put_character(CharacterPtr ch) {
+		characters.push_back(ch);
+		map << ch;
+	}
+
 	void init() {
+		// nodelay(stdscr, false);
 		srand(time(0));
 		generate_level();
-		characters.push_back(knight);
-		map << characters.back();
-		characters.push_back(princess);
-		map << characters.back();
-		characters.push_back(CharacterPtr(new Dragon(4, MAP_WIDTH-4, HP_DRAGON, DMG_DRAGON)));
-		map << characters.back();
+		put_character(knight);
+		put_character(princess);
+		put_character(CharacterPtr(new Dragon(4, MAP_WIDTH-4)));
+		put_character(CharacterPtr(new Warlock(10, MAP_WIDTH-10)));
 		for(int i = 0; i < MAP_HEIGHT; i++) {
 			for(int j = 0; j < MAP_WIDTH; j++) {
 				if (map.is_penetrable(i, j) && chance(2, "")) {
@@ -149,13 +157,13 @@ struct {
 
 
 int main(int argc, char** argv) {
-	cout << "\033[40;0m" << "Hello" << std::endl;
+	// cout << "\033[40;0m" << "Hello" << std::endl;
 	Game.init();
 	Game.render();
  	while (!Game.is_over()) {
  		Game.next_turn();
  		Game.render();
  	}
- 	Game.render();
+ 	cout << (Game.is_lose() ? "You lose\n" : "You win\n");
  	return 0;
 }

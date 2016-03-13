@@ -10,6 +10,7 @@
 #include <map>
 #include <string>
 #include "colored_text.h"
+#include "coords.h"
 
 extern bool chance(int a, std::string s);
 
@@ -28,8 +29,6 @@ static const char SYM_MAGIC    = '%';
 static const char SYM_CURSE    = 'X';
 static const char SYM_MEDKIT   = '+';
 
-static const int MAP_HEIGHT = 30;
-static const int MAP_WIDTH  = 60;
 
 static std::map<char, std::string> names;
 
@@ -94,6 +93,8 @@ protected:
 
 
 class Room {
+private:
+
 
 };
 

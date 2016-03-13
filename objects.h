@@ -3,6 +3,7 @@
 #include "base_objects.h"
 #include <string>
 #include "colored_text.h"
+#include "coords.h"
 
 static const int DMG_FLAME  = 7;
 static const int DMG_CURSE  = 15;

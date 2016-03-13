@@ -4,6 +4,7 @@
 #include <list>
 #include <string>
 #include "colored_text.h"
+#include "coords.h"
 
 
 static const int HP_KNIGHT   = 70; 

@@ -28,7 +28,7 @@ struct {
 	std::list<BaseObjectPtr> relief;
 	CharacterPtr knight   = CharacterPtr(new Knight(4, 3, HP_KNIGHT, DMG_KN_SWORD));
 	CharacterPtr princess = CharacterPtr(new Princess(1, MAP_WIDTH-2, HP_PRINCESS, DMG_PRINCESS));
-	Map map;
+	Map map(relief);
 	unsigned int counter = 0;
 
 	bool is_over() {
@@ -114,24 +114,6 @@ struct {
 		// cout << "enemies cnt: " << characters.size()-2 << "\n\n";
 	}
 
-	void generate_level() {
-		map.generate(42, 7);
-		for(int i = 0; i < MAP_HEIGHT; i++) {
-			for(int j = 0; j < MAP_WIDTH; j++) {
-				relief.push_back(ObjectPtr(new Object(i, j)));
-				map << relief.back();
-			}
-		}
-		for(int i = 0; i < MAP_HEIGHT; i++) {
-			for(int j = 0; j < MAP_WIDTH; j++) {
-				if (map.gen_is_wall(i, j)) {
-					relief.push_back(BaseObjectPtr(new Wall(i, j)));
-					map << relief.back(); 
-				}
-			}
-		}
-	}
-
 	void put_character(CharacterPtr ch) {
 		characters.push_back(ch);
 		map << ch;
@@ -143,9 +125,9 @@ struct {
 	}
 
 	void init() {
-		// nodelay(stdscr, false);
 		srand(time(0));
-		generate_level();
+		map.generate(42, 7, relief, 0, 0);
+
 		put_character(knight);
 		put_character(princess);
 		put_character(CharacterPtr(new Dragon(4, MAP_WIDTH-4)));
@@ -164,11 +146,6 @@ struct {
 
 
 int main(int argc, char** argv) {
-
-	BilateralArray2D<int> barr2;
-	barr2[3][4] = 5;
-	barr2[-10][1] = 1;
-
 	Game.init();
 	Game.render();
  	while (!Game.is_over()) {

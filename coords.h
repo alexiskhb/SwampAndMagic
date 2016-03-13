@@ -20,9 +20,9 @@ struct Coord {
 
 	Coord(const int ax, const int ay, const int arow, const int acol) : x(ax), y(ay), row(arow), col(acol) {
 	}
-	// Room coordinate
+	// Room coordinates
 	int x, y;
-	// Cell coordinate
+	// Cell coordinates
 	int row, col;
 };
 
@@ -35,17 +35,17 @@ struct GCoord {
 		int absrow = abs(arow);
 		int abscol = abs(acol);
 		
-		components.y = (absrow/MAP_HEIGHT + 1)*sgn(arow);
-		components.x = (abscol/MAP_WIDTH  + 1)*sgn(acol);
+		parts.y = (absrow/MAP_HEIGHT + 1)*sgn(arow);
+		parts.x = (abscol/MAP_WIDTH  + 1)*sgn(acol);
 
-		components.y -= (arow >= 0 ? 1 : 0);
-		components.x -= (acol >= 0 ? 1 : 0);
+		parts.y -= (arow >= 0 ? 1 : 0);
+		parts.x -= (acol >= 0 ? 1 : 0);
 
-		components.row = arow >= 0 ? absrow%MAP_HEIGHT : MAP_HEIGHT - absrow%MAP_HEIGHT;
-		components.col = acol >= 0 ? abscol%MAP_WIDTH  : MAP_WIDTH  - abscol%MAP_WIDTH;
+		parts.row = arow >= 0 ? absrow%MAP_HEIGHT : MAP_HEIGHT - absrow%MAP_HEIGHT;
+		parts.col = acol >= 0 ? abscol%MAP_WIDTH  : MAP_WIDTH  - abscol%MAP_WIDTH;
 	}
 
-	GCoord(const Coord c) : components(c) {
+	GCoord(const Coord c) : parts(c) {
 		// Translate cell's (0;0) to global coordinates
 		int grow_st = c.y*MAP_HEIGHT;
 		int gcol_st = c.x*MAP_WIDTH;
@@ -53,7 +53,7 @@ struct GCoord {
 		row = grow_st + c.row;
 		col = gcol_st + c.col;
 	}
-
+	// Global coordinates
 	int row, col;
-	Coord components;
+	Coord parts;
 };

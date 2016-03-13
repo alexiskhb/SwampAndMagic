@@ -11,6 +11,7 @@
 #include <string>
 #include "colored_text.h"
 #include "coords.h"
+#include "bilateral_array.h"
 
 extern bool chance(int a, std::string s);
 
@@ -30,7 +31,6 @@ static const char SYM_CURSE    = 'X';
 static const char SYM_MEDKIT   = '+';
 
 
-static std::map<char, std::string> names;
 
 class Map;
 class BaseObject;
@@ -40,6 +40,7 @@ class Character;
 typedef std::shared_ptr<BaseObject> BaseObjectPtr;
 typedef std::shared_ptr<Object> ObjectPtr;
 typedef std::shared_ptr<Character> CharacterPtr;
+typedef std::shared_ptr<std::list<BaseObjectPtr>> ListBaseObjPtr;
 typedef std::pair<int,int> IntIntPair;
 typedef std::list<IntIntPair> IntIntPairList;
 
@@ -91,16 +92,17 @@ protected:
 
 
 class Room {
-private:
-
-
+public:
+	std::list<BaseObjectPtr> map[MAP_HEIGHT][MAP_WIDTH];	
 };
 
 class Map {
 public:
+	Map(ListBaseObjPtr relief);
+
 	BaseObjectPtr operator<<(BaseObjectPtr obj);
 
-	std::list<BaseObjectPtr>* operator[](int index);
+	// std::list<BaseObjectPtr>* operator[](int index);
 
 	bool is_penetrable(int arow, int acol);
 
@@ -108,7 +110,7 @@ public:
 
 	int get_width();
 
-	void generate(int achance, int steps);
+	void generate(int achance, int steps, int ax, int ay);
 
 	bool gen_is_wall(int arow, int acol);
 
@@ -117,6 +119,8 @@ public:
 	IntIntPairList shortest_way(IntIntPair from, IntIntPair to);
 
 	BaseObjectPtr nearest_symb(IntIntPair from, std::string targets);
+
+	friend std::ostream& operator<<(std::ostream& display, Map& m);
 private:
 	int  gen_alive_count(int arow, int acol);
 
@@ -128,12 +132,13 @@ private:
 
 	inline int  get_distance(int arow, int acol);
 
+	BilateralArray2D<Room*> world;
 	int height = MAP_HEIGHT;
 	int width  = MAP_WIDTH;
-	std::list<BaseObjectPtr> map[MAP_HEIGHT][MAP_WIDTH];
 	int distance[MAP_HEIGHT * MAP_WIDTH];
 	bool map_stencil[MAP_HEIGHT][MAP_WIDTH];
 	int shortest_distance = MAP_WIDTH*MAP_WIDTH + MAP_HEIGHT*MAP_HEIGHT;
+	GCoord upper_left_corner;
+	GCoord bottom_rgt_corner;
+	ListBaseObjPtr relief;
 };
-
-std::ostream& operator<<(std::ostream& display, Map& m);

@@ -1,4 +1,5 @@
 #include "base_objects.h"
+#include "objects.h"
 
 
 using namespace std;
@@ -84,33 +85,36 @@ bool BaseObject::is_evil() {
 
 
 
+Map::Map(ListBaseObjPtr arelief) : upper_left_corner(0, 0), bottom_rgt_corner(MAP_HEIGHT-1, MAP_WIDTH-1), relief(arelief) {
+	world[0][0] = new Room();
+}
+
 BaseObjectPtr Map::operator<<(BaseObjectPtr obj) {
-	int row = obj->getrow();
-	int col = obj->getcol();
+	GCoord coord(obj->getrow(), obj->getcol());
+	Room& room = *world[coord.parts.x][coord.parts.y];
+	ListBaseObjPtr& cell = room.map[coord.parts.row][coord.parts.col];
 	// impenetrable objects should be in the back of the list
 	if (obj->is_penetrable()) {
-		map[row][col].insert(next(map[row][col].begin()), obj);
+		cell.insert(next(cell.begin()), obj);
 	}
 	else {
-		map[row][col].push_back(obj);
+		cell.push_back(obj);
 	}
 	return obj;
 }
 
 ostream& operator<<(ostream& display, Map& m) {
-	for(int i = 0; i < m.get_height(); i++) {
-		for(int j = 0; j < m.get_width(); j++) {
-			// printf("%s", m[i][j].back()->fcolor.c_str());
-			display << m[i][j].back()->fcolor;
-			display << m[i][j].back()->symbol();
+	GCoord cur_coord;
+	for(int i = m.upper_left_corner.row; i <= m.bottom_rgt_corner.row; i++) {
+		for(int j = m.upper_left_corner.col; j <= m.bottom_rgt_corner.col; j++) {
+			cur_coord = GCoord(i, j);
+			Room& room = *m.world[cur_coord.parts.x][cur_coord.parts.y];
+			display << room.map[cur_coord.parts.row][cur_coord.parts.col].back()->fcolor;
+			display << room.map[cur_coord.parts.row][cur_coord.parts.col].back()->symbol();
 		}
 		display << Colored() << endl;
 	}
 	return display;
-}
-
-list<BaseObjectPtr>* Map::operator[](int index) {
-	return map[index];
 }
 
 int Map::get_height() {
@@ -185,6 +189,7 @@ IntIntPairList Map::shortest_way(IntIntPair from, IntIntPair to) {
 
 BaseObjectPtr Map::nearest_symb(IntIntPair from, std::string targets) {
 	IntIntPairList deque;
+	GCoord coord;
 	int r = from.first;
 	int c = from.second;
 	int d = 0;
@@ -230,7 +235,8 @@ bool Map::is_penetrable(int arow, int acol) {
 	return map[arow][acol].back()->is_penetrable();
 }
 
-void Map::generate(int achance, int steps) {
+void Map::generate(int achance, int steps, int ax, int ay) {
+	GCoord coord;
 	for(int i = 0; i < MAP_HEIGHT; i++) {
 		for(int j = 0; j < MAP_WIDTH; j++) {
 			map_stencil[i][j] = chance(achance, "");
@@ -238,6 +244,24 @@ void Map::generate(int achance, int steps) {
 	}
 	for(int i = 0; i < steps; i++) {
 		gen_step();
+	}
+
+	for(int i = 0; i < MAP_HEIGHT; i++) {
+		for(int j = 0; j < MAP_WIDTH; j++) {
+			coord = GCoord(Coord(ax, ay, i, j));
+			relief.push_back(ObjectPtr(new Object(coord.row, coord.col)));
+			*this << relief.back();
+		}
+	}
+
+	for(int i = 0; i < MAP_HEIGHT; i++) {
+		for(int j = 0; j < MAP_WIDTH; j++) {
+			if (gen_is_wall(i, j)) {
+				coord = GCoord(Coord(ax, ay, i, j));
+				relief.push_back(BaseObjectPtr(new Wall(coord.row, coord.col)));
+				*this << relief.back(); 
+			}
+		}
 	}
 }
 

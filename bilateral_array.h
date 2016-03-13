@@ -6,7 +6,6 @@
 #include <algorithm>
 #include <limits>
 
-#include <iostream>
 
 template <class Type> class BilateralArray;
 template <class Type> class BAIterator;

@@ -6,6 +6,8 @@
 #include <algorithm>
 #include <limits>
 
+#include <iostream>
+
 template <class Type> class BilateralArray;
 template <class Type> class BAIterator;
 template <class Type> class BANode;
@@ -14,6 +16,9 @@ template <class Type> class BANode;
 template <class Type> 
 class BANode {
 public:
+	template <class TType> friend class BilateralArray;
+	template <class TType> friend class BilateralArray2D;
+
 	BANode() : value(Type()), index(0), is_used(false) {
 	}
 
@@ -46,6 +51,7 @@ public:
 	}
 
 	Type value;
+private:
 	int  index;
 	bool is_used;
 };
@@ -59,6 +65,7 @@ class BilateralArray {
 public:
 	typedef std::vector<BANode<Type>> NodeVector;
 	typedef NodeVector& NodeVectorRef;
+	template <class TType> friend class BilateralArray2D;
 	BilateralArray() {
 		negative.push_back(BANode<Type>(Type(), 0));
 	}
@@ -72,7 +79,7 @@ public:
 		max_index = std::max(max_index, index);
 	}
 
-	void insert(const int index, Type value) {
+	void assign(const int index, Type value) {
 		expand_for(index);
 		semiaxis(index).at(abs(index)) = BANode<Type>(value, index);
 	}
@@ -91,6 +98,7 @@ public:
 
 	Type& operator[](const int index) {
 		expand_for(index);
+		semiaxis(index).at(abs(index)).is_used = true;
 		return semiaxis(index).at(abs(index)).value;
 	}
 
@@ -99,7 +107,12 @@ public:
 	Type& expand_for(const int index) {
 		if (abs(index) >= semiaxis(index).size()) {
 			semiaxis(index).resize(abs(index) + 1);
+			auto t = semiaxis(index).begin();
+			for(int i = 0, k = sgn(index); i < semiaxis(index).size(); t++, i++) {
+				t->index = i*k; 
+			}
 		}
+		semiaxis(index).at(abs(index)).is_used = true;
 		update_minmax(index);
 		return semiaxis(index).at(abs(index)).value;
 	}
@@ -128,8 +141,6 @@ public:
 		return max_index;
 	}
 
-
-
 	class iterator : public std::iterator<std::forward_iterator_tag, BANode<Type>> {
 	public:
 		friend class BilateralArray;
@@ -146,6 +157,7 @@ public:
 
 		iterator& operator=(const iterator& other) {
 			index = other.index;
+			owner = other.owner;
 			return *this;
 		}
 
@@ -176,7 +188,6 @@ public:
 		}
 
 		int index;
-
 		BilateralArray<Type>& owner;
 	};
 
@@ -213,16 +224,100 @@ public:
 		return *this;
 	}
 	
-	void insert(const int x, const int y, Type element) {
+	void assign(const int x, const int y, Type element) {
 		expand_for(x, y) = element;
 	}
 
 	bool is_used(const int x, const int y) {
-		return area.expand_for(x).is_used(y);
+		return area.is_used(x) && area.at(x).is_used(y);
 	}
 
 	BilateralArray<Type>& operator[](const int index) {
 		return area.expand_for(index);
+	}
+
+	Type& at(const int ax, const int ay) {
+		return area.at(ax).at(ay);
+	}
+
+	class iterator : public std::iterator<std::forward_iterator_tag, BANode<Type>> {
+	public:
+		friend class BilateralArray2D;
+
+		iterator(const iterator& other) : x(other.x), y(other.y), owner(other.owner) {
+		}
+
+		~iterator() {
+		}
+
+		bool is_dereferenceable() {
+			return owner.is_used(x, y);
+		}
+
+		iterator& operator=(const iterator& other) {
+			x = other.x;
+			y = other.y;
+			owner = other.owner;
+			return *this;
+		}
+
+		bool operator==(const iterator& other) {
+			return x == other.x && y == other.y;
+		}
+
+		bool operator!=(const iterator& other) {
+			return x != other.x || y != other.y;
+		}
+
+		iterator& operator++() {
+			bool at_x = true;
+			do {
+				if (x > owner.area.max_index) {
+					x = owner.area.max_index;
+					y = owner.area.at(x).max_index + 1;
+					break;
+				}
+				if (!owner.area.is_used(x)) {
+					at_x = false;
+					++x;
+					continue;
+				}
+				if (!at_x) {
+					y = owner.area.at(x).min_index;
+					at_x = true;
+				}
+				else {
+					++y;
+					if (y > owner.area.at(x).max_index) {
+						++x;
+						at_x = false;
+					}
+				}
+			} while(!is_dereferenceable());
+			return *this;
+		}
+
+		Type& operator*() {
+			return owner.at(x, y);
+		}
+
+		Type& operator->() {
+			return owner.at(x, y);
+		}
+	private:
+		iterator(int ax, int ay, BilateralArray2D<Type>& aowner) : x(ax), y(ay), owner(aowner) {
+		}
+
+		int x, y;
+		BilateralArray2D<Type>& owner;
+	};
+
+	iterator begin() {
+		return iterator(area.min_index, area.at(area.min_index).min_index, *this);
+	}
+
+	iterator end() {
+		return iterator(area.max_index, area.at(area.max_index).max_index + 1, *this);	
 	}
 private:
 	// ...-x <-|-|-|-|-|-0-|-|-|-|-|-|-> ...+x

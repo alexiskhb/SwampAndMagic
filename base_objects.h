@@ -13,8 +13,6 @@
 #include "coords.h"
 #include "bilateral_array.h"
 
-extern bool chance(int a, std::string s);
-
 // map is 8-connected area
 
 static const char SYM_EMPTY    = ' ';
@@ -32,18 +30,40 @@ static const char SYM_MEDKIT   = '+';
 
 
 
+
 class Map;
+
 class BaseObject;
+
 class Object;
+
 class Character;
 
+
 typedef std::shared_ptr<BaseObject> BaseObjectPtr;
+
 typedef std::shared_ptr<Object> ObjectPtr;
+
 typedef std::shared_ptr<Character> CharacterPtr;
+
 typedef std::shared_ptr<std::list<BaseObjectPtr>> ListBaseObjPtr;
+
 typedef std::list<BaseObjectPtr> BaseList;
+
 typedef std::pair<int,int> IntIntPair;
+
 typedef std::list<IntIntPair> IntIntPairList;
+
+typedef std::map<unsigned int, int> UIntIntMap;
+
+typedef std::pair<unsigned int, int> UIntIntPair;
+
+
+
+extern unsigned int cantor_pairing(const int a, const int b);
+
+extern bool chance(int a, std::string s);
+
 
 
 class BaseObject {
@@ -135,14 +155,14 @@ private:
 
 	void clear_distances();
 
-	inline void set_distance(int arow, int acol, int value);
+	void set_distance(int arow, int acol, int value);
 
-	inline int  get_distance(int arow, int acol);
+	int  get_distance(int arow, int acol);
 
 	BilateralArray2D<Room*> world;
 	int height = MAP_HEIGHT;
 	int width  = MAP_WIDTH;
-	int distance[MAP_HEIGHT * MAP_WIDTH];
+	UIntIntMap distance;
 	bool map_stencil[MAP_HEIGHT][MAP_WIDTH];
 	int shortest_distance = MAP_WIDTH*MAP_WIDTH + MAP_HEIGHT*MAP_HEIGHT;
 	GCoord upper_left_corner;

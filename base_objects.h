@@ -41,6 +41,7 @@ typedef std::shared_ptr<BaseObject> BaseObjectPtr;
 typedef std::shared_ptr<Object> ObjectPtr;
 typedef std::shared_ptr<Character> CharacterPtr;
 typedef std::shared_ptr<std::list<BaseObjectPtr>> ListBaseObjPtr;
+typedef std::list<BaseObjectPtr> BaseList;
 typedef std::pair<int,int> IntIntPair;
 typedef std::list<IntIntPair> IntIntPairList;
 
@@ -93,12 +94,14 @@ protected:
 
 class Room {
 public:
-	std::list<BaseObjectPtr> map[MAP_HEIGHT][MAP_WIDTH];	
+	BaseList map[MAP_HEIGHT][MAP_WIDTH];	
 };
 
 class Map {
 public:
-	Map(ListBaseObjPtr relief);
+	Map(BaseList& relief);
+
+	~Map();
 
 	BaseObjectPtr operator<<(BaseObjectPtr obj);
 
@@ -120,7 +123,11 @@ public:
 
 	BaseObjectPtr nearest_symb(IntIntPair from, std::string targets);
 
+	BaseList& map(const int arow, const int acol);
+
 	friend std::ostream& operator<<(std::ostream& display, Map& m);
+
+	BaseList& operator()(const int row, const int col);	
 private:
 	int  gen_alive_count(int arow, int acol);
 
@@ -140,5 +147,5 @@ private:
 	int shortest_distance = MAP_WIDTH*MAP_WIDTH + MAP_HEIGHT*MAP_HEIGHT;
 	GCoord upper_left_corner;
 	GCoord bottom_rgt_corner;
-	ListBaseObjPtr relief;
+	BaseList& relief;
 };

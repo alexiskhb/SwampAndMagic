@@ -10,7 +10,7 @@ static const int ST_CELL = 0;
 
 template <typename Type> 
 int sgn(Type val) {
-    return (Type(0) < val) - (val < Type(0));
+    return (Type(0) <= val) - (val < Type(0));
 }
 
 

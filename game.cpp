@@ -28,7 +28,7 @@ struct {
 	std::list<BaseObjectPtr> relief;
 	CharacterPtr knight   = CharacterPtr(new Knight(4, 3, HP_KNIGHT, DMG_KN_SWORD));
 	CharacterPtr princess = CharacterPtr(new Princess(1, MAP_WIDTH-2, HP_PRINCESS, DMG_PRINCESS));
-	Map map(relief);
+	Map map = Map(relief);
 	unsigned int counter = 0;
 
 	bool is_over() {
@@ -42,7 +42,7 @@ struct {
 	void kill_died_characters_objects() {
 		for(auto obj: dyn_objects) {
 			if (map.is_on_the_map(obj->getrow(), obj->getcol())) {
-				map[obj->prevrow()][obj->prevcol()].remove(obj);
+				map(obj->prevrow(), obj->prevcol()).remove(obj);
 			}
 			if (obj->is_alive()) {
 				map << obj;
@@ -50,7 +50,7 @@ struct {
 		}
 		for(auto ch: characters) {
 			if (ch->hitpoints() <= 0) {
-				map[ch->getrow()][ch->getcol()].remove(ch);
+				map(ch->getrow(), ch->getcol()).remove(ch);
 			}
 		}
 		characters.remove_if([&](CharacterPtr ch) {
@@ -72,7 +72,7 @@ struct {
 		for(auto obj: dyn_objects) {
 			if (map.is_on_the_map(obj->getrow(), obj->getcol())) {
 				obj->impact(characters, dyn_objects);
-				map[obj->getrow()][obj->getcol()].remove(obj);
+				map(obj->getrow(), obj->getcol()).remove(obj);
 				map << obj;
 				obj->turn();
 			}
@@ -98,7 +98,7 @@ struct {
 				else {
 					// here we attach a cell to character
 					// so other characters can not step on it
-					map[ch->prevrow()][ch->prevcol()].remove(ch);
+					map(ch->prevrow(), ch->prevcol()).remove(ch);
 					map << ch;
 				}
 			}
@@ -126,7 +126,7 @@ struct {
 
 	void init() {
 		srand(time(0));
-		map.generate(42, 7, relief, 0, 0);
+		map.generate(42, 7, 0, 0);
 
 		put_character(knight);
 		put_character(princess);

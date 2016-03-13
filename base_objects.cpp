@@ -85,14 +85,20 @@ bool BaseObject::is_evil() {
 
 
 
-Map::Map(ListBaseObjPtr arelief) : upper_left_corner(0, 0), bottom_rgt_corner(MAP_HEIGHT-1, MAP_WIDTH-1), relief(arelief) {
+Map::Map(BaseList& arelief) : upper_left_corner(0, 0), bottom_rgt_corner(MAP_HEIGHT-1, MAP_WIDTH-1), relief(arelief) {
 	world[0][0] = new Room();
+}
+
+Map::~Map() {
+
 }
 
 BaseObjectPtr Map::operator<<(BaseObjectPtr obj) {
 	GCoord coord(obj->getrow(), obj->getcol());
+	// cout << obj->getrow() << ' ' << obj->getcol() << endl;
+	// cout << coord.parts.x << ' ' << coord.parts.y << endl;
 	Room& room = *world[coord.parts.x][coord.parts.y];
-	ListBaseObjPtr& cell = room.map[coord.parts.row][coord.parts.col];
+	BaseList& cell = room.map[coord.parts.row][coord.parts.col];
 	// impenetrable objects should be in the back of the list
 	if (obj->is_penetrable()) {
 		cell.insert(next(cell.begin()), obj);
@@ -131,108 +137,118 @@ void Map::clear_distances() {
 
 IntIntPairList Map::shortest_way(IntIntPair from, IntIntPair to) {
 	IntIntPairList way;
-	IntIntPairList temp_way;
-	int r = from.first;
-	int c = from.second;
-	int d = 0;
-	bool found = false;
-	IntIntPair target;
-	temp_way.push_back(IntIntPair(r, c));
-	while (temp_way.size() > 0) {
-		r = temp_way.front().first;
-		c = temp_way.front().second;
-		if (abs(r - to.first) <= 1 && abs(c - to.second) <= 1) {
-			found = true;
-			target = IntIntPair(r, c);
-			break;
-		}
-		d = get_distance(r, c);
-		temp_way.pop_front();
-		for(int i = -1; i <= 1; i++) {
-			for(int j = -1; j <= 1; j++) {
-				if (i == 0 && j == 0) {
-					continue;
-				}
-				if (is_on_the_map(r + i, c + j) && get_distance(r + i, c + j) == 0 && is_penetrable(r + i, c + j)) {
-					temp_way.push_back(IntIntPair(r + i, c + j));
-					set_distance(r + i, c + j, d + 1);
-				}
-			}
-		}
+	// IntIntPairList temp_way;
+	// int r = from.first;
+	// int c = from.second;
+	// int d = 0;
+	// bool found = false; map
+	// IntIntPair target;
+	// temp_way.push_back(IntIntPair(r, c));
+	// while (temp_way.size() > 0) {
+	// 	r = temp_way.front().first;
+	// 	c = temp_way.front().second;
+	// 	if (abs(r - to.first) <= 1 && abs(c - to.second) <= 1) {
+	// 		found = true;
+	// 		target = IntIntPair(r, c);
+	// 		break;
+	// 	}
+	// 	d = get_distance(r, c);
+	// 	temp_way.pop_front();
+	// 	for(int i = -1; i <= 1; i++) {
+	// 		for(int j = -1; j <= 1; j++) {
+	// 			if (i == 0 && j == 0) {
+	// 				continue;
+	// 			}
+	// 			if (is_on_the_map(r + i, c + j) && get_distance(r + i, c + j) == 0 && is_penetrable(r + i, c + j)) {
+	// 				temp_way.push_back(IntIntPair(r + i, c + j));
+	// 				set_distance(r + i, c + j, d + 1);
+	// 			}
+	// 		}
+	// 	}
 		
-	}
-	if (found) {
-		r = target.first;
-		c = target.second;
-		d = get_distance(r, c);
-		while (d > 0) {
-			bool continue_ij = true;
-			way.push_front(IntIntPair(r, c));
-			for(int i = -1; i <= 1 && continue_ij; i++) {
-				for(int j = -1; j <= 1 && continue_ij; j++) {
-					if (i == 0 && j == 0) {
-						continue;
-					}
-					if (get_distance(r + i, c + j) == d - 1) {
-						r = r + i;
-						c = c + j;
-						--d;
-						continue_ij = false;
-					}	
-				}
-			}
-		}
-	}
-	clear_distances();
+	// }
+	// if (found) {
+	// 	r = target.first;
+	// 	c = target.second;
+	// 	d = get_distance(r, c);
+	// 	while (d > 0) {
+	// 		bool continue_ij = true;
+	// 		way.push_front(IntIntPair(r, c));
+	// 		for(int i = -1; i <= 1 && continue_ij; i++) {
+	// 			for(int j = -1; j <= 1 && continue_ij; j++) {
+	// 				if (i == 0 && j == 0) {
+	// 					continue;
+	// 				}
+	// 				if (get_distance(r + i, c + j) == d - 1) {
+	// 					r = r + i;
+	// 					c = c + j;
+	// 					--d;
+	// 					continue_ij = false;
+	// 				}	
+	// 			}
+	// 		}
+	// 	}
+	// }
+	// clear_distances();
 	return way;
 }
 
 BaseObjectPtr Map::nearest_symb(IntIntPair from, std::string targets) {
-	IntIntPairList deque;
-	GCoord coord;
+	// IntIntPairList deque;
+	// GCoord coord;
 	int r = from.first;
 	int c = from.second;
-	int d = 0;
+	// int d = 0;
 	bool found = false;
-	IntIntPair target;
-	deque.push_back(IntIntPair(r, c));
-	while (deque.size() > 0) {
-		r = deque.front().first;
-		c = deque.front().second;
-		char p = map[r][c].back()->symbol();
-		for(unsigned int i = 0; i < targets.size() && !found; i++) {
-			found |= targets.find(p) != std::string::npos;
-		}
-		if (found) {
-			target = IntIntPair(r, c);
-			break;
-		}
-		d = get_distance(r, c);
-		deque.pop_front();
-		for(int i = -1; i <= 1; i++) {
-			for(int j = -1; j <= 1; j++) {
-				if (i == 0 && j == 0) {
-					continue;
-				}
-				if (is_on_the_map(r + i, c + j) && get_distance(r + i, c + j) == 0) {
-					deque.push_back(IntIntPair(r + i, c + j));
-					set_distance(r + i, c + j, d + 1);
-				}
-			}
-		}
-	}
-	clear_distances();
+	// IntIntPair target;
+	// deque.push_back(IntIntPair(r, c));
+	// while (deque.size() > 0) {
+	// 	r = deque.front().first;
+	// 	c = deque.front().second;
+	// 	char p = map(r, c).back()->symbol();
+	// 	for(unsigned int i = 0; i < targets.size() && !found; i++) {
+	// 		found |= targets.find(p) != std::string::npos;
+	// 	}
+	// 	if (found) {
+	// 		target = IntIntPair(r, c);
+	// 		break;
+	// 	}
+	// 	d = get_distance(r, c);
+	// 	deque.pop_front();
+	// 	for(int i = -1; i <= 1; i++) {
+	// 		for(int j = -1; j <= 1; j++) {
+	// 			if (i == 0 && j == 0) {
+	// 				continue;
+	// 			}
+	// 			if (is_on_the_map(r + i, c + j) && get_distance(r + i, c + j) == 0) {
+	// 				deque.push_back(IntIntPair(r + i, c + j));
+	// 				set_distance(r + i, c + j, d + 1);
+	// 			}
+	// 		}
+	// 	}
+	// }
+	// clear_distances();
 	if (found) {
-		return map[r][c].back();
+		return map(r, c).back();
 	}
 	else {
-		return map[from.first][from.second].back();
+		return map(from.first, from.second).back();
 	}
 }
 
 bool Map::is_penetrable(int arow, int acol) {
 	// we know that impenetrable objects should be in the back of the list
-	return map[arow][acol].back()->is_penetrable();
+	return map(arow, acol).back()->is_penetrable();
+}
+
+BaseList& Map::map(const int arow, const int acol) {
+	GCoord coord(arow, acol);
+	Room& room = *world[coord.parts.x][coord.parts.y];
+	return room.map[coord.parts.row][coord.parts.col];
+}
+
+BaseList& Map::operator()(const int row, const int col) {
+	return map(row, col);
 }
 
 void Map::generate(int achance, int steps, int ax, int ay) {

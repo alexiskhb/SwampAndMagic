@@ -19,7 +19,7 @@ game: $(OBJ)
 	$(CC) $(OBJ) $(LIBS) -o $(NAME)
 
 $(OBJ): $(SRC)
-	$(CC) $(CFLAGS) $(SRC)
+	$(CC) $(DBGFLAGS) $(CFLAGS) $(SRC)
 
 clean:
 	rm -rf *.o

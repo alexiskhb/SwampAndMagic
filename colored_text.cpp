@@ -24,8 +24,8 @@ Colored::Colored(const BGColorCode abg_code, const FGColorCode afg_code) : fg_co
 
 std::string Colored::to_string() {
 	return 
-		string("\033[") + std::to_string(fg_code) + string(";") + 
-		std::to_string(bg_code) + string("m");
+		"\033[" + std::to_string(fg_code) + ";" + 
+		std::to_string(bg_code) + "m";
 }
 
 std::ostream& operator<<(std::ostream& out, Colored color) {

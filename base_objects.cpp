@@ -90,7 +90,11 @@ Map::Map(BaseList& arelief) : upper_left_corner(0, 0), bottom_rgt_corner(MAP_HEI
 }
 
 Map::~Map() {
-
+	for(auto iter = world.begin(); iter != world.end(); ++iter) {
+		if (*iter != nullptr) {
+			delete *iter;
+		}
+	}
 }
 
 BaseObjectPtr Map::operator<<(BaseObjectPtr obj) {

@@ -160,7 +160,7 @@ bool Knight::attack(list<CharacterPtr>& characters, list<ObjectPtr>& objects, Ma
 			return true;
 		}
 		case CMD_QUIT: {
-			exit(0);
+			health = 0;
 		}
 	}
 	return true;

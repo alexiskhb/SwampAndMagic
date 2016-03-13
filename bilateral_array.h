@@ -20,7 +20,29 @@ public:
 	BANode(const Type& elem, const int aindex) : value(elem), index(aindex), is_used(true) {
 	}
 
+	BANode(const BANode& other) : value(other.get_valuec()), index(other.indexc()), is_used(other.is_usedc()) {
+	}
+
+	BANode& operator=(const BANode& other) {
+		value   = other.get_valuec();
+		index   = other.indexc();
+		is_used = other.is_usedc();
+		return *this;
+	}
+
 	~BANode() {
+	}
+
+	bool is_usedc() const {
+		return is_used;
+	}
+
+	int indexc() const {
+		return index;
+	}
+
+	const Type& get_valuec() const {
+		return value;
 	}
 
 	Type value;
@@ -35,11 +57,13 @@ public:
 template <class Type>
 class BilateralArray {
 public:
+	typedef std::vector<BANode<Type>> NodeVector;
+	typedef NodeVector& NodeVectorRef;
 	BilateralArray() {
 		negative.push_back(BANode<Type>(Type(), 0));
 	}
 
-	std::vector<BANode<Type>>& semiaxis(const int index) {
+	NodeVectorRef semiaxis(const int index) {
 		return index >= 0 ? positive : negative;
 	}
 
@@ -57,17 +81,17 @@ public:
 		return positive.size() + (negative.size() > 1 ? negative.size() - 1 : 0);
 	}
 
-	bool includes(const int index) const {
+	bool includes(const int index) {
 		return semiaxis(index).size() > abs(index);
 	}
 
 	Type& at(const int index) {
-		expand_for(index);
 		return semiaxis(index).at(abs(index)).value;
 	}
 
 	Type& operator[](const int index) {
-		return at(index);
+		expand_for(index);
+		return semiaxis(index).at(abs(index)).value;
 	}
 
 	// Does nothing if value at index already available.
@@ -91,23 +115,81 @@ public:
 	}
 
 	void push_back(const Type&& value) {
-		update_minmax(positive.size() - 1);
+		update_minmax(positive.size());
 		positive.push_back(BANode<Type>(value, positive.size() - 1));
 	}
 
 	void push_front(const Type&& value) {
-		update_minmax(negative.size() - 1);
+		update_minmax(negative.size());
 		negative.push_back(BANode<Type>(value, negative.size() - 1));
 	}
 
-	int biggest_index() {
+	int biggest_index() const {
 		return max_index;
 	}
 
-	
+
+
+	class iterator : public std::iterator<std::forward_iterator_tag, BANode<Type>> {
+	public:
+		friend class BilateralArray;
+
+		iterator(const iterator& other) : index(other.index), owner(other.owner) {
+		}
+
+		~iterator() {
+		}
+
+		bool is_dereferenceable() {
+			return owner.is_used(index);
+		}
+
+		iterator& operator=(const iterator& other) {
+			index = other.index;
+			return *this;
+		}
+
+		bool operator==(const iterator& other) {
+			return index == other.index;
+		}
+
+		bool operator!=(const iterator& other) {
+			return index != other.index;
+		}
+
+		iterator& operator++() {
+			do {
+				++index;
+			} while(!is_dereferenceable() && index <= owner.biggest_index());
+			return *this;
+		}
+
+		Type& operator*() {
+			return owner.at(index);
+		}
+
+		Type& operator->() {
+			return owner.at(index);
+		}
+	private:
+		iterator(int aindex, BilateralArray<Type>& aowner) : index(aindex), owner(aowner) {
+		}
+
+		int index;
+
+		BilateralArray<Type>& owner;
+	};
+
+	iterator begin() {
+		return iterator(min_index, *this);
+	}
+
+	iterator end() {
+		return iterator(max_index+1, *this);	
+	}
 private:
 	// Zero is in positive 
-	std::vector<BANode<Type>> negative, positive;
+	NodeVector negative, positive;
 	int min_index = std::numeric_limits<int>::max();
 	int max_index = std::numeric_limits<int>::min();
 };

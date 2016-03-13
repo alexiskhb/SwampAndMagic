@@ -81,12 +81,10 @@ public:
 
 	std::string fcolor;
 protected:
-	int row = 0;
-	int col = 0;
+	GCoord coord;
 	// we need prev_coords to remove reference to object
 	// from previous cell of map after move
-	int prev_row = 0;
-	int prev_col = 0;
+	GCoord prev_coord;
 	int health = 1;
 	int damage = 0;
 };
@@ -120,7 +118,7 @@ public:
 
 	BaseObjectPtr nearest_symb(IntIntPair from, std::string targets);
 private:
-	int  gen_alive_count(int row, int col);
+	int  gen_alive_count(int arow, int acol);
 
 	void gen_step();
 

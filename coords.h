@@ -26,8 +26,12 @@ struct Coord {
 	int row, col;
 };
 
-struct GlobalCoord {
-	GlobalCoord(const int arow, const int acol) : row(arow), col(acol) {
+struct GCoord {
+	GCoord() : row(ST_CELL), col(ST_CELL) {
+
+	}
+
+	GCoord(const int arow, const int acol) : row(arow), col(acol) {
 		int absrow = abs(arow);
 		int abscol = abs(acol);
 		
@@ -41,7 +45,7 @@ struct GlobalCoord {
 		components.col = acol >= 0 ? abscol%MAP_WIDTH  : MAP_WIDTH  - abscol%MAP_WIDTH;
 	}
 
-	GlobalCoord(const Coord c) : components(c) {
+	GCoord(const Coord c) : components(c) {
 		// Translate cell's (0;0) to global coordinates
 		int grow_st = c.y*MAP_HEIGHT;
 		int gcol_st = c.x*MAP_WIDTH;

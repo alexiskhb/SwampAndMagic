@@ -126,14 +126,14 @@ void Knight::magic(list<ObjectPtr>& objects, char direction) {
 			di = di_around;
 			dj = dj_around;
 			for(unsigned int t = 0; t < 16; t++) {
-				objects.push_back(ObjectPtr(new Magic(row + di[t], col + dj[t], 2)));
+				objects.push_back(ObjectPtr(new Magic(getrow() + di[t], getcol() + dj[t], 2)));
 			}
 			return;
 		}
 
 	}
 	for(unsigned int t = 1; t < 5; t++) {
-		objects.push_back(ObjectPtr(new Magic(row + di[t], col + dj[t], 2)));
+		objects.push_back(ObjectPtr(new Magic(getrow() + di[t], getcol() + dj[t], 2)));
 	}
 }
 
@@ -167,8 +167,7 @@ bool Knight::attack(list<CharacterPtr>& characters, list<ObjectPtr>& objects, Ma
 }
 
 bool Knight::move(Map& m, std::list<CharacterPtr>& characters) {
-	prev_row = row;
-	prev_col = col;
+	prev_coord = coord;
 	char action;
 	if (moved_on_attack == CMD_NONE) {
 		// action = getch();
@@ -179,43 +178,43 @@ bool Knight::move(Map& m, std::list<CharacterPtr>& characters) {
 	}
 	switch (action) {
 		case CMD_UP: {
-			--row;
+			--coord.row;
 			return true;	
 		}
 		case CMD_DOWN: {
-			++row;
+			++coord.row;
 			return true;
 		}
 		case CMD_AROUND: {
-			++row;
+			++coord.row;
 			return true;
 		}
 		case CMD_LEFT: {
-			--col;
+			--coord.col;
 			return true;
 		}
 		case CMD_RIGHT: {
-			++col;
+			++coord.col;
 			return true;
 		}
 		case CMD_LUP: {
-			--row;
-			--col;
+			--coord.row;
+			--coord.col;
 			return true;	
 		}
 		case CMD_LDOWN: {
-			++row;
-			--col;
+			++coord.row;
+			--coord.col;
 			return true;
 		}
 		case CMD_RUP: {
-			--row;
-			++col;
+			--coord.row;
+			++coord.col;
 			return true;
 		}
 		case CMD_RDOWN: {
-			++row;
-			++col;
+			++coord.row;
+			++coord.col;
 			return true;
 		}
 	}
@@ -251,8 +250,7 @@ bool Princess::suffer(int dmg) {
 }
 
 bool Princess::move(Map& m, std::list<CharacterPtr>& characters) {
-	prev_row = row;
-	prev_col = col;
+	prev_coord = coord;
 	return false;
 }
 
@@ -273,16 +271,15 @@ Monster::~Monster() {
 }
 
 bool Monster::move(Map& m, std::list<CharacterPtr>& characters) {
-	prev_row = row;
-	prev_col = col;
+	prev_coord = coord;
 	if (chance(30, "")) {
-		row += dz_1[rand()%3];
-		col += dz_1[rand()%3];
+		coord.row += dz_1[rand()%3];
+		coord.col += dz_1[rand()%3];
 	}
 	else {
 		if (way.size() > 0) {
-			row = way.front().first;
-			col = way.front().second;
+			coord.row = way.front().first;
+			coord.col = way.front().second;
 			way.pop_front();
 		}
 	}
@@ -317,7 +314,7 @@ Dragon::~Dragon() {
 void Dragon::magic(list<ObjectPtr>& objects) {
 	int flames_cnt = rand()%30 + 1;
 	for(int i = 0; i < flames_cnt; i++) {
-		objects.push_back(ObjectPtr(new Flame( row+(rand()%10 - 5), col+(rand()%10 - 5) )));	
+		objects.push_back(ObjectPtr(new Flame( getrow() + (rand()%10-5), getcol() + (rand()%10-5) )));	
 	}
 }
 
@@ -328,7 +325,7 @@ bool Dragon::attack(list<CharacterPtr>& characters, list<ObjectPtr>& objects, Ma
 		slash(characters);
 		return true;
 	}
-	if (abs(knight->getrow() - row) < 10 && abs(knight->getcol() - col) < 10) {
+	if (abs(knight->getrow() - getrow()) < 10 && abs(knight->getcol() - getcol()) < 10) {
 		if (chance(45, "")) {
 			magic(objects);
 		}
@@ -377,7 +374,7 @@ bool Zombie::attack(list<CharacterPtr>& characters, list<ObjectPtr>& objects, Ma
 		slash(characters);
 		return true;
 	}
-	// objects.push_back(ObjectPtr(new Swamp(this->row, this->col)));
+	// objects.push_back(ObjectPtr(new Swamp(getrow()), getcol())));
 	return false;
 }
 
@@ -412,6 +409,6 @@ bool Warlock::attack(list<CharacterPtr>& characters, list<ObjectPtr>& objects, M
 		slash(characters);
 		return true;
 	}
-	// objects.push_back(ObjectPtr(new Swamp(this->row, this->col)));
+	// objects.push_back(ObjectPtr(new Swamp(getrow(), getcol())));
 	return false;
 }

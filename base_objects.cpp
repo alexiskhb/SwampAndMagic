@@ -16,7 +16,7 @@ BaseObject::BaseObject() {
 	fcolor = Colored(BG_WHITE, FG_BLACK).to_string();
 }
 
-BaseObject::BaseObject(int arow, int acol) : row(arow), col(acol), prev_row(arow), prev_col(acol) {
+BaseObject::BaseObject(int arow, int acol) : coord(arow, acol), prev_coord(arow, acol) {
 	fcolor = Colored(BG_WHITE, FG_BLACK).to_string();	
 }
 
@@ -27,28 +27,28 @@ BaseObject::~BaseObject() {
 // if two objects are NEAR but do not match
 bool BaseObject::operator%(const BaseObject& obj) {
 	return 
-		(abs(row - obj.row) <= 1 && abs(col - obj.col) <= 1) &&
-		!(row == obj.row && col == obj.col);
+		(abs(coord.row - obj.coord.row) <= 1 && abs(coord.col - obj.coord.col) <= 1) &&
+		!(coord.row == obj.coord.row && coord.col == obj.coord.col);
 }
 
 bool BaseObject::operator==(const BaseObject& obj) {
-	return row == obj.row && col == obj.col;
+	return coord.row == obj.coord.row && coord.col == obj.coord.col;
 }
 
 int BaseObject::getrow() {
-	return row;
+	return coord.row;
 }
 
 int BaseObject::getcol() {
-	return col;
+	return coord.col;
 }
 
 int BaseObject::prevrow() {
-	return prev_row;
+	return prev_coord.row;
 }
 
 int BaseObject::prevcol() {
-	return prev_col;
+	return prev_coord.col;
 }
 
 int BaseObject::hitpoints() {
@@ -56,8 +56,8 @@ int BaseObject::hitpoints() {
 }
 
 void BaseObject::move_to_prev() {
-	row = prev_row;
-	col = prev_col;
+	coord.row = prev_coord.row;
+	coord.col = prev_coord.col;
 }
 
 bool BaseObject::is_alive() {
@@ -245,12 +245,12 @@ bool Map::gen_is_wall(int arow, int acol) {
 	return map_stencil[arow][acol];
 }
 
-int Map::gen_alive_count(int row, int col) {
+int Map::gen_alive_count(int arow, int acol) {
 	int result = 0;
 	for(int i = -1; i <= 1; i++) {
 		for(int j = -1; j <= 1; j++) {
-			int nr = row + i, nc = col + j;
-			if (nr == row && nc == col) {
+			int nr = arow + i, nc = acol + j;
+			if (nr == arow && nc == acol) {
 				continue;
 			}
 			if (nr < 0 || nc < 0 || nr >= MAP_HEIGHT || nc >= MAP_WIDTH) {

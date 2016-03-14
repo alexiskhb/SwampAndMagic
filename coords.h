@@ -32,17 +32,7 @@ struct GCoord {
 	}
 
 	GCoord(const int arow, const int acol) : row(arow), col(acol) {
-		int absrow = abs(arow);
-		int abscol = abs(acol);
-		
-		parts.y = (absrow/MAP_HEIGHT + 1)*sgn(arow);
-		parts.x = (abscol/MAP_WIDTH  + 1)*sgn(acol);
-
-		parts.y -= (arow >= 0 ? 1 : 0);
-		parts.x -= (acol >= 0 ? 1 : 0);
-
-		parts.row = arow >= 0 ? absrow%MAP_HEIGHT : MAP_HEIGHT - absrow%MAP_HEIGHT;
-		parts.col = acol >= 0 ? abscol%MAP_WIDTH  : MAP_WIDTH  - abscol%MAP_WIDTH;
+		recalculate(arow, acol);
 	}
 
 	GCoord(const Coord c) : parts(c) {
@@ -53,6 +43,37 @@ struct GCoord {
 		row = grow_st + c.row;
 		col = gcol_st + c.col;
 	}
+
+	void recalculate(const int arow, const int acol) {
+		row = arow;
+		col = acol;
+
+		int absrow = abs(arow);
+		int abscol = abs(acol);
+		
+		parts.y = ((absrow-1)/MAP_HEIGHT + 1)*sgn(arow);
+		parts.x = ((abscol-1)/MAP_WIDTH  + 1)*sgn(acol);
+
+		parts.y -= (arow >= 0 ? 1 : 0);
+		parts.x -= (acol >= 0 ? 1 : 0);
+
+		parts.row = arow >= 0 ? absrow%MAP_HEIGHT : MAP_HEIGHT - 1 - (absrow-1)%MAP_HEIGHT;
+		parts.col = acol >= 0 ? abscol%MAP_WIDTH  : MAP_WIDTH  - 1 - (abscol-1)%MAP_WIDTH;
+	}
+
+	GCoord operator+(const GCoord& other) const {
+		return GCoord(row + other.row, col + other.col);
+	}
+
+	GCoord& operator+=(const GCoord& other) {
+		recalculate(row + other.row, col + other.col);
+		return *this;
+	}
+
+	GCoord operator-(const GCoord& other) const {
+		return GCoord(row - other.row, col - other.col);
+	}
+
 	// Global coordinates
 	int row, col;
 	Coord parts;

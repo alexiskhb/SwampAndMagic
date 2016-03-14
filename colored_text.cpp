@@ -24,10 +24,10 @@ Colored::Colored(const BGColorCode abg_code, const FGColorCode afg_code) : fg_co
 
 std::string Colored::to_string() {
 	return 
-		"\033[" + std::to_string(fg_code) + ";" + 
-		std::to_string(bg_code) + "m";
+		std::string("\033[") + std::to_string(fg_code) + std::string(";") + 
+		std::to_string(bg_code) + std::string("m");
 }
 
 std::ostream& operator<<(std::ostream& out, Colored color) {
-	return out << "\033[" << color.fg_code << ';' << color.bg_code << "m";
+	return out << std::string("\033[") << color.fg_code << ';' << color.bg_code << 'm';
 }

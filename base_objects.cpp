@@ -64,6 +64,14 @@ int BaseObject::hitpoints() {
 	return health;
 }
 
+GCoord BaseObject::get_coord() {
+	return GCoord(getrow(), getcol());
+}
+
+GCoord BaseObject::get_prev() {
+	return GCoord(prevrow(), prevcol());
+}
+
 void BaseObject::move_to_prev() {
 	coord.row = prev_coord.row;
 	coord.col = prev_coord.col;
@@ -92,22 +100,50 @@ bool BaseObject::is_evil() {
 
 
 
+Room::Room() {
+
+}
+
+Room::~Room() {
+
+}
+
+
+
 
 Map::Map(BaseList& arelief) : upper_left_corner(0, 0), bottom_rgt_corner(MAP_HEIGHT-1, MAP_WIDTH-1), relief(arelief) {
-	world[0][0] = new Room();
+	create_room(0, 0);
 }
 
 Map::~Map() {
+	static int k = 1;
 	for(auto iter = world.begin(); iter != world.end(); ++iter) {
 		if (*iter != nullptr) {
 			delete *iter;
+			cout << k++ << "-th room destroyed\n";
 		}
 	}
+}
+
+void Map::create_room(const int ax, const int ay) {
+	if (is_room_exists[cantor_pairing(ax, ay)]) {
+		return;
+	}
+	cout << ax << ' ' << ay << endl << "================\n";
+	world[ax][ay] = new Room();
+	generate(47, 6, ax, ay);
+	is_room_exists[cantor_pairing(ax, ay)] = true;
+}
+
+void Map::move_the_frame(GCoord shift) {
+	upper_left_corner += shift;
+	bottom_rgt_corner += shift;
 }
 
 BaseObjectPtr Map::operator<<(BaseObjectPtr obj) {
 	GCoord coord(obj->getrow(), obj->getcol());
 	// cout << obj->getrow() << ' ' << obj->getcol() << endl;
+	// cout << coord.parts.row << ' ' << coord.parts.col << endl;
 	// cout << coord.parts.x << ' ' << coord.parts.y << endl;
 	Room& room = *world[coord.parts.x][coord.parts.y];
 	BaseList& cell = room.map[coord.parts.row][coord.parts.col];
@@ -122,12 +158,24 @@ BaseObjectPtr Map::operator<<(BaseObjectPtr obj) {
 }
 
 ostream& operator<<(ostream& display, Map& m) {
+	m.create_room(m.upper_left_corner.parts.x, m.upper_left_corner.parts.y);
+	m.create_room(m.bottom_rgt_corner.parts.x, m.upper_left_corner.parts.y);
+	m.create_room(m.bottom_rgt_corner.parts.x, m.bottom_rgt_corner.parts.y);
+	m.create_room(m.upper_left_corner.parts.x, m.bottom_rgt_corner.parts.y);
 	GCoord cur_coord;
 	for(int i = m.upper_left_corner.row; i <= m.bottom_rgt_corner.row; i++) {
 		for(int j = m.upper_left_corner.col; j <= m.bottom_rgt_corner.col; j++) {
 			cur_coord = GCoord(i, j);
 			Room& room = *m.world[cur_coord.parts.x][cur_coord.parts.y];
-			display << room.map[cur_coord.parts.row][cur_coord.parts.col].back()->fcolor;
+			if (room.map[cur_coord.parts.row][cur_coord.parts.col].back()->color().size() > 10) {
+				cout << endl << room.map[cur_coord.parts.row][cur_coord.parts.col].back()->color().size() << endl;
+				for(int i = 0; i < 20; i++) {
+					cout << room.map[cur_coord.parts.row][cur_coord.parts.col].back()->color()[i];
+				}
+				cout << endl;
+				exit(0);
+			}
+			display << room.map[cur_coord.parts.row][cur_coord.parts.col].back()->color();
 			display << room.map[cur_coord.parts.row][cur_coord.parts.col].back()->symbol();
 		}
 		display << Colored() << endl;
@@ -147,7 +195,7 @@ void Map::clear_distances() {
 	distance.clear();
 }
 
-IntIntPairList Map::shortest_way(IntIntPair from, IntIntPair to) {
+IntIntPairList Map::shortest_way(IntIntPair from, IntIntPair to, int max_length) {
 	IntIntPairList way;
 	IntIntPairList temp_way;
 	int r = from.first;
@@ -159,7 +207,7 @@ IntIntPairList Map::shortest_way(IntIntPair from, IntIntPair to) {
 	while (temp_way.size() > 0) {
 		r = temp_way.front().first;
 		c = temp_way.front().second;
-		if (abs(r - to.first) <= 1 && abs(c - to.second) <= 1) {
+		if ((abs(r - to.first) <= 1 && abs(c - to.second) <= 1) || d >= max_length) {
 			found = true;
 			target = IntIntPair(r, c);
 			break;
@@ -212,7 +260,7 @@ int Map::get_distance(int arow, int acol) {
 	return distance[cantor_pairing(arow, acol)];
 }
 
-BaseObjectPtr Map::nearest_symb(IntIntPair from, std::string targets) {
+BaseObjectPtr Map::nearest_symb(IntIntPair from, std::string targets, int max_length) {
 	IntIntPairList deque;
 	GCoord coord;
 	int r = from.first;
@@ -228,7 +276,7 @@ BaseObjectPtr Map::nearest_symb(IntIntPair from, std::string targets) {
 		for(unsigned int i = 0; i < targets.size() && !found; i++) {
 			found |= targets.find(p) != std::string::npos;
 		}
-		if (found) {
+		if (found || d >= max_length) {
 			target = IntIntPair(r, c);
 			break;
 		}
@@ -313,7 +361,7 @@ int Map::gen_alive_count(int arow, int acol) {
 				continue;
 			}
 			if (nr < 0 || nc < 0 || nr >= MAP_HEIGHT || nc >= MAP_WIDTH) {
-				++result;
+				// ++result;
 				continue;
 			}
 			if (map_stencil[nr][nc]) {
@@ -340,5 +388,6 @@ void Map::gen_step() {
 }
 
 bool Map::is_on_the_map(int arow, int acol) {
-	return arow >= 0 && acol >= 0 && arow < height && acol < width;
+	GCoord coord(arow, acol);
+	return is_room_exists[cantor_pairing(coord.parts.x, coord.parts.y)];
 }

@@ -58,6 +58,10 @@ typedef std::map<unsigned int, int> UIntIntMap;
 
 typedef std::pair<unsigned int, int> UIntIntPair;
 
+typedef std::map<unsigned int, bool> UIntBoolMap;
+
+typedef std::pair<unsigned int, bool> UIntBoolPair;
+
 
 
 extern unsigned int cantor_pairing(const int a, const int b);
@@ -91,18 +95,21 @@ public:
 
 	void move_to_prev();
 
+	GCoord get_coord();
+
+	GCoord get_prev();
+
+	std::string& color();
+
 	virtual bool is_alive();
 
 	virtual char symbol();
 
-	virtual std::string& color();
-
 	virtual bool is_penetrable();
 
 	virtual bool is_evil();
-
-	std::string fcolor;
 protected:
+	std::string fcolor;
 	GCoord coord;
 	// we need prev_coords to remove reference to object
 	// from previous cell of map after move
@@ -114,6 +121,8 @@ protected:
 
 class Room {
 public:
+	Room();
+	~Room();
 	BaseList map[MAP_HEIGHT][MAP_WIDTH];	
 };
 
@@ -139,15 +148,19 @@ public:
 
 	bool is_on_the_map(int arow, int acol);
 
-	IntIntPairList shortest_way(IntIntPair from, IntIntPair to);
+	void create_room(const int ax, const int ay);
 
-	BaseObjectPtr nearest_symb(IntIntPair from, std::string targets);
+	IntIntPairList shortest_way(IntIntPair from, IntIntPair to, int max_length);
+
+	BaseObjectPtr nearest_symb(IntIntPair from, std::string targets, int max_length);
 
 	BaseList& map(const int arow, const int acol);
 
 	friend std::ostream& operator<<(std::ostream& display, Map& m);
 
-	BaseList& operator()(const int row, const int col);	
+	BaseList& operator()(const int row, const int col);
+
+	void move_the_frame(GCoord shift);
 private:
 	int  gen_alive_count(int arow, int acol);
 
@@ -163,6 +176,7 @@ private:
 	int height = MAP_HEIGHT;
 	int width  = MAP_WIDTH;
 	UIntIntMap distance;
+	UIntIntMap is_room_exists;
 	bool map_stencil[MAP_HEIGHT][MAP_WIDTH];
 	int shortest_distance = MAP_WIDTH*MAP_WIDTH + MAP_HEIGHT*MAP_HEIGHT;
 	GCoord upper_left_corner;

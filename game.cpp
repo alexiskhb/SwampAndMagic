@@ -26,7 +26,7 @@ struct {
 	std::list<CharacterPtr> characters;
 	std::list<ObjectPtr> dyn_objects;
 	std::list<BaseObjectPtr> relief;
-	CharacterPtr knight   = CharacterPtr(new Knight(4, 3, HP_KNIGHT, DMG_KN_SWORD));
+	CharacterPtr knight   = CharacterPtr(new Knight(MAP_HEIGHT/2, MAP_WIDTH/2, HP_KNIGHT, DMG_KN_SWORD));
 	CharacterPtr princess = CharacterPtr(new Princess(1, MAP_WIDTH-2, HP_PRINCESS, DMG_PRINCESS));
 	Map map = Map(relief);
 	unsigned int counter = 0;
@@ -63,6 +63,7 @@ struct {
 
 	void next_turn() {
 		++counter;
+		map.move_the_frame(knight->get_coord() - knight->get_prev());
 		CharacterBoolMap did_attack;
 		for(auto ch_iter = std::next(characters.begin()); ch_iter != characters.end(); ch_iter++) {
 			auto ch = *ch_iter;
@@ -109,8 +110,9 @@ struct {
 	inline void render() {
 		cout << map;
 		cout << "HP: " << characters.front()->hitpoints() << "	NEAREST_ENEMY: ";
-		BaseObjectPtr obj = map.nearest_symb(IntIntPair(knight->getrow(), knight->getcol()), std::string("zD"));
-		cout << obj->hitpoints() << "\n"; 
+		BaseObjectPtr obj = map.nearest_symb(IntIntPair(knight->getrow(), knight->getcol()), std::string("zD"), 40);
+		cout << obj->hitpoints() << "\n";
+		cout << "(" << knight->getcol() << "; " << -knight->getrow() << ")\n"; 
 		// cout << "enemies cnt: " << characters.size()-2 << "\n\n";
 	}
 
@@ -126,8 +128,6 @@ struct {
 
 	void init() {
 		srand(time(0));
-		map.generate(42, 7, 0, 0);
-
 		put_character(knight);
 		put_character(princess);
 		put_character(CharacterPtr(new Dragon(4, MAP_WIDTH-4)));

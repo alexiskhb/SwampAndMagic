@@ -7,7 +7,7 @@ using namespace std;
 
 
 Object::Object(int arow, int acol) : BaseObject(arow, acol) {
-	
+	fcolor = Colored(BG_WHITE, FG_BLACK).to_string();
 }
 
 Object::~Object() {
@@ -189,7 +189,7 @@ Medkit::Medkit(int arow, int acol) : Object(arow, acol) {
 Medkit::Medkit(int arow, int acol, int timelife) : Object(arow, acol) {
 	health = timelife;
 	damage = DMG_MEDKIT;
-	fcolor = Colored(BG_GREEN, FG_WHITE).to_string();
+	fcolor = Colored(BG_GREEN, FG_BLACK).to_string();
 }
 
 Medkit::~Medkit() {

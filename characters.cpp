@@ -12,13 +12,13 @@ int dz_3[7] = {-3, -2, -1, 0, 1, 2, 3};
 
 
 Character::Character(int arow, int acol) : BaseObject(arow, acol) {
-	fcolor = Colored(BG_BLACK, FG_WHITE).to_string();
+	fcolor = Colored(BG_BLACK, FG_BLACK).to_string();
 }
 
 Character::Character(int arow, int acol, int hp, int dmg) : BaseObject(arow, acol) {
 	damage = dmg;
 	health = hp;
-	fcolor = Colored(BG_BLACK, FG_WHITE).to_string();
+	fcolor = Colored(BG_BLACK, FG_BLACK).to_string();
 }
 
 Character::~Character() {
@@ -230,7 +230,7 @@ bool Knight::suffer(int dmg) {
 
 
 Princess::Princess(int arow, int acol) : Character(arow, acol) {
-
+	fcolor = Colored(BG_AQUA, FG_WHITE).to_string();
 }
 
 Princess::Princess(int arow, int acol, int hp, int dmg) : Character(arow, acol, hp, dmg) {
@@ -293,7 +293,7 @@ void Monster::refresh_way(Map& m, std::list<CharacterPtr>& characters) {
 IntIntPairList Monster::shortest_way_to(BaseObjectPtr obj, Map& m) {
 	return m.shortest_way(
 		IntIntPair(this->getrow(), this->getcol()), 
-		IntIntPair(obj ->getrow(), obj ->getcol()));
+		IntIntPair(obj ->getrow(), obj ->getcol()), 25);
 }
 
 
@@ -348,7 +348,7 @@ bool Dragon::suffer(int dmg) {
 
 
 Zombie::Zombie(int arow, int acol) : Monster(arow, acol, HP_ZOMBIE, DMG_ZOMBIE) {
-
+	fcolor = Colored(BG_ORANGE, FG_WHITE).to_string();
 }
 
 Zombie::Zombie(int arow, int acol, int hp, int dmg) : Monster(arow, acol, hp, dmg) {

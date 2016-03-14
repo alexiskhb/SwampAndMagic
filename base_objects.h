@@ -119,12 +119,17 @@ protected:
 };
 
 
+
 class Room {
 public:
 	Room();
+
 	~Room();
+	
 	BaseList map[MAP_HEIGHT][MAP_WIDTH];	
 };
+
+
 
 class Map {
 public:
@@ -150,6 +155,8 @@ public:
 
 	void create_room(const int ax, const int ay);
 
+	void create_rooms();
+
 	IntIntPairList shortest_way(IntIntPair from, IntIntPair to, int max_length);
 
 	BaseObjectPtr nearest_symb(IntIntPair from, std::string targets, int max_length);
@@ -165,8 +172,6 @@ private:
 	int  gen_alive_count(int arow, int acol);
 
 	void gen_step();
-
-	void clear_distances();
 
 	void set_distance(int arow, int acol, int value);
 

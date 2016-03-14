@@ -36,6 +36,8 @@ static const char CMD_MAGIC  = 'f';
 static const char CMD_NONE   = 'n';
 static const char CMD_QUIT   = 'Q';
 
+static const std::string ENEMIES("zDW");
+
 
 class Character : public BaseObject {
 public:
@@ -54,6 +56,8 @@ public:
 
 	virtual bool move(Map& m, std::list<CharacterPtr>& characters) = 0;
 
+	virtual bool has_plans();
+
 	// all characters are impenetrable
 	bool is_penetrable() override;
 };
@@ -68,6 +72,8 @@ public:
 
 	~Knight() override;
 
+	bool has_plans() override;
+
 	char symbol() override;
 
 	bool is_evil() override;
@@ -81,6 +87,7 @@ public:
 	bool suffer(int dmg) override;
 private:
 	char moved_on_attack;
+	std::string actions;
 };
 
 

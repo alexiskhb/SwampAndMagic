@@ -42,6 +42,10 @@ bool Character::suffer(int dmg) {
 	return (health -= dmg) <= 0;
 }
 
+bool Character::has_plans() {
+	return false;
+}
+
 // all characters are impenetrable
 bool Character::is_penetrable() {
 	return false;
@@ -141,8 +145,11 @@ bool Knight::attack(list<CharacterPtr>& characters, list<ObjectPtr>& objects, Ma
 	std::string moves(STR_MOVES);
 	moved_on_attack = CMD_NONE;
 	char action;
-	// action = getch();
-	cin >> action;
+	if (actions.size() == 0) {
+		cin >> actions;
+	}
+	action = actions[0];
+	actions.erase(0, 1);
 	// condition means player wants to move
 	if (moves.find(action) != std::string::npos) {
 		moved_on_attack = action;
@@ -155,7 +162,11 @@ bool Knight::attack(list<CharacterPtr>& characters, list<ObjectPtr>& objects, Ma
 		}
 		case CMD_MAGIC: {
 			char direction;
-			cin >> direction;
+			if (actions.size() == 0) {
+				cin >> actions;
+			}
+			direction = actions[0];
+			actions.erase(0, 1);
 			magic(objects, direction);
 			return true;
 		}
@@ -166,12 +177,20 @@ bool Knight::attack(list<CharacterPtr>& characters, list<ObjectPtr>& objects, Ma
 	return true;
 }
 
+bool Knight::has_plans() {
+	return actions.size() > 0;
+}
+
 bool Knight::move(Map& m, std::list<CharacterPtr>& characters) {
 	prev_coord = coord;
 	char action;
 	if (moved_on_attack == CMD_NONE) {
 		// action = getch();
-		cin >> action;
+		if (actions.size() == 0) {
+			cin >> actions;
+		}
+		action = actions[0];
+		actions.erase(0, 1);
 	}
 	else {
 		action = moved_on_attack;

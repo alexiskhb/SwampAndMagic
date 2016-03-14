@@ -7,7 +7,9 @@
 #include "colored_text.h"
 #include <string>
 #include <curses.h>
+#include <algorithm>
 #include "bilateral_array.h"
+#include <cstdlib>
 
 
 using std::cout;
@@ -61,7 +63,7 @@ struct {
 		});
 	}
 
-	void next_turn() {
+	bool next_turn() {
 		++counter;
 		map.move_the_frame(knight->get_coord() - knight->get_prev());
 		CharacterBoolMap did_attack;
@@ -105,12 +107,19 @@ struct {
 			}
 		}
 		kill_died_characters_objects();
+		map.create_rooms();
+		return !knight->has_plans();
 	}
 
 	inline void render() {
+		system("clear");
 		cout << map;
-		cout << "HP: " << characters.front()->hitpoints() << "	NEAREST_ENEMY: ";
-		BaseObjectPtr obj = map.nearest_symb(IntIntPair(knight->getrow(), knight->getcol()), std::string("zD"), 40);
+		cout << "HP: " << characters.front()->hitpoints() << "	NEAREST_CHARACTER: ";
+		BaseObjectPtr obj = 
+			map.nearest_symb(
+				IntIntPair(knight->getrow(), knight->getcol()), 
+				std::string(ENEMIES), 
+				std::min(MAP_HEIGHT, MAP_WIDTH)/2);
 		cout << obj->hitpoints() << "\n";
 		cout << "(" << knight->getcol() << "; " << -knight->getrow() << ")\n"; 
 		// cout << "enemies cnt: " << characters.size()-2 << "\n\n";
@@ -127,7 +136,6 @@ struct {
 	}
 
 	void init() {
-		srand(time(0));
 		put_character(knight);
 		put_character(princess);
 		put_character(CharacterPtr(new Dragon(4, MAP_WIDTH-4)));
@@ -149,9 +157,11 @@ int main(int argc, char** argv) {
 	Game.init();
 	Game.render();
  	while (!Game.is_over()) {
- 		Game.next_turn();
- 		Game.render();
+ 		if (Game.next_turn()) {
+ 			Game.render();
+ 		}
  	}
+ 	Game.render();
  	cout << (Game.is_lose() ? "You lose\n" : "You win\n");
  	return 0;
 }

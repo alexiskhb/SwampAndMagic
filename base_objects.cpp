@@ -116,11 +116,11 @@ Map::Map(BaseList& arelief) : upper_left_corner(0, 0), bottom_rgt_corner(MAP_HEI
 }
 
 Map::~Map() {
-	static int k = 1;
+	// static int k = 1;
 	for(auto iter = world.begin(); iter != world.end(); ++iter) {
 		if (*iter != nullptr) {
 			delete *iter;
-			cout << k++ << "-th room destroyed\n";
+			// cout << k++ << "-th room destroyed\n";
 		}
 	}
 }
@@ -129,9 +129,9 @@ void Map::create_room(const int ax, const int ay) {
 	if (is_room_exists[cantor_pairing(ax, ay)]) {
 		return;
 	}
-	cout << ax << ' ' << ay << endl << "================\n";
 	world[ax][ay] = new Room();
-	generate(47, 6, ax, ay);
+	int pos = chance(80, "") ? 47+rand()%5 : 50+rand()%4;
+	generate(pos, 6, ax, ay);
 	is_room_exists[cantor_pairing(ax, ay)] = true;
 }
 
@@ -142,9 +142,6 @@ void Map::move_the_frame(GCoord shift) {
 
 BaseObjectPtr Map::operator<<(BaseObjectPtr obj) {
 	GCoord coord(obj->getrow(), obj->getcol());
-	// cout << obj->getrow() << ' ' << obj->getcol() << endl;
-	// cout << coord.parts.row << ' ' << coord.parts.col << endl;
-	// cout << coord.parts.x << ' ' << coord.parts.y << endl;
 	Room& room = *world[coord.parts.x][coord.parts.y];
 	BaseList& cell = room.map[coord.parts.row][coord.parts.col];
 	// impenetrable objects should be in the back of the list
@@ -157,21 +154,25 @@ BaseObjectPtr Map::operator<<(BaseObjectPtr obj) {
 	return obj;
 }
 
+void Map::create_rooms() {
+	create_room(upper_left_corner.parts.x, upper_left_corner.parts.y);
+	create_room(bottom_rgt_corner.parts.x, upper_left_corner.parts.y);
+	create_room(bottom_rgt_corner.parts.x, bottom_rgt_corner.parts.y);
+	create_room(upper_left_corner.parts.x, bottom_rgt_corner.parts.y);
+}
+
 ostream& operator<<(ostream& display, Map& m) {
-	m.create_room(m.upper_left_corner.parts.x, m.upper_left_corner.parts.y);
-	m.create_room(m.bottom_rgt_corner.parts.x, m.upper_left_corner.parts.y);
-	m.create_room(m.bottom_rgt_corner.parts.x, m.bottom_rgt_corner.parts.y);
-	m.create_room(m.upper_left_corner.parts.x, m.bottom_rgt_corner.parts.y);
+	static GCoord coords[MAP_HEIGHT][MAP_WIDTH];
+	for(int i = m.upper_left_corner.row, ii = 0; i <= m.bottom_rgt_corner.row; i++, ii++) {
+		for(int j = m.upper_left_corner.col, jj = 0; j <= m.bottom_rgt_corner.col; j++, jj++) {
+			coords[ii][jj] = GCoord(i, j);
+		}
+	}
 	GCoord cur_coord;
-	for(int i = m.upper_left_corner.row; i <= m.bottom_rgt_corner.row; i++) {
-		for(int j = m.upper_left_corner.col; j <= m.bottom_rgt_corner.col; j++) {
-			cur_coord = GCoord(i, j);
+	for(int i = 0; i < MAP_HEIGHT; i++) {
+		for(int j = 0; j < MAP_WIDTH; j++) {
+			cur_coord = coords[i][j];
 			Room& room = *m.world[cur_coord.parts.x][cur_coord.parts.y];
-			if (room.map[cur_coord.parts.row][cur_coord.parts.col].back()->color().size() > 10) {
-				cout << endl << room.map[cur_coord.parts.row][cur_coord.parts.col].back()->color().size() << endl;
-				cout << (room.map[cur_coord.parts.row][cur_coord.parts.col].size() == 0) << endl;
-				exit(0);
-			}
 			display << room.map[cur_coord.parts.row][cur_coord.parts.col].back()->color();
 			display << room.map[cur_coord.parts.row][cur_coord.parts.col].back()->symbol();
 		}
@@ -186,10 +187,6 @@ int Map::get_height() {
 
 int Map::get_width() {
 	return width;
-}
-
-void Map::clear_distances() {
-	distance.clear();
 }
 
 IntIntPairList Map::shortest_way(IntIntPair from, IntIntPair to, int max_length) {
@@ -248,7 +245,7 @@ IntIntPairList Map::shortest_way(IntIntPair from, IntIntPair to, int max_length)
 			}
 		}
 	}
-	clear_distances();
+	distance.clear();
 	return way;
 }
 
@@ -294,7 +291,7 @@ BaseObjectPtr Map::nearest_symb(IntIntPair from, std::string targets, int max_le
 			}
 		}
 	}
-	clear_distances();
+	distance.clear();
 	if (found) {
 		return map(r, c).back();
 	}

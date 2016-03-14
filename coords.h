@@ -51,12 +51,11 @@ struct GCoord {
 		int absrow = abs(arow);
 		int abscol = abs(acol);
 		
-		parts.y = ((absrow-1)/MAP_HEIGHT + 1)*sgn(arow);
-		parts.x = ((abscol-1)/MAP_WIDTH  + 1)*sgn(acol);
-
+		parts.y = ((absrow - (arow < 0 ? 1 : 0))/MAP_HEIGHT + 1)*sgn(arow);
+		parts.x = ((abscol - (acol < 0 ? 1 : 0))/MAP_WIDTH  + 1)*sgn(acol);
 		parts.y -= (arow >= 0 ? 1 : 0);
 		parts.x -= (acol >= 0 ? 1 : 0);
-
+	
 		parts.row = arow >= 0 ? absrow%MAP_HEIGHT : MAP_HEIGHT - 1 - (absrow-1)%MAP_HEIGHT;
 		parts.col = acol >= 0 ? abscol%MAP_WIDTH  : MAP_WIDTH  - 1 - (abscol-1)%MAP_WIDTH;
 	}

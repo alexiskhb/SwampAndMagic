@@ -41,6 +41,7 @@ void Object::impact(list<CharacterPtr>& characters, std::list<ObjectPtr>& object
 
 Wall::Wall(int arow, int acol) : Object(arow, acol) {
 	fcolor = Colored(BG_GRAY, FG_DARK_GRAY).to_string();
+	fsymb = SYM_WALL | COLOR_PAIR(ID_WALL);
 }
 
 Wall::~Wall() {
@@ -67,6 +68,7 @@ Flame::Flame(int arow, int acol) : Object(arow, acol) {
 	health = TIME_FLAME;
 	damage = DMG_FLAME;
 	fcolor = Colored(BG_WHITE, FG_RED).to_string();
+	fsymb = SYM_FLAME | COLOR_PAIR(ID_FLAME);
 }
 
 Flame::~Flame() {
@@ -81,7 +83,7 @@ void Flame::impact(list<CharacterPtr>& characters, std::list<ObjectPtr>& objects
 	for(auto ch: characters) {
 		if (*ch == *this && ch->symbol() != SYM_DRAGON) {
 			ch->suffer(damage);
-			cout << ch->symbol() << " ON FIRE\n";
+			// cout << ch->symbol() << " ON FIRE\n";
 		}
 	}
 }
@@ -93,6 +95,7 @@ void Flame::impact(list<CharacterPtr>& characters, std::list<ObjectPtr>& objects
 Swamp::Swamp(int arow, int acol) : Object(arow, acol) {
 	health = TIME_SWAMP;
 	fcolor = Colored(BG_WHITE, FG_YELLOW).to_string();
+	fsymb = SYM_SWAMP | COLOR_PAIR(ID_SWAMP);
 }
 
 Swamp::~Swamp() {
@@ -116,12 +119,14 @@ Magic::Magic(int arow, int acol) : Object(arow, acol) {
 	health = TIME_MAGIC;
 	damage = DMG_MAGIC;
 	fcolor = Colored(BG_WHITE, FG_B_BLUE).to_string();
+	fsymb = SYM_MAGIC | COLOR_PAIR(ID_MAGIC) | A_BOLD;
 }
 
 Magic::Magic(int arow, int acol, int timelife) : Object(arow, acol) {
 	health = timelife;
 	damage = DMG_MAGIC;
 	fcolor = Colored(BG_WHITE, FG_B_BLUE).to_string();
+	fsymb = SYM_MAGIC | COLOR_PAIR(ID_MAGIC) | A_BOLD;
 }
 
 Magic::~Magic() {
@@ -153,12 +158,14 @@ Curse::Curse(int arow, int acol) : Object(arow, acol) {
 	health = TIME_CURSE;
 	damage = DMG_CURSE;
 	fcolor = Colored(BG_WHITE, FG_B_BLUE).to_string();
+	fsymb = SYM_CURSE | COLOR_PAIR(ID_CURSE);
 }
 
 Curse::Curse(int arow, int acol, int timelife) : Object(arow, acol) {
 	health = timelife;
 	damage = DMG_CURSE;
 	fcolor = Colored(BG_WHITE, FG_B_BLUE).to_string();
+	fsymb = SYM_CURSE | COLOR_PAIR(ID_CURSE);
 }
 
 Curse::~Curse() {
@@ -184,12 +191,14 @@ Medkit::Medkit(int arow, int acol) : Object(arow, acol) {
 	health = TIME_MEDKIT;
 	damage = DMG_MEDKIT;
 	fcolor = Colored(BG_WHITE, FG_GREEN).to_string();
+	fsymb = SYM_MEDKIT | COLOR_PAIR(ID_MEDKIT) | A_BOLD;
 }
 
 Medkit::Medkit(int arow, int acol, int timelife) : Object(arow, acol) {
 	health = timelife;
 	damage = DMG_MEDKIT;
 	fcolor = Colored(BG_GREEN, FG_BLACK).to_string();
+	fsymb = SYM_MEDKIT | COLOR_PAIR(ID_MEDKIT) | A_BOLD;
 }
 
 Medkit::~Medkit() {

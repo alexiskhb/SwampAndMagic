@@ -3,6 +3,24 @@
 // #include <iostream>
 #include <ostream>
 #include <string>
+#include <curses.h>
+
+
+enum ObjectID {
+	ID_KNIGHT   = 1,
+	ID_PRINCESS = 2,
+	ID_DRAGON   = 3,
+	ID_ZOMBIE   = 4,
+	ID_WARLOCK  = 5,
+	ID_MAGIC    = 6,
+	ID_FLAME    = 7,
+	ID_SWAMP    = 8,
+	ID_CURSE    = 9,
+	ID_WALL     = 10,
+	ID_EMPTY    = 11,
+	ID_MEDKIT   = 12
+};
+
 
 
 enum FGColorCode {

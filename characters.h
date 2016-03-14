@@ -22,19 +22,28 @@ static const int DMG_ZOMBIE   = 2;
 static const int DMG_WARLOCK  = 1;
 
 
-static const char CMD_UP     = 'w';
-static const char CMD_DOWN   = 'x';
-static const char CMD_LEFT   = 'a';
-static const char CMD_RIGHT  = 'd';
-static const char CMD_LUP    = 'q';
-static const char CMD_LDOWN  = 'z';
-static const char CMD_RUP    = 'e';
-static const char CMD_RDOWN  = 'c';
-static const char CMD_AROUND = 's';
-static const char CMD_ATTACK = 'r';
-static const char CMD_MAGIC  = 'f';
-static const char CMD_NONE   = 'n';
-static const char CMD_QUIT   = 'Q';
+static const char CMD_UP      = 'w';
+static const char CMD_DOWN    = 'x';
+static const char CMD_LEFT    = 'a';
+static const char CMD_RIGHT   = 'd';
+static const char CMD_LUP     = 'q';
+static const char CMD_LDOWN   = 'z';
+static const char CMD_RUP     = 'e';
+static const char CMD_RDOWN   = 'c';
+static const char CMD_AROUND  = 's';
+static const char CMD_NUP     = '8';
+static const char CMD_NDOWN   = '2';
+static const char CMD_NLEFT   = '4';
+static const char CMD_NRIGHT  = '6';
+static const char CMD_NLUP    = '7';
+static const char CMD_NLDOWN  = '1';
+static const char CMD_NRUP    = '9';
+static const char CMD_NRDOWN  = '3';
+static const char CMD_NAROUND = '5';
+static const char CMD_ATTACK  = 'f';
+static const char CMD_MAGIC   = 'r';
+static const char CMD_NONE    = 'n';
+static const char CMD_QUIT    = 'Q';
 
 static const std::string ENEMIES("zDW");
 
@@ -86,6 +95,7 @@ public:
 
 	bool suffer(int dmg) override;
 private:
+	char get_command();
 	char moved_on_attack;
 	std::string actions;
 };

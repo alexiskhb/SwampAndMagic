@@ -61,10 +61,11 @@ Knight::Knight(int arow, int acol) : Character(arow, acol) {
 
 Knight::Knight(int arow, int acol, int hp, int dmg) : Character(arow, acol, hp, dmg) {
 	fcolor = Colored(BG_GREEN, FG_WHITE).to_string();
+	fsymb = SYM_KNIGHT | COLOR_PAIR(ID_KNIGHT);
 }
 
 Knight::~Knight() {
-	cout << ">> Knight died\n";
+	// cout << ">> Knight died\n";
 }
 
 char Knight::symbol() {
@@ -86,55 +87,62 @@ void Knight::magic(list<ObjectPtr>& objects, char direction) {
 	int* di = di_around;
 	int* dj = dj_around;
 	switch (direction) {
-		case CMD_UP: {
+		case CMD_NUP: 
+		case CMD_UP: 
 			di = di_dec;
 			dj = consts;
 			break;	
-		}
-		case CMD_DOWN: {
+		
+		case CMD_NDOWN: 
+		case CMD_DOWN: 
 			di = di_inc;
 			dj = consts;
 			break;
-		}
-		case CMD_LEFT: {
+		
+		case CMD_NLEFT: 
+		case CMD_LEFT: 
 			di = consts;
 			dj = dj_dec;
 			break;
-		}
-		case CMD_RIGHT: {
+		
+		case CMD_NRIGHT: 
+		case CMD_RIGHT: 
 			di = consts;
 			dj = dj_inc;
 			break;
-		}
-		case CMD_LUP: {
+		
+		case CMD_NLUP: 
+		case CMD_LUP: 
 			di = di_dec;
 			dj = dj_dec;
 			break;	
-		}
-		case CMD_LDOWN: {
+		
+		case CMD_NLDOWN: 
+		case CMD_LDOWN: 
 			di = di_inc;
 			dj = dj_dec;
 			break;
-		}
-		case CMD_RUP: {
+		
+		case CMD_NRUP: 
+		case CMD_RUP: 
 			di = di_dec;
 			dj = dj_inc;
 			break;
-		}
-		case CMD_RDOWN: {
+		
+		case CMD_NRDOWN: 
+		case CMD_RDOWN: 
 			di = di_inc;
 			dj = dj_inc;
 			break;
-		}
-		case CMD_AROUND: {
+		
+		case CMD_NAROUND: 
+		case CMD_AROUND: 
 			di = di_around;
 			dj = dj_around;
 			for(unsigned int t = 0; t < 16; t++) {
 				objects.push_back(ObjectPtr(new Magic(getrow() + di[t], getcol() + dj[t], 2)));
 			}
 			return;
-		}
-
 	}
 	for(unsigned int t = 1; t < 5; t++) {
 		objects.push_back(ObjectPtr(new Magic(getrow() + di[t], getcol() + dj[t], 2)));
@@ -144,12 +152,7 @@ void Knight::magic(list<ObjectPtr>& objects, char direction) {
 bool Knight::attack(list<CharacterPtr>& characters, list<ObjectPtr>& objects, Map& m) {
 	std::string moves(STR_MOVES);
 	moved_on_attack = CMD_NONE;
-	char action;
-	if (actions.size() == 0) {
-		cin >> actions;
-	}
-	action = actions[0];
-	actions.erase(0, 1);
+	char action = get_command();
 	// condition means player wants to move
 	if (moves.find(action) != std::string::npos) {
 		moved_on_attack = action;
@@ -158,16 +161,13 @@ bool Knight::attack(list<CharacterPtr>& characters, list<ObjectPtr>& objects, Ma
 	switch (action) {
 		case CMD_ATTACK: {
 			slash(characters);
+			prev_coord = coord;
 			return true;	
 		}
 		case CMD_MAGIC: {
-			char direction;
-			if (actions.size() == 0) {
-				cin >> actions;
-			}
-			direction = actions[0];
-			actions.erase(0, 1);
+			char direction = get_command();
 			magic(objects, direction);
+			prev_coord = coord;
 			return true;
 		}
 		case CMD_QUIT: {
@@ -181,61 +181,74 @@ bool Knight::has_plans() {
 	return actions.size() > 0;
 }
 
+char Knight::get_command() {
+	// if (actions.size() == 0) {
+	// 	cin >> actions;
+	// }
+	// char action = actions[0];
+	// actions.erase(0, 1);
+	return getch();
+}
+
 bool Knight::move(Map& m, std::list<CharacterPtr>& characters) {
 	prev_coord = coord;
 	char action;
 	if (moved_on_attack == CMD_NONE) {
 		// action = getch();
-		if (actions.size() == 0) {
-			cin >> actions;
-		}
-		action = actions[0];
-		actions.erase(0, 1);
+		action = get_command();
 	}
 	else {
 		action = moved_on_attack;
 	}
-	switch (action) {
-		case CMD_UP: {
+	switch (action) { 
+		case CMD_NUP: 
+		case CMD_UP:
 			--coord.row;
 			return true;	
-		}
-		case CMD_DOWN: {
+		
+		case CMD_NDOWN: 
+		case CMD_DOWN: 
 			++coord.row;
 			return true;
-		}
-		case CMD_AROUND: {
+		
+		case CMD_NAROUND: 
+		case CMD_AROUND: 
 			++coord.row;
 			return true;
-		}
-		case CMD_LEFT: {
+		
+		case CMD_NLEFT: 
+		case CMD_LEFT: 
 			--coord.col;
 			return true;
-		}
-		case CMD_RIGHT: {
+		
+		case CMD_NRIGHT: 
+		case CMD_RIGHT: 
 			++coord.col;
 			return true;
-		}
-		case CMD_LUP: {
+		
+		case CMD_NLUP: 
+		case CMD_LUP: 
 			--coord.row;
 			--coord.col;
 			return true;	
-		}
-		case CMD_LDOWN: {
+		
+		case CMD_NLDOWN: 
+		case CMD_LDOWN: 
 			++coord.row;
 			--coord.col;
 			return true;
-		}
-		case CMD_RUP: {
+		
+		case CMD_NRUP: 
+		case CMD_RUP: 
 			--coord.row;
 			++coord.col;
 			return true;
-		}
-		case CMD_RDOWN: {
+		
+		case CMD_NRDOWN: 
+		case CMD_RDOWN: 
 			++coord.row;
 			++coord.col;
-			return true;
-		}
+			return true;	
 	}
 	return false;
 }
@@ -250,14 +263,16 @@ bool Knight::suffer(int dmg) {
 
 Princess::Princess(int arow, int acol) : Character(arow, acol) {
 	fcolor = Colored(BG_AQUA, FG_WHITE).to_string();
+	fsymb = SYM_PRINCESS | COLOR_PAIR(ID_PRINCESS);
 }
 
 Princess::Princess(int arow, int acol, int hp, int dmg) : Character(arow, acol, hp, dmg) {
 	fcolor = Colored(BG_AQUA, FG_WHITE).to_string();
+	fsymb = SYM_PRINCESS | COLOR_PAIR(ID_PRINCESS);
 }
 
 Princess::~Princess() {
-	cout << ">> Princess died\n";
+	// cout << ">> Princess died\n";
 }
 
 char Princess::symbol() {
@@ -312,7 +327,7 @@ void Monster::refresh_way(Map& m, std::list<CharacterPtr>& characters) {
 IntIntPairList Monster::shortest_way_to(BaseObjectPtr obj, Map& m) {
 	return m.shortest_way(
 		IntIntPair(this->getrow(), this->getcol()), 
-		IntIntPair(obj ->getrow(), obj ->getcol()), std::max(MAP_HEIGHT, MAP_WIDTH)/2);
+		IntIntPair(obj ->getrow(), obj ->getcol()), std::min(MAP_HEIGHT, MAP_WIDTH)/2);
 }
 
 
@@ -320,14 +335,16 @@ IntIntPairList Monster::shortest_way_to(BaseObjectPtr obj, Map& m) {
 
 Dragon::Dragon(int arow, int acol) : Monster(arow, acol, HP_DRAGON, DMG_DRAGON) {
 	fcolor = Colored(BG_RED, FG_WHITE).to_string();
+	fsymb = SYM_DRAGON | COLOR_PAIR(ID_DRAGON);
 }
 
 Dragon::Dragon(int arow, int acol, int hp, int dmg) : Monster(arow, acol, hp, dmg) {
 	fcolor = Colored(BG_RED, FG_WHITE).to_string();
+	fsymb = SYM_DRAGON | COLOR_PAIR(ID_DRAGON);
 }
 
 Dragon::~Dragon() {
-	cout << "Dragon died\n";
+	// cout << "Dragon died\n";
 }
 
 void Dragon::magic(list<ObjectPtr>& objects) {
@@ -368,10 +385,12 @@ bool Dragon::suffer(int dmg) {
 
 Zombie::Zombie(int arow, int acol) : Monster(arow, acol, HP_ZOMBIE, DMG_ZOMBIE) {
 	fcolor = Colored(BG_ORANGE, FG_WHITE).to_string();
+	fsymb = SYM_ZOMBIE | COLOR_PAIR(ID_ZOMBIE);
 }
 
 Zombie::Zombie(int arow, int acol, int hp, int dmg) : Monster(arow, acol, hp, dmg) {
 	fcolor = Colored(BG_ORANGE, FG_WHITE).to_string();
+	fsymb = SYM_ZOMBIE | COLOR_PAIR(ID_ZOMBIE);
 }
 
 Zombie::~Zombie() {
@@ -403,14 +422,16 @@ bool Zombie::attack(list<CharacterPtr>& characters, list<ObjectPtr>& objects, Ma
 
 Warlock::Warlock(int arow, int acol) : Monster(arow, acol, HP_WARLOCK, DMG_WARLOCK) {
 	fcolor = Colored(BG_BLACK, FG_WHITE).to_string();
+	fsymb = SYM_WARLOCK | COLOR_PAIR(ID_WARLOCK);
 }
 
 Warlock::Warlock(int arow, int acol, int hp, int dmg) : Monster(arow, acol, hp, dmg) {
 	fcolor = Colored(BG_BLACK, FG_WHITE).to_string();
+	fsymb = SYM_WARLOCK | COLOR_PAIR(ID_WARLOCK);
 }
 
 Warlock::~Warlock() {
-	cout << "Warlock died\n";
+	// cout << "Warlock died\n";
 }
 
 char Warlock::symbol() {

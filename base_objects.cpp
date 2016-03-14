@@ -23,10 +23,12 @@ bool chance(int a, std::string s) {
 
 BaseObject::BaseObject() {
 	fcolor = Colored(BG_WHITE, FG_BLACK).to_string();
+	fsymb = SYM_EMPTY | COLOR_PAIR(ID_EMPTY) | A_BOLD | A_BLINK;
 }
 
 BaseObject::BaseObject(int arow, int acol) : coord(arow, acol), prev_coord(arow, acol) {
-	fcolor = Colored(BG_WHITE, FG_BLACK).to_string();	
+	fcolor = Colored(BG_WHITE, FG_BLACK).to_string();
+	fsymb = SYM_EMPTY | COLOR_PAIR(ID_EMPTY) | A_BOLD | A_BLINK;	
 }
 
 BaseObject::~BaseObject() {
@@ -72,6 +74,10 @@ GCoord BaseObject::get_prev() {
 	return GCoord(prevrow(), prevcol());
 }
 
+void BaseObject::set_prev(GCoord coord) {
+	prev_coord = coord;
+}
+
 void BaseObject::move_to_prev() {
 	coord.row = prev_coord.row;
 	coord.col = prev_coord.col;
@@ -83,6 +89,10 @@ bool BaseObject::is_alive() {
 
 char BaseObject::symbol() {
 	return SYM_EMPTY;
+}
+
+chtype BaseObject::symb() {
+	return fsymb;
 }
 
 std::string& BaseObject::color() {
@@ -130,7 +140,7 @@ void Map::create_room(const int ax, const int ay) {
 		return;
 	}
 	world[ax][ay] = new Room();
-	int pos = chance(80, "") ? 47+rand()%5 : 50+rand()%4;
+	int pos = chance(70, "") ? 47+rand()%5 : 50+rand()%4;
 	generate(pos, 6, ax, ay);
 	is_room_exists[cantor_pairing(ax, ay)] = true;
 }
@@ -159,6 +169,26 @@ void Map::create_rooms() {
 	create_room(bottom_rgt_corner.parts.x, upper_left_corner.parts.y);
 	create_room(bottom_rgt_corner.parts.x, bottom_rgt_corner.parts.y);
 	create_room(upper_left_corner.parts.x, bottom_rgt_corner.parts.y);
+}
+
+void Map::display(const int shift) {
+	static GCoord coords[MAP_HEIGHT][MAP_WIDTH];
+	for(int i = upper_left_corner.row, ii = 0; i <= bottom_rgt_corner.row; i++, ii++) {
+		for(int j = upper_left_corner.col, jj = 0; j <= bottom_rgt_corner.col; j++, jj++) {
+			coords[ii][jj] = GCoord(i, j);
+		}
+	}
+	GCoord cur_coord;
+	// clear();
+	for(int i = 0; i < MAP_HEIGHT; i++) {
+		for(int j = 0; j < MAP_WIDTH; j++) {
+			cur_coord = coords[i][j];
+			move(i + shift, j + shift);
+			Room& room = *world[cur_coord.parts.x][cur_coord.parts.y];
+			addch(room.map[cur_coord.parts.row][cur_coord.parts.col].back()->symb());
+		}
+	}
+	refresh();
 }
 
 ostream& operator<<(ostream& display, Map& m) {

@@ -7,7 +7,7 @@ CC=g++
 CFLAGS=-c -Wall -std=c++11
 DBGFLAGS= -g -O3
 
-LIBS=-lncursesw
+LIBS=-lncurses -lncursesw --enable-ext-colors
 
 SRC=$(NAME).cpp base_objects.cpp objects.cpp characters.cpp colored_text.cpp
 
@@ -19,7 +19,7 @@ game: $(OBJ)
 	$(CC) $(OBJ) $(LIBS) -o $(NAME)
 
 $(OBJ): $(SRC)
-	$(CC) $(DBGFLAGS) $(CFLAGS) $(SRC)
+	$(CC) $(CFLAGS) $(SRC)
 
 clean:
 	rm -rf *.o

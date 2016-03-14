@@ -12,6 +12,7 @@
 #include "colored_text.h"
 #include "coords.h"
 #include "bilateral_array.h"
+#include <curses.h>
 
 // map is 8-connected area
 
@@ -95,11 +96,15 @@ public:
 
 	void move_to_prev();
 
+	void set_prev(GCoord coord);
+
 	GCoord get_coord();
 
 	GCoord get_prev();
 
 	std::string& color();
+
+	chtype symb();
 
 	virtual bool is_alive();
 
@@ -116,6 +121,7 @@ protected:
 	GCoord prev_coord;
 	int health = 1;
 	int damage = 0;
+	chtype fsymb;
 };
 
 
@@ -125,7 +131,7 @@ public:
 	Room();
 
 	~Room();
-	
+
 	BaseList map[MAP_HEIGHT][MAP_WIDTH];	
 };
 
@@ -168,6 +174,8 @@ public:
 	BaseList& operator()(const int row, const int col);
 
 	void move_the_frame(GCoord shift);
+
+	void display(int shift);
 private:
 	int  gen_alive_count(int arow, int acol);
 

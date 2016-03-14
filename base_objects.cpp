@@ -169,10 +169,7 @@ ostream& operator<<(ostream& display, Map& m) {
 			Room& room = *m.world[cur_coord.parts.x][cur_coord.parts.y];
 			if (room.map[cur_coord.parts.row][cur_coord.parts.col].back()->color().size() > 10) {
 				cout << endl << room.map[cur_coord.parts.row][cur_coord.parts.col].back()->color().size() << endl;
-				for(int i = 0; i < 20; i++) {
-					cout << room.map[cur_coord.parts.row][cur_coord.parts.col].back()->color()[i];
-				}
-				cout << endl;
+				cout << (room.map[cur_coord.parts.row][cur_coord.parts.col].size() == 0) << endl;
 				exit(0);
 			}
 			display << room.map[cur_coord.parts.row][cur_coord.parts.col].back()->color();
@@ -200,6 +197,9 @@ IntIntPairList Map::shortest_way(IntIntPair from, IntIntPair to, int max_length)
 	IntIntPairList temp_way;
 	int r = from.first;
 	int c = from.second;
+	if ((r - to.first)*(r - to.first) + (c - to.second)*(c - to.second) > max_length*max_length) {
+		return way;
+	}
 	int d = 0;
 	bool found = false;
 	IntIntPair target;
@@ -207,7 +207,7 @@ IntIntPairList Map::shortest_way(IntIntPair from, IntIntPair to, int max_length)
 	while (temp_way.size() > 0) {
 		r = temp_way.front().first;
 		c = temp_way.front().second;
-		if ((abs(r - to.first) <= 1 && abs(c - to.second) <= 1) || d >= max_length) {
+		if (abs(r - to.first) <= 1 && abs(c - to.second) <= 1) {
 			found = true;
 			target = IntIntPair(r, c);
 			break;
@@ -319,6 +319,7 @@ BaseList& Map::operator()(const int row, const int col) {
 }
 
 void Map::generate(int achance, int steps, int ax, int ay) {
+	srand(time(0));
 	GCoord coord;
 	for(int i = 0; i < MAP_HEIGHT; i++) {
 		for(int j = 0; j < MAP_WIDTH; j++) {

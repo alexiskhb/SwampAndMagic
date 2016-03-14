@@ -3,6 +3,7 @@
 #include "base_objects.h"
 #include <list>
 #include <string>
+#include <algorithm>
 #include "colored_text.h"
 #include "coords.h"
 

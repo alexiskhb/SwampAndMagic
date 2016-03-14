@@ -66,54 +66,33 @@ public:
 	typedef NodeVector& NodeVectorRef;
 	template <class TType> friend class BilateralArray2D;
 	BilateralArray() {
-		negative.push_back(BANode<Type>(Type(), 0));
 	}
 
-	NodeVectorRef semiaxis(const int index) {
-		return index >= 0 ? positive : negative;
-	}
-
-	void update_minmax(const int index) {
-		min_index = std::min(min_index, index);
-		max_index = std::max(max_index, index);
-	}
-
-	void assign(const int index, Type value) {
-		expand_for(index);
-		semiaxis(index).at(abs(index)) = BANode<Type>(value, index);
-	}
-
-	unsigned int size() const {
-		return positive.size() + (negative.size() > 1 ? negative.size() - 1 : 0);
-	}
-
-	bool includes(const int index) {
-		return semiaxis(index).size() > abs(index);
+	int size() const {
+		return static_cast<int>(axis.size());
 	}
 
 	Type& at(const int index) {
-		return semiaxis(index).at(abs(index)).value;
+		return axis.at(stou(index)).value;
 	}
 
 	Type& operator[](const int index) {
 		expand_for(index);
-		semiaxis(index).at(abs(index)).is_used = true;
-		return semiaxis(index).at(abs(index)).value;
+		axis.at(stou(index)).is_used = true;
+		return axis.at(stou(index)).value;
 	}
 
 	// Does nothing if value at index already available.
 	// Returns reference to value at index, NOT this!
 	Type& expand_for(const int index) {
-		if (abs(index) >= semiaxis(index).size()) {
-			semiaxis(index).resize(abs(index) + 1);
-			auto t = semiaxis(index).begin();
-			for(int i = 0, k = sgn(index); i < semiaxis(index).size(); t++, i++) {
-				t->index = i*k; 
+		if (stou(index) >= size()) {
+			axis.resize(stou(index)+1);
+			for(int i = prev_size; i < size(); i++) {
+				axis.at(i).index = utos(i); 
 			}
+			prev_size = size();
 		}
-		semiaxis(index).at(abs(index)).is_used = true;
-		update_minmax(index);
-		return semiaxis(index).at(abs(index)).value;
+		return axis.at(stou(index)).value;
 	}
 
 	// Does the same as expand_for(), but returns *this.
@@ -123,85 +102,83 @@ public:
 	}
 
 	bool is_used(const int index) {
-		return includes(index) && semiaxis(index).at(abs(index)).is_used;
-	}
-
-	void push_back(const Type&& value) {
-		update_minmax(positive.size());
-		positive.push_back(BANode<Type>(value, positive.size() - 1));
-	}
-
-	void push_front(const Type&& value) {
-		update_minmax(negative.size());
-		negative.push_back(BANode<Type>(value, negative.size() - 1));
-	}
-
-	int biggest_index() const {
-		return max_index;
+		return axis.size() > stou(index) && axis.at(stou(index)).is_used;
 	}
 
 	class iterator : public std::iterator<std::forward_iterator_tag, BANode<Type>> {
 	public:
 		friend class BilateralArray;
 
-		iterator(const iterator& other) : index(other.index), owner(other.owner) {
+		iterator(const iterator& other) : uindex(other.uindex), owner(other.owner) {
 		}
 
 		~iterator() {
 		}
 
-		bool is_dereferenceable() {
-			return owner.is_used(index);
+		bool is_deref() {
+			return owner.is_used(utos(uindex));
 		}
 
 		iterator& operator=(const iterator& other) {
-			index = other.index;
-			owner = other.owner;
+			uindex = other.uindex;
+			owner  = other.owner;
 			return *this;
 		}
 
 		bool operator==(const iterator& other) {
-			return index == other.index;
+			return uindex == other.uindex && owner == other.owner;
 		}
 
 		bool operator!=(const iterator& other) {
-			return index != other.index;
+			return uindex != other.uindex || owner != other.owner;
 		}
 
 		iterator& operator++() {
 			do {
-				++index;
-			} while(!is_dereferenceable() && index <= owner.biggest_index());
+				++uindex;
+			} while(!is_deref() && uindex < owner.size());
 			return *this;
 		}
 
 		Type& operator*() {
-			return owner.at(index);
+			return owner.at(owner.utos(uindex));
 		}
 
 		Type& operator->() {
-			return owner.at(index);
+			return owner.at(owner.utos(uindex));
 		}
 	private:
-		iterator(int aindex, BilateralArray<Type>& aowner) : index(aindex), owner(aowner) {
+		iterator(int auindex, BilateralArray<Type>& aowner) : uindex(auindex), owner(aowner) {
 		}
 
-		int index;
+		int uindex;
 		BilateralArray<Type>& owner;
 	};
 
 	iterator begin() {
-		return iterator(min_index, *this);
+		iterator newit = iterator(0, *this);
+		if (!newit.is_deref()) {
+			++newit;
+		}
+		return newit;
 	}
 
 	iterator end() {
-		return iterator(max_index+1, *this);	
+		return iterator(size(), *this);
 	}
 private:
-	// Zero is in positive 
-	NodeVector negative, positive;
-	int min_index = std::numeric_limits<int>::max();
-	int max_index = std::numeric_limits<int>::min();
+	// signed to unsigned
+	inline int stou(const int signed_index) {
+		return signed_index >= 0 ? 2*signed_index : 2*abs(signed_index)-1;
+	}
+
+	// unsigned to signed
+	inline int utos(const int uindex) {
+		return ((uindex+1)/2) * (uindex%2 == 0 ? 1 : -1);
+	}
+
+	NodeVector axis;
+	int prev_size = 0;
 };
 
 
@@ -222,17 +199,15 @@ public:
 		expand_for(x, y);
 		return *this;
 	}
-	
-	void assign(const int x, const int y, Type element) {
-		expand_for(x, y) = element;
-	}
 
 	bool is_used(const int x, const int y) {
 		return area.is_used(x) && area.at(x).is_used(y);
 	}
 
 	BilateralArray<Type>& operator[](const int index) {
-		return area.expand_for(index);
+		BilateralArray<Type>& result = area.expand_for(index);
+		area.axis.at(area.stou(index)).is_used = true;
+		return result;
 	}
 
 	Type& at(const int ax, const int ay) {
@@ -243,80 +218,95 @@ public:
 	public:
 		friend class BilateralArray2D;
 
-		iterator(const iterator& other) : x(other.x), y(other.y), owner(other.owner) {
+		iterator(const iterator& other) : ux(other.ux), uy(other.uy), owner(other.owner) {
 		}
 
 		~iterator() {
 		}
 
-		bool is_dereferenceable() {
-			return owner.is_used(x, y);
+		bool is_deref() {
+			return owner.is_used(utos(ux), utos(uy));
 		}
 
 		iterator& operator=(const iterator& other) {
-			x = other.x;
-			y = other.y;
+			ux = other.ux;
+			uy = other.uy;
 			owner = other.owner;
 			return *this;
 		}
 
 		bool operator==(const iterator& other) {
-			return x == other.x && y == other.y;
+			return ux == other.ux && uy == other.uy;
 		}
 
 		bool operator!=(const iterator& other) {
-			return x != other.x || y != other.y;
+			return ux != other.ux || uy != other.uy;
 		}
 
 		iterator& operator++() {
 			bool at_x = true;
 			do {
-				if (x > owner.area.max_index) {
-					x = owner.area.max_index;
-					y = owner.area.at(x).max_index + 1;
+				if (ux >= owner.area.size()) {
+					ux = owner.area.size() > 0 ? owner.area.size()-1 : 0;
+					uy = owner.area.size() > 0 ? owner.area.at(owner.area.utos(ux)).size() : 0;
 					break;
 				}
-				if (!owner.area.is_used(x)) {
+				if (!owner.area.is_used(owner.area.utos(ux))) {
 					at_x = false;
-					++x;
+					++ux;
 					continue;
 				}
 				if (!at_x) {
-					y = owner.area.at(x).min_index;
+					uy = 0;
 					at_x = true;
 				}
 				else {
-					++y;
-					if (y > owner.area.at(x).max_index) {
-						++x;
+					++uy;
+					if (uy >= owner.area.at(owner.area.utos(ux)).size()) {
+						++ux;
 						at_x = false;
 					}
 				}
-			} while(!is_dereferenceable());
+			} while(!is_deref());
 			return *this;
 		}
 
 		Type& operator*() {
-			return owner.at(x, y);
+			return owner.at(owner.area.utos(ux), owner.area.utos(uy));
 		}
 
 		Type& operator->() {
-			return owner.at(x, y);
+			return owner.at(owner.area.utos(ux), owner.area.utos(uy));
 		}
 	private:
-		iterator(int ax, int ay, BilateralArray2D<Type>& aowner) : x(ax), y(ay), owner(aowner) {
+		iterator(int ax, int ay, BilateralArray2D<Type>& aowner) : ux(ax), uy(ay), owner(aowner) {
 		}
 
-		int x, y;
+		int utos(const int index) {
+			return owner.area.utos(index);
+		}
+
+		int stou(const int index) {
+			return owner.area.stou(index);
+		}
+
+		int ux, uy;
 		BilateralArray2D<Type>& owner;
 	};
 
 	iterator begin() {
-		return iterator(area.min_index, area.at(area.min_index).min_index, *this);
+		iterator newit = iterator(0, 0, *this);
+		if (!newit.is_deref()) {
+			++newit;
+		}
+		return newit;
 	}
 
 	iterator end() {
-		return iterator(area.max_index, area.at(area.max_index).max_index + 1, *this);	
+		return iterator(
+			area.size() > 0 ? area.size()-1 : 0, 
+			area.size() > 0 ? area.at(area.utos(area.size()-1)).size() : 0, 
+			*this);	
 	}
 private:
 	// ...-x <-|-|-|-|-|-0-|-|-|-|-|-|-> ...+x

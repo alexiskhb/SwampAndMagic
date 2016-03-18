@@ -150,7 +150,7 @@ void Magic::impact(list<CharacterPtr>& characters, std::list<ObjectPtr>& objects
 	for(auto obj: objects) {
 		if (*obj == *this && obj->symbol() == SYM_FLAME) {
 			obj->destroy();
-			health = TIME_MAGIC;
+			health = 3*TIME_MAGIC;
 		}
 	}
 	if (!m.is_penetrable(coord)) {
@@ -161,18 +161,28 @@ void Magic::impact(list<CharacterPtr>& characters, std::list<ObjectPtr>& objects
 
 
 
-Curse::Curse(int arow, int acol) : Object(arow, acol) {
+Curse::Curse(int arow, int acol) : Object(arow, acol), generation(0)  {
 	health = TIME_CURSE;
 	damage = DMG_CURSE;
-	fcolor = Colored(BG_WHITE, FG_B_BLUE).to_string();
 	fsymb = SYM_CURSE | A_BOLD | A_REVERSE | COLOR_PAIR(ID_CURSE);
 }
 
-Curse::Curse(int arow, int acol, int timelife) : Object(arow, acol) {
+Curse::Curse(int arow, int acol, int timelife) : Object(arow, acol), generation(0)  {
 	health = timelife;
 	damage = DMG_CURSE;
-	fcolor = Colored(BG_WHITE, FG_B_BLUE).to_string();
 	fsymb = SYM_CURSE | A_BOLD | A_REVERSE | COLOR_PAIR(ID_CURSE);
+}
+
+Curse::Curse(int arow, int acol, int timelife, GCoord dir) : Object(arow, acol, dir), generation(0)  {
+	health = timelife;
+	damage = DMG_CURSE;
+	fsymb = SYM_CURSE | A_BOLD | A_REVERSE | COLOR_PAIR(ID_CURSE) | A_BOLD;
+}
+
+Curse::Curse(int arow, int acol, int timelife, int gener, GCoord dir) : Object(arow, acol, dir), generation(gener) {
+	health = timelife;
+	damage = DMG_CURSE;
+	fsymb = SYM_CURSE | A_BOLD | A_REVERSE | COLOR_PAIR(ID_CURSE) | A_BOLD;
 }
 
 Curse::~Curse() {
@@ -184,9 +194,16 @@ char Curse::symbol() {
 }
 
 void Curse::impact(list<CharacterPtr>& characters, std::list<ObjectPtr>& objects, Map& m) {
+	static int di[4] = {-1, -1, 1, 1};
+	static int dj[4] = {-1, 1, 1, -1};
+	if (generation < 3) {
+		for(int t = 0; t < 4; t++) {
+			objects.push_front(make_shared<Curse>(getrow() + di[t], getcol() + dj[t], 2, generation+1, GCoord(sgn0(di[t]), sgn0(dj[t]))));
+		}
+	}
 	for(auto ch: characters) {
 		if (*ch == *this) {
-			ch->suffer(ch->symbol() == SYM_KNIGHT ? -damage*1.5 : damage);
+			ch->suffer(ch->symbol() == SYM_WARLOCK ? 0 : damage);
 		}
 	}
 	if (!m.is_penetrable(coord)) {

@@ -169,6 +169,10 @@ public:
 
 	~Warlock() override;
 
+	void magic(std::list<CharacterPtr>& characters, std::list<ObjectPtr>& objects);
+
+	bool move(Map& m, std::list<CharacterPtr>& characters) override;
+
 	char symbol() override;
 
 	bool suffer(int dmg) override;

@@ -18,10 +18,9 @@ typedef std::pair<CharacterPtr, bool> CharacterBoolPair;
 
 struct {
 	// CHARACTERS
-	// first(): player(knight)
-	// next   : princess
-	// third  : dragon
-	// >3: zombies and other(if any)
+	// first : player(knight)
+	// next  : princess
+	// >2    : monsters
 	std::list<CharacterPtr> characters;
 	std::list<ObjectPtr> dyn_objects;
 	std::list<BaseObjectPtr> relief;

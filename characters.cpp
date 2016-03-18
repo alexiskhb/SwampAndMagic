@@ -145,7 +145,7 @@ void Knight::magic(list<ObjectPtr>& objects, char direction) {
 			}
 			return;
 	}
-	for(unsigned int t = 1; t < 5; t++) {
+	for(unsigned int t = 0; t < 5; t++) {
 		objects.push_back(make_shared<Magic>(getrow() + di[t], getcol() + dj[t], 10, GCoord(sgn0(di[t]), sgn0(dj[t]))));
 	}
 }
@@ -440,10 +440,36 @@ bool Warlock::suffer(int dmg) {
 bool Warlock::attack(list<CharacterPtr>& characters, list<ObjectPtr>& objects, Map& m) {
 	CharacterPtr knight = characters.front();
 	refresh_way(m, characters);
+	if (chance(30)) {
+		magic(characters, objects);
+	}
 	if (*this % *knight) {
 		slash(characters);
 		return true;
 	}
-	// objects.push_back(ObjectPtr(new Swamp(getrow(), getcol())));
 	return false;
+}
+
+bool Warlock::move(Map& m, std::list<CharacterPtr>& characters) {
+	prev_coord = coord;
+	if (chance(20)) {
+		coord.row += dz_2[rand()%5];
+		coord.col += dz_2[rand()%5];
+	}
+	else {
+		if (way.size() > 0) {
+			coord.row = way.front().first;
+			coord.col = way.front().second;
+			way.pop_front();
+		}
+	}
+	return false;
+}
+
+void Warlock::magic(list<CharacterPtr>& characters, list<ObjectPtr>& objects) {
+	CharacterPtr kn = characters.front();
+	GCoord dc = kn->get_coord() - coord;
+	objects.push_back(make_shared<Curse>(
+		getrow() + sgn0(dc.row), getcol() + sgn0(dc.col), 
+		2, GCoord(sgn0(dc.row), sgn0(dc.col))));
 }

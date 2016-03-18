@@ -25,13 +25,15 @@ static const char
 	CMD_ATTACK  = 'f',
 	CMD_MAGIC   = 'r',
 	CMD_NONE    = 'n',
-	CMD_QUIT    = 'Q';
+	CMD_QUIT    = 'Q',
+	CMD_REPLAY  = 'R',
+	CMD_MAP     = 'M';
 
 
 static struct {
 public:
 	void put_commands() {
-		
+
 	}
 private:
 	std::string commands;

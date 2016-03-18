@@ -5,6 +5,9 @@
 using namespace std;
 
 
+int BaseObject::turn = 0;
+
+
 unsigned int cantor_pairing(const int a, const int b) {
 	unsigned int A = a >= 0 ? 2*static_cast<unsigned int>(a) : -2*static_cast<unsigned int>(a) - 1;
 	unsigned int B = b >= 0 ? 2*static_cast<unsigned int>(b) : -2*static_cast<unsigned int>(b) - 1;
@@ -69,8 +72,13 @@ GCoord BaseObject::get_prev() {
 	return GCoord(prevrow(), prevcol());
 }
 
-void BaseObject::set_prev(GCoord coord) {
-	prev_coord = coord;
+void BaseObject::set_prev(GCoord acoord) {
+	prev_coord = acoord;
+}
+
+void BaseObject::moveto(GCoord acoord) {
+	set_prev(coord);
+	coord = acoord;
 }
 
 void BaseObject::move_to_prev() {
@@ -121,20 +129,18 @@ Map::Map(BaseList& arelief) : upper_left_corner(0, 0), bottom_rgt_corner(MAP_HEI
 }
 
 Map::~Map() {
-	// static int k = 1;
-	for(auto iter = world.begin(); iter != world.end(); ++iter) {
-		if (*iter != nullptr) {
-			delete *iter;
-			// cout << k++ << "-th room destroyed\n";
-		}
-	}
+	// for(auto iter = world.begin(); iter != world.end(); ++iter) {
+	// 	if (*iter != nullptr) {
+	// 		delete *iter;
+	// 	}
+	// }
 }
 
 void Map::create_room(const int ax, const int ay) {
 	if (is_room_exists[cantor_pairing(ax, ay)]) {
 		return;
 	}
-	world[ax][ay] = new Room();
+	world[ax][ay] = std::make_shared<Room>();
 	int pos = chance(70) ? 47+rand()%5 : 50+rand()%4;
 	generate(pos, 6, ax, ay);
 	is_room_exists[cantor_pairing(ax, ay)] = true;
@@ -241,7 +247,7 @@ IntIntPairList Map::shortest_way(IntIntPair from, IntIntPair to, int max_length)
 				if (i == 0 && j == 0) {
 					continue;
 				}
-				if (is_on_the_map(r + i, c + j) && get_distance(r + i, c + j) == 0 && is_penetrable(r + i, c + j)) {
+				if (is_on_the_map(r + i, c + j) && get_distance(r + i, c + j) == 0 && is_penetrable(GCoord(r + i, c + j))) {
 					temp_way.push_back(IntIntPair(r + i, c + j));
 					set_distance(r + i, c + j, d + 1);
 				}
@@ -282,11 +288,11 @@ int Map::get_distance(int arow, int acol) {
 	return distance[cantor_pairing(arow, acol)];
 }
 
-BaseObjectPtr Map::nearest_symb(IntIntPair from, std::string targets, int max_length) {
+BaseObjectPtr Map::nearest_symb(GCoord from, std::string targets, int max_length) {
 	IntIntPairList deque;
 	GCoord coord;
-	int r = from.first;
-	int c = from.second;
+	int r = from.row;
+	int c = from.col;
 	int d = 0;
 	bool found = false;
 	IntIntPair target;
@@ -321,13 +327,13 @@ BaseObjectPtr Map::nearest_symb(IntIntPair from, std::string targets, int max_le
 		return map(r, c).back();
 	}
 	else {
-		return map(from.first, from.second).back();
+		return map(from.row, from.col).back();
 	}
 }
 
-bool Map::is_penetrable(int arow, int acol) {
+bool Map::is_penetrable(GCoord acoord) {
 	// we know that impenetrable objects should be in the back of the list
-	return map(arow, acol).back()->is_penetrable();
+	return map(acoord.row, acoord.col).back()->is_penetrable();
 }
 
 BaseList& Map::map(const int arow, const int acol) {

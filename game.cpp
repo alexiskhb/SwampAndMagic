@@ -72,10 +72,10 @@ struct {
 		did_attack.insert(CharacterBoolPair(knight, knight->attack(characters, dyn_objects, *map)));
 		for(auto obj: dyn_objects) {
 			if (map->is_on_the_map(obj->getrow(), obj->getcol())) {
-				obj->impact(characters, dyn_objects);
+				obj->impact(characters, dyn_objects, *map);
 				(*map)(obj->getrow(), obj->getcol()).remove(obj);
 				*map << obj;
-				obj->turn();
+				obj->make_turn();
 			}
 			else {
 				obj->move_to_prev();
@@ -92,7 +92,7 @@ struct {
 				else
 				// changes will be accepted after calling kill_died_characters_objects()
 				// so we can cancel try to move on wall here. prev_coords now match with actual.
-				if (!map->is_penetrable(ch->getrow(), ch->getcol())) {
+				if (!map->is_penetrable(ch->get_coord())) {
 					ch->move_to_prev();
 				}
 				else {
@@ -119,14 +119,15 @@ struct {
 		map->display(shift);
 		BaseObjectPtr obj = 
 			map->nearest_symb(
-				IntIntPair(knight->getrow(), knight->getcol()), 
+				knight->get_coord(), 
 				std::string(ENEMIES), 
 				std::min(MAP_HEIGHT, MAP_WIDTH)/2);
 		status = "HP: " + std::to_string(characters.front()->hitpoints());
 		gprint(MAP_HEIGHT+shift, MAP_WIDTH/2 - status.size()/2 - status.size()%2, status.c_str());
+		status = "(" + std::to_string(knight->getcol()) + ", " + std::to_string(-knight->getrow()) + ")";
+		gprint(MAP_HEIGHT+shift, shift + MAP_WIDTH - status.size(), status.c_str());
 		status = "NEAREST CHARACTER: " + std::to_string(obj->hitpoints());
 		gprint(MAP_HEIGHT+shift+1, MAP_WIDTH/2 - status.size()/2 - status.size()%2, status.c_str());
-		// cout << "(" << knight->getcol() << "; " << -knight->getrow() << ")\n"; 
 	}
 
 	void put_character(CharacterPtr ch) {
@@ -142,7 +143,9 @@ struct {
 	void init() {
 		map = std::make_shared<Map>(relief);
 		knight = std::make_shared<Knight>(MAP_HEIGHT/2, MAP_WIDTH/2, HP_KNIGHT, DMG_KN_SWORD);
+		knight->moveto(map->nearest_symb(knight->get_coord(), " ", MAP_HEIGHT)->get_coord());
 		princess = std::make_shared<Princess>(1, MAP_WIDTH-2, HP_PRINCESS, DMG_PRINCESS);
+		princess->moveto(map->nearest_symb(princess->get_coord(), " ", MAP_HEIGHT)->get_coord());
 		counter = 0;
 		initscr();
 		keypad(stdscr, true);
@@ -162,6 +165,8 @@ struct {
 		init_pair(ID_WALL     , COLOR_BLACK , COLOR_WHITE  );
 		init_pair(ID_EMPTY    , COLOR_WHITE , COLOR_BLACK  );
 		init_pair(ID_MEDKIT   , COLOR_WHITE , COLOR_RED    );
+		init_pair(ID_DRGNEST  , COLOR_WHITE , COLOR_RED    );
+		init_pair(ID_GRVYARD  , COLOR_WHITE , COLOR_GREEN  );
 		
 		put_character(knight);
 		put_character(princess);
@@ -170,7 +175,7 @@ struct {
 		put_dynobject(std::make_shared<Medkit>(MAP_HEIGHT/2, MAP_WIDTH/2));
 		for(int i = 0; i < MAP_HEIGHT; i++) {
 			for(int j = 0; j < MAP_WIDTH; j++) {
-				if (map->is_penetrable(i, j) && chance(2)) {
+				if (map->is_penetrable(GCoord(i, j)) && chance(2)) {
 					characters.push_back(std::make_shared<Zombie>(i, j, HP_ZOMBIE, DMG_ZOMBIE));
 					*map << characters.back();
 				}
@@ -206,16 +211,17 @@ int main(int argc, char** argv) {
 	Game.init();
  	Game.main_cycle();
  	while (true) {
- 		Game.status = std::string("PRESS 'Q' TO QUIT OR 'R' TO REPLAY");
+ 		Game.status = "PRESS '" + std::string(1, CMD_QUIT) + "' TO QUIT OR '" + std::string(1, CMD_REPLAY) + "' TO REPLAY";
  		Game.gprint(0, MAP_WIDTH/2 - Game.status.size()/2, Game.status.c_str());
  		Game.render();
  		char what_to_do = getch();
+ 		// Clear 0-th row
  		Game.gprint(0, 0, " ");
- 		if (what_to_do == 'Q') {
+ 		if (what_to_do == CMD_QUIT) {
  			Game.stop();
  			break;
  		}
- 		if (what_to_do == 'r' || what_to_do == 'R') {
+ 		if (what_to_do == CMD_REPLAY) {
  			Game.replay();
  		}
  	}

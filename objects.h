@@ -5,33 +5,40 @@
 #include "colored_text.h"
 #include "coords.h"
 
-static const int DMG_FLAME  = 7;
-static const int DMG_CURSE  = 15;
-static const int DMG_MAGIC  = 8;
-static const int DMG_MEDKIT = -20;
-static const int TIME_SWAMP  = 15;
-static const int TIME_MAGIC  = 5;
-static const int TIME_CURSE  = 2;
-static const int TIME_FLAME  = 4;
-static const int TIME_INFTY  = -10000;
-static const int TIME_MEDKIT = TIME_INFTY;
+static const int 
+	DMG_FLAME  = 7,
+	DMG_CURSE  = 15,
+	DMG_MAGIC  = 7,
+	DMG_MEDKIT = -20,
+	TIME_SWAMP   = 15,
+	TIME_MAGIC   = 5,
+	TIME_CURSE   = 2,
+	TIME_FLAME   = 4,
+	TIME_INFTY   = -10000,
+	TIME_MEDKIT  = TIME_INFTY,
+	TIME_DRGNEST = TIME_INFTY,
+	TIME_GRVYARD = TIME_INFTY;
 
 
 class Object : public BaseObject {
 public:
 	Object(int arow, int acol);
 
+	Object(int arow, int acol, GCoord dir);
+
 	~Object() override;
 	
 	virtual void destroy();
 
-	virtual void turn();
+	virtual void make_turn();
 
-	virtual void impact(std::list<CharacterPtr>& characters, std::list<ObjectPtr>& objects);
+	virtual void impact(std::list<CharacterPtr>& characters, std::list<ObjectPtr>& objects, Map& m);
 
 	bool is_penetrable() override;
 
 	bool is_alive() override;
+protected:
+	GCoord direction;
 };
 
 
@@ -48,7 +55,7 @@ public:
 
 	bool is_penetrable() override;
 
-	void impact(std::list<CharacterPtr>& characters, std::list<ObjectPtr>& objects) override;
+	void impact(std::list<CharacterPtr>& characters, std::list<ObjectPtr>& objects, Map& m) override;
 };
 
 
@@ -63,7 +70,7 @@ public:
 
 	char symbol() override;
 
-	void impact(std::list<CharacterPtr>& characters, std::list<ObjectPtr>& objects) override;
+	void impact(std::list<CharacterPtr>& characters, std::list<ObjectPtr>& objects, Map& m) override;
 };
 
 
@@ -78,7 +85,7 @@ public:
 
 	char symbol() override;
 
-	void impact(std::list<CharacterPtr>& characters, std::list<ObjectPtr>& objects) override;
+	void impact(std::list<CharacterPtr>& characters, std::list<ObjectPtr>& objects, Map& m) override;
 };
 
 
@@ -91,11 +98,13 @@ public:
 
 	Magic(int arow, int acol, int timelife);
 
+	Magic(int arow, int acol, int timelife, GCoord dir);
+
 	~Magic() override;
 
 	char symbol() override;
 
-	void impact(std::list<CharacterPtr>& characters, std::list<ObjectPtr>& objects) override;
+	void impact(std::list<CharacterPtr>& characters, std::list<ObjectPtr>& objects, Map& m) override;
 };
 
 
@@ -111,7 +120,7 @@ public:
 
 	char symbol() override;
 
-	void impact(std::list<CharacterPtr>& characters, std::list<ObjectPtr>& objects) override;
+	void impact(std::list<CharacterPtr>& characters, std::list<ObjectPtr>& objects, Map& m) override;
 };
 
 
@@ -127,20 +136,36 @@ public:
 
 	char symbol() override;
 
-	void impact(std::list<CharacterPtr>& characters, std::list<ObjectPtr>& objects) override;
+	void impact(std::list<CharacterPtr>& characters, std::list<ObjectPtr>& objects, Map& m) override;
 };
 
 
 
 
 
-class DragonNest {
+class DragonNest : public Object {
+	DragonNest(int arow, int acol);
 
+	~DragonNest() override;
+
+	char symbol() override;
+
+	void impact(std::list<CharacterPtr>& characters, std::list<ObjectPtr>& objects, Map& m) override;
+private:
+	int frequency;
 };
 
 
-class Graveyard {
+class Graveyard : public Object {
+	Graveyard(int arow, int acol);
 
+	~Graveyard() override;
+
+	char symbol() override;
+
+	void impact(std::list<CharacterPtr>& characters, std::list<ObjectPtr>& objects, Map& m) override;
+private:
+	int frequency;
 };
 
 

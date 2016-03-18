@@ -19,7 +19,9 @@ enum ObjectID {
 	ID_CURSE    = 9,
 	ID_WALL     = 10,
 	ID_EMPTY    = 11,
-	ID_MEDKIT   = 12
+	ID_MEDKIT   = 12,
+	ID_DRGNEST  = 13,
+	ID_GRVYARD  = 14
 };
 
 

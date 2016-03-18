@@ -13,6 +13,11 @@ int sgn(Type val) {
     return (Type(0) <= val) - (val < Type(0));
 }
 
+template <typename Type> 
+int sgn0(Type val) {
+    return (Type(0) < val) - (val < Type(0));
+}
+
 
 struct Coord {
 	Coord() : x(ST_ROOM), y(ST_ROOM), row(ST_CELL), col(ST_CELL) {

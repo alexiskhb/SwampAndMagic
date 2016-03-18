@@ -6,7 +6,10 @@ using namespace std;
 
 
 
-Object::Object(int arow, int acol) : BaseObject(arow, acol) {
+Object::Object(int arow, int acol) : BaseObject(arow, acol), direction(0, 0) {
+}
+
+Object::Object(int arow, int acol, GCoord dir) : BaseObject(arow, acol), direction(dir) {
 }
 
 Object::~Object() {
@@ -25,13 +28,14 @@ bool Object::is_alive() {
 	return health > 0 || health == TIME_INFTY;
 }
 
-void Object::turn() {
-	if (health > 0) {
+void Object::make_turn() {
+	if (health > 0 && health != TIME_INFTY) {
 		--health;
 	}
+	moveto(coord+direction);
 }
 
-void Object::impact(list<CharacterPtr>& characters, std::list<ObjectPtr>& objects) {
+void Object::impact(list<CharacterPtr>& characters, std::list<ObjectPtr>& objects, Map& m) {
 
 }
 
@@ -39,7 +43,6 @@ void Object::impact(list<CharacterPtr>& characters, std::list<ObjectPtr>& object
 
 
 Wall::Wall(int arow, int acol) : Object(arow, acol) {
-	fcolor = Colored(BG_GRAY, FG_DARK_GRAY).to_string();
 	fsymb = SYM_WALL | COLOR_PAIR(ID_WALL);
 }
 
@@ -55,7 +58,7 @@ bool Wall::is_penetrable() {
 	return false;
 }
 
-void Wall::impact(list<CharacterPtr>& characters, std::list<ObjectPtr>& objects) {
+void Wall::impact(list<CharacterPtr>& characters, std::list<ObjectPtr>& objects, Map& m) {
 
 }
 
@@ -66,7 +69,6 @@ void Wall::impact(list<CharacterPtr>& characters, std::list<ObjectPtr>& objects)
 Flame::Flame(int arow, int acol) : Object(arow, acol) {
 	health = TIME_FLAME;
 	damage = DMG_FLAME;
-	fcolor = Colored(BG_WHITE, FG_RED).to_string();
 	fsymb = SYM_FLAME | A_BOLD | A_REVERSE | COLOR_PAIR(ID_FLAME);
 }
 
@@ -78,7 +80,7 @@ char Flame::symbol() {
 	return SYM_FLAME;
 }
 
-void Flame::impact(list<CharacterPtr>& characters, std::list<ObjectPtr>& objects) {
+void Flame::impact(list<CharacterPtr>& characters, std::list<ObjectPtr>& objects, Map& m) {
 	for(auto ch: characters) {
 		if (*ch == *this && ch->symbol() != SYM_DRAGON) {
 			ch->suffer(damage);
@@ -93,7 +95,6 @@ void Flame::impact(list<CharacterPtr>& characters, std::list<ObjectPtr>& objects
 
 Swamp::Swamp(int arow, int acol) : Object(arow, acol) {
 	health = TIME_SWAMP;
-	fcolor = Colored(BG_WHITE, FG_YELLOW).to_string();
 	fsymb = SYM_SWAMP | A_BOLD | A_REVERSE | COLOR_PAIR(ID_SWAMP);
 }
 
@@ -105,7 +106,7 @@ char Swamp::symbol() {
 	return SYM_SWAMP;
 }
 
-void Swamp::impact(list<CharacterPtr>& characters, std::list<ObjectPtr>& objects) {
+void Swamp::impact(list<CharacterPtr>& characters, std::list<ObjectPtr>& objects, Map& m) {
 
 }
 
@@ -117,14 +118,18 @@ void Swamp::impact(list<CharacterPtr>& characters, std::list<ObjectPtr>& objects
 Magic::Magic(int arow, int acol) : Object(arow, acol) {
 	health = TIME_MAGIC;
 	damage = DMG_MAGIC;
-	fcolor = Colored(BG_WHITE, FG_B_BLUE).to_string();
 	fsymb = SYM_MAGIC | A_BOLD | A_REVERSE | COLOR_PAIR(ID_MAGIC) | A_BOLD;
 }
 
 Magic::Magic(int arow, int acol, int timelife) : Object(arow, acol) {
 	health = timelife;
 	damage = DMG_MAGIC;
-	fcolor = Colored(BG_WHITE, FG_B_BLUE).to_string();
+	fsymb = SYM_MAGIC | A_BOLD | A_REVERSE | COLOR_PAIR(ID_MAGIC) | A_BOLD;
+}
+
+Magic::Magic(int arow, int acol, int timelife, GCoord dir) : Object(arow, acol, dir) {
+	health = timelife;
+	damage = DMG_MAGIC;
 	fsymb = SYM_MAGIC | A_BOLD | A_REVERSE | COLOR_PAIR(ID_MAGIC) | A_BOLD;
 }
 
@@ -136,7 +141,7 @@ char Magic::symbol() {
 	return SYM_MAGIC;
 }
 
-void Magic::impact(list<CharacterPtr>& characters, std::list<ObjectPtr>& objects) {
+void Magic::impact(list<CharacterPtr>& characters, std::list<ObjectPtr>& objects, Map& m) {
 	for(auto ch: characters) {
 		if (*ch == *this) {
 			ch->suffer(ch->symbol() == SYM_KNIGHT ? -damage*1.5 : damage);
@@ -147,6 +152,9 @@ void Magic::impact(list<CharacterPtr>& characters, std::list<ObjectPtr>& objects
 			obj->destroy();
 			health = TIME_MAGIC;
 		}
+	}
+	if (!m.is_penetrable(coord)) {
+		health = 0;
 	}
 }
 
@@ -175,11 +183,14 @@ char Curse::symbol() {
 	return SYM_CURSE;
 }
 
-void Curse::impact(list<CharacterPtr>& characters, std::list<ObjectPtr>& objects) {
+void Curse::impact(list<CharacterPtr>& characters, std::list<ObjectPtr>& objects, Map& m) {
 	for(auto ch: characters) {
 		if (*ch == *this) {
 			ch->suffer(ch->symbol() == SYM_KNIGHT ? -damage*1.5 : damage);
 		}
+	}
+	if (!m.is_penetrable(coord)) {
+		health = 0;
 	}
 }
 
@@ -189,14 +200,12 @@ void Curse::impact(list<CharacterPtr>& characters, std::list<ObjectPtr>& objects
 Medkit::Medkit(int arow, int acol) : Object(arow, acol) {
 	health = TIME_MEDKIT;
 	damage = DMG_MEDKIT;
-	fcolor = Colored(BG_WHITE, FG_GREEN).to_string();
 	fsymb = SYM_MEDKIT | A_BOLD | A_REVERSE | COLOR_PAIR(ID_MEDKIT) | A_BOLD;
 }
 
 Medkit::Medkit(int arow, int acol, int timelife) : Object(arow, acol) {
 	health = timelife;
 	damage = DMG_MEDKIT;
-	fcolor = Colored(BG_GREEN, FG_BLACK).to_string();
 	fsymb = SYM_MEDKIT | A_BOLD | A_REVERSE | COLOR_PAIR(ID_MEDKIT) | A_BOLD;
 }
 
@@ -208,7 +217,7 @@ char Medkit::symbol() {
 	return SYM_MEDKIT;
 }
 
-void Medkit::impact(list<CharacterPtr>& characters, std::list<ObjectPtr>& objects) {
+void Medkit::impact(list<CharacterPtr>& characters, std::list<ObjectPtr>& objects, Map& m) {
 	for(auto ch: characters) {
 		if (*ch == *this) {
 			ch->suffer(damage);
@@ -216,4 +225,51 @@ void Medkit::impact(list<CharacterPtr>& characters, std::list<ObjectPtr>& object
 			break;
 		}
 	}
+}
+
+
+
+
+
+DragonNest::DragonNest(int arow, int acol) : Object(arow, acol), frequency(5+rand()%5) {
+	health = TIME_DRGNEST;
+	fsymb = SYM_DRGNEST | A_BOLD | A_REVERSE | COLOR_PAIR(ID_DRGNEST) | A_BOLD;
+}
+
+DragonNest::~DragonNest() {
+
+}
+
+char DragonNest::symbol() {
+	return SYM_DRGNEST;
+}
+
+void DragonNest::impact(list<CharacterPtr>& characters, std::list<ObjectPtr>& objects, Map& m) {
+	if (!(turn%frequency == 0)) {
+		return;
+	}
+
+}
+
+
+
+
+Graveyard::Graveyard(int arow, int acol) : Object(arow, acol), frequency(5+rand()%5) {
+	health = TIME_GRVYARD;
+	fsymb = SYM_GRVYARD | A_BOLD | A_REVERSE | COLOR_PAIR(ID_GRVYARD) | A_BOLD;
+}
+
+Graveyard::~Graveyard() {
+
+}
+
+char Graveyard::symbol() {
+	return SYM_GRVYARD;
+}
+
+void Graveyard::impact(list<CharacterPtr>& characters, std::list<ObjectPtr>& objects, Map& m) {
+	if (!(turn%frequency == 0)) {
+		return;
+	}
+
 }

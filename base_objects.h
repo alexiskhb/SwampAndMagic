@@ -15,18 +15,21 @@
 
 // map is 8-connected area
 
-static const char SYM_EMPTY    = ' ';
-static const char SYM_WALL     = '.';
-static const char SYM_KNIGHT   = 'K';
-static const char SYM_PRINCESS = 'P';
-static const char SYM_DRAGON   = 'D';
-static const char SYM_ZOMBIE   = 'z';
-static const char SYM_WARLOCK  = 'W';
-static const char SYM_SWAMP    = '~';
-static const char SYM_FLAME    = '*';
-static const char SYM_MAGIC    = '%';
-static const char SYM_CURSE    = 'X';
-static const char SYM_MEDKIT   = '+';
+static const char 
+	SYM_EMPTY    = ' ',
+	SYM_WALL     = '.',
+	SYM_KNIGHT   = 'K',
+	SYM_PRINCESS = 'P',
+	SYM_DRAGON   = 'D',
+	SYM_ZOMBIE   = 'z',
+	SYM_WARLOCK  = 'W',
+	SYM_SWAMP    = '~',
+	SYM_FLAME    = '*',
+	SYM_MAGIC    = '%',
+	SYM_CURSE    = 'X',
+	SYM_MEDKIT   = '+',
+	SYM_DRGNEST  = '@',
+	SYM_GRVYARD  = '~';
 
 
 
@@ -39,6 +42,8 @@ class Object;
 
 class Character;
 
+class Room;
+
 
 typedef std::shared_ptr<BaseObject> BaseObjectPtr;
 
@@ -47,6 +52,8 @@ typedef std::shared_ptr<Object> ObjectPtr;
 typedef std::shared_ptr<Character> CharacterPtr;
 
 typedef std::shared_ptr<Map> MapPtr;
+
+typedef std::shared_ptr<Room> RoomPtr;
 
 typedef std::shared_ptr<std::list<BaseObjectPtr>> ListBaseObjPtr;
 
@@ -97,7 +104,9 @@ public:
 
 	void move_to_prev();
 
-	void set_prev(GCoord coord);
+	void set_prev(GCoord acoord);
+
+	void moveto(GCoord acoord);
 
 	GCoord get_coord();
 
@@ -114,6 +123,8 @@ public:
 	virtual bool is_penetrable();
 
 	virtual bool is_evil();
+
+	static int turn;
 protected:
 	std::string fcolor;
 	GCoord coord;
@@ -148,7 +159,7 @@ public:
 
 	// std::list<BaseObjectPtr>* operator[](int index);
 
-	bool is_penetrable(int arow, int acol);
+	bool is_penetrable(GCoord acoord);
 
 	int get_height();
 
@@ -166,7 +177,7 @@ public:
 
 	IntIntPairList shortest_way(IntIntPair from, IntIntPair to, int max_length);
 
-	BaseObjectPtr nearest_symb(IntIntPair from, std::string targets, int max_length);
+	BaseObjectPtr nearest_symb(GCoord from, std::string targets, int max_length);
 
 	BaseList& map(const int arow, const int acol);
 
@@ -186,7 +197,7 @@ private:
 
 	int  get_distance(int arow, int acol);
 
-	BilateralArray2D<Room*> world;
+	BilateralArray2D<RoomPtr> world;
 	int height = MAP_HEIGHT;
 	int width  = MAP_WIDTH;
 	UIntIntMap distance;

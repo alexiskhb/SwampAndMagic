@@ -78,13 +78,13 @@ bool Knight::is_evil() {
 }
 
 void Knight::magic(list<ObjectPtr>& objects, char direction) {
-	int consts[5] = {0, 0, 0, 0, 0};
-	int di_inc[5] = {1, 2, 3, 4, 5};
-	int di_dec[5] = {-1, -2, -3, -4, -5};
-	int dj_inc[5] = {1, 2, 3, 4, 5};
-	int dj_dec[5] = {-1, -2, -3, -4, -5};
-	int di_around[16] = {-2, -2, -2, -2, -2, -1, 0, 1, 2, 2, 2, 2, 2, 1, 0, -1};
-	int dj_around[16] = {-2, -1, 0, 1, 2, 2, 2, 2, 2, 1, 0, -1, -2, -2, -2, -2};
+	static int consts[5] = {0, 0, 0, 0, 0};
+	static int di_inc[5] = {1, 2, 3, 4, 5};
+	static int di_dec[5] = {-1, -2, -3, -4, -5};
+	static int dj_inc[5] = {1, 2, 3, 4, 5};
+	static int dj_dec[5] = {-1, -2, -3, -4, -5};
+	static int di_around[16] = {-2, -2, -2, -2, -2, -1, 0, 1, 2, 2, 2, 2, 2, 1, 0, -1};
+	static int dj_around[16] = {-2, -1, 0, 1, 2, 2, 2, 2, 2, 1, 0, -1, -2, -2, -2, -2};
 	int* di = di_around;
 	int* dj = dj_around;
 	switch (direction) {
@@ -141,17 +141,17 @@ void Knight::magic(list<ObjectPtr>& objects, char direction) {
 			di = di_around;
 			dj = dj_around;
 			for(unsigned int t = 0; t < 16; t++) {
-				objects.push_back(ObjectPtr(new Magic(getrow() + di[t], getcol() + dj[t], 2)));
+				objects.push_back(make_shared<Magic>(getrow() + di[t], getcol() + dj[t], 10, GCoord(sgn0(di[t]), sgn0(dj[t]))));
 			}
 			return;
 	}
 	for(unsigned int t = 1; t < 5; t++) {
-		objects.push_back(ObjectPtr(new Magic(getrow() + di[t], getcol() + dj[t], 2)));
+		objects.push_back(make_shared<Magic>(getrow() + di[t], getcol() + dj[t], 10, GCoord(sgn0(di[t]), sgn0(dj[t]))));
 	}
 }
 
 bool Knight::attack(list<CharacterPtr>& characters, list<ObjectPtr>& objects, Map& m) {
-	std::string moves(STR_MOVES);
+	static std::string moves(STR_MOVES);
 	moved_on_attack = CMD_NONE;
 	char action = get_command();
 	// condition means player wants to move
@@ -322,7 +322,7 @@ void Monster::refresh_way(Map& m, std::list<CharacterPtr>& characters) {
 IntIntPairList Monster::shortest_way_to(BaseObjectPtr obj, Map& m) {
 	return m.shortest_way(
 		IntIntPair(this->getrow(), this->getcol()), 
-		IntIntPair(obj ->getrow(), obj ->getcol()), std::min(MAP_HEIGHT, MAP_WIDTH)/2);
+		IntIntPair(obj ->getrow(), obj ->getcol()), 2*(std::min(MAP_HEIGHT, MAP_WIDTH)/3));
 }
 
 
@@ -345,7 +345,7 @@ Dragon::~Dragon() {
 void Dragon::magic(list<ObjectPtr>& objects) {
 	int flames_cnt = rand()%30 + 1;
 	for(int i = 0; i < flames_cnt; i++) {
-		objects.push_back(ObjectPtr(new Flame( getrow() + (rand()%10-5), getcol() + (rand()%10-5) )));	
+		objects.push_back(make_shared<Flame>( getrow() + (rand()%10-5), getcol() + (rand()%10-5) ));	
 	}
 }
 

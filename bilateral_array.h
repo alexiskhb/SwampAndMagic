@@ -79,6 +79,8 @@ public:
 	Type& operator[](const int index) {
 		expand_for(index);
 		axis.at(stou(index)).is_used = true;
+		most_neg_ = std::min(most_neg_, index);
+		most_pos_ = std::max(most_pos_, index);
 		return axis.at(stou(index)).value;
 	}
 
@@ -103,6 +105,14 @@ public:
 
 	bool is_used(const int index) {
 		return axis.size() > stou(index) && axis.at(stou(index)).is_used;
+	}
+
+	int most_neg() {
+		return most_neg_;
+	}
+
+	int most_pos() {
+		return most_pos_;
 	}
 
 	class iterator : public std::iterator<std::forward_iterator_tag, BANode<Type>> {
@@ -179,11 +189,22 @@ private:
 
 	NodeVector axis;
 	int prev_size = 0;
+	int most_neg_ = std::numeric_limits<int>::max();
+	int most_pos_ = std::numeric_limits<int>::min();
 };
 
 
 
-
+/*
+	|---------------> X
+	|
+	|
+	|
+	|
+	V
+	
+	Y
+*/
 template <class Type>
 class BilateralArray2D {
 public:
@@ -206,12 +227,23 @@ public:
 
 	BilateralArray<Type>& operator[](const int index) {
 		BilateralArray<Type>& result = area.expand_for(index);
+		// Mark that there is an Y-axis on X_index 
 		area.axis.at(area.stou(index)).is_used = true;
+		most_left_x = std::min(most_left_x, index);
+		most_up_y   = std::min(most_up_y  , area.at(index).most_neg());
 		return result;
 	}
 
 	Type& at(const int ax, const int ay) {
 		return area.at(ax).at(ay);
+	}
+
+	int most_left_used() {
+		return most_left_x;
+	}
+
+	int most_up_used() {
+		return most_up_y;
 	}
 
 	class iterator : public std::iterator<std::forward_iterator_tag, BANode<Type>> {
@@ -309,6 +341,11 @@ public:
 			*this);	
 	}
 private:
-	// ...-x <-|-|-|-|-|-0-|-|-|-|-|-|-> ...+x
+	//                 -Y
+	// ...-X -|-|-|-|-|-0-|-|-|-|-|-|-> ...+X
+	//        V V V V V   V V V V V V
+	//                 +Y
 	BilateralArray< BilateralArray<Type> > area;
+	int most_left_x = std::numeric_limits<int>::max();
+	int most_up_y   = std::numeric_limits<int>::max();
 };

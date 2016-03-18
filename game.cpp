@@ -1,7 +1,6 @@
 #include "base_objects.h"
 #include "objects.h"
 #include "characters.h"
-#include <iostream>
 #include <map>
 #include <ctime>
 #include "colored_text.h"
@@ -10,9 +9,7 @@
 #include <algorithm>
 #include "bilateral_array.h"
 #include <cstdlib>
-
-
-using std::cout;
+#include "control.h"
 
 
 typedef std::map<CharacterPtr, bool> CharacterBoolMap;
@@ -28,9 +25,10 @@ struct {
 	std::list<CharacterPtr> characters;
 	std::list<ObjectPtr> dyn_objects;
 	std::list<BaseObjectPtr> relief;
-	CharacterPtr knight;//   = CharacterPtr(new Knight(MAP_HEIGHT/2, MAP_WIDTH/2, HP_KNIGHT, DMG_KN_SWORD));
-	CharacterPtr princess;// = CharacterPtr(new Princess(1, MAP_WIDTH-2, HP_PRINCESS, DMG_PRINCESS));
-	Map* map;
+	CharacterPtr knight;
+	CharacterPtr princess;
+	MapPtr map;
+	std::string status;
 	unsigned int counter;
 
 	bool is_over() {
@@ -90,7 +88,6 @@ struct {
 				if (!map->is_on_the_map(ch->getrow(), ch->getcol())) {
 					ch->move_to_prev();
 					ch->suffer(ch->hitpoints());
-					// cout << "AHAHAHAAAHAA\n";
 				}
 				else
 				// changes will be accepted after calling kill_died_characters_objects()
@@ -125,11 +122,10 @@ struct {
 				IntIntPair(knight->getrow(), knight->getcol()), 
 				std::string(ENEMIES), 
 				std::min(MAP_HEIGHT, MAP_WIDTH)/2);
-		gprint(
-			MAP_HEIGHT+shift, 
-			MAP_WIDTH/4,
-			("HP: " + std::to_string(characters.front()->hitpoints()) + 
-			 "	NEAREST_CHARACTER: " + std::to_string(obj->hitpoints()) + "\0").c_str());
+		status = "HP: " + std::to_string(characters.front()->hitpoints());
+		gprint(MAP_HEIGHT+shift, MAP_WIDTH/2 - status.size()/2 - status.size()%2, status.c_str());
+		status = "NEAREST CHARACTER: " + std::to_string(obj->hitpoints());
+		gprint(MAP_HEIGHT+shift+1, MAP_WIDTH/2 - status.size()/2 - status.size()%2, status.c_str());
 		// cout << "(" << knight->getcol() << "; " << -knight->getrow() << ")\n"; 
 	}
 
@@ -144,9 +140,9 @@ struct {
 	}
 
 	void init() {
-		map = new Map(relief);
-		knight = CharacterPtr(new Knight(MAP_HEIGHT/2, MAP_WIDTH/2, HP_KNIGHT, DMG_KN_SWORD));
-		princess = CharacterPtr(new Princess(1, MAP_WIDTH-2, HP_PRINCESS, DMG_PRINCESS));
+		map = std::make_shared<Map>(relief);
+		knight = std::make_shared<Knight>(MAP_HEIGHT/2, MAP_WIDTH/2, HP_KNIGHT, DMG_KN_SWORD);
+		princess = std::make_shared<Princess>(1, MAP_WIDTH-2, HP_PRINCESS, DMG_PRINCESS);
 		counter = 0;
 		initscr();
 		keypad(stdscr, true);
@@ -169,13 +165,13 @@ struct {
 		
 		put_character(knight);
 		put_character(princess);
-		put_character(CharacterPtr(new Dragon(4, MAP_WIDTH-4)));
-		put_character(CharacterPtr(new Warlock(10, MAP_WIDTH-10)));
-		put_dynobject(ObjectPtr(new Medkit(MAP_HEIGHT/2, MAP_WIDTH/2)));
+		put_character(std::make_shared<Dragon>(4, MAP_WIDTH-4));
+		put_character(std::make_shared<Warlock>(10, MAP_WIDTH-10));
+		put_dynobject(std::make_shared<Medkit>(MAP_HEIGHT/2, MAP_WIDTH/2));
 		for(int i = 0; i < MAP_HEIGHT; i++) {
 			for(int j = 0; j < MAP_WIDTH; j++) {
-				if (map->is_penetrable(i, j) && chance(2, "")) {
-					characters.push_back(CharacterPtr(new Zombie(i, j, HP_ZOMBIE, DMG_ZOMBIE)));
+				if (map->is_penetrable(i, j) && chance(2)) {
+					characters.push_back(std::make_shared<Zombie>(i, j, HP_ZOMBIE, DMG_ZOMBIE));
 					*map << characters.back();
 				}
 			}
@@ -183,7 +179,6 @@ struct {
 	}
 
 	void stop() {
-		delete map;
 		characters.clear();
 		dyn_objects.clear();
 		relief.clear();
@@ -211,11 +206,12 @@ int main(int argc, char** argv) {
 	Game.init();
  	Game.main_cycle();
  	while (true) {
- 		Game.gprint(0, MAP_WIDTH/4, "PRESS 'Q' TO QUIT OR 'R' TO REPLAY\0");
+ 		Game.status = std::string("PRESS 'Q' TO QUIT OR 'R' TO REPLAY");
+ 		Game.gprint(0, MAP_WIDTH/2 - Game.status.size()/2, Game.status.c_str());
  		Game.render();
  		char what_to_do = getch();
  		Game.gprint(0, 0, " ");
- 		if (what_to_do == 'q' || what_to_do == 'Q') {
+ 		if (what_to_do == 'Q') {
  			Game.stop();
  			break;
  		}

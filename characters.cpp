@@ -1,6 +1,7 @@
 #include "characters.h"
 #include "objects.h"
 #include <curses.h>
+#include "control.h"
 
 static const char* STR_MOVES  = "wasdqezcx"; 
 
@@ -65,7 +66,7 @@ Knight::Knight(int arow, int acol, int hp, int dmg) : Character(arow, acol, hp, 
 }
 
 Knight::~Knight() {
-	// cout << ">> Knight died\n";
+
 }
 
 char Knight::symbol() {
@@ -182,11 +183,6 @@ bool Knight::has_plans() {
 }
 
 char Knight::get_command() {
-	// if (actions.size() == 0) {
-	// 	cin >> actions;
-	// }
-	// char action = actions[0];
-	// actions.erase(0, 1);
 	return getch();
 }
 
@@ -194,7 +190,6 @@ bool Knight::move(Map& m, std::list<CharacterPtr>& characters) {
 	prev_coord = coord;
 	char action;
 	if (moved_on_attack == CMD_NONE) {
-		// action = getch();
 		action = get_command();
 	}
 	else {
@@ -306,7 +301,7 @@ Monster::~Monster() {
 
 bool Monster::move(Map& m, std::list<CharacterPtr>& characters) {
 	prev_coord = coord;
-	if (chance(30, "")) {
+	if (chance(30)) {
 		coord.row += dz_1[rand()%3];
 		coord.col += dz_1[rand()%3];
 	}
@@ -357,12 +352,12 @@ void Dragon::magic(list<ObjectPtr>& objects) {
 bool Dragon::attack(list<CharacterPtr>& characters, list<ObjectPtr>& objects, Map& m) {
 	CharacterPtr knight = characters.front();
 	refresh_way(m, characters);
-	if (*this % *knight && chance(80, "")) {
+	if (*this % *knight && chance(80)) {
 		slash(characters);
 		return true;
 	}
 	if (abs(knight->getrow() - getrow()) < 10 && abs(knight->getcol() - getcol()) < 10) {
-		if (chance(45, "")) {
+		if (chance(45)) {
 			magic(objects);
 		}
 		return false;

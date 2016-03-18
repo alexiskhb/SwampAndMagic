@@ -1,6 +1,5 @@
 #pragma once
 
-#include <iostream>
 #include <vector>
 #include <list>
 #include <string>
@@ -47,6 +46,8 @@ typedef std::shared_ptr<Object> ObjectPtr;
 
 typedef std::shared_ptr<Character> CharacterPtr;
 
+typedef std::shared_ptr<Map> MapPtr;
+
 typedef std::shared_ptr<std::list<BaseObjectPtr>> ListBaseObjPtr;
 
 typedef std::list<BaseObjectPtr> BaseList;
@@ -67,7 +68,7 @@ typedef std::pair<unsigned int, bool> UIntBoolPair;
 
 extern unsigned int cantor_pairing(const int a, const int b);
 
-extern bool chance(int a, std::string s);
+extern bool chance(int a);
 
 
 

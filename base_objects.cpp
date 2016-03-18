@@ -12,12 +12,9 @@ unsigned int cantor_pairing(const int a, const int b) {
 }
 
 
-bool chance(int a, std::string s) {
+bool chance(int a) {
 	a = 101 - a;
 	int result = rand()%1000 + 1;
-	if (s.size() > 0) {
-		cout << "result of " << s << " is " << result/10 << ". need " << a << endl;
-	}
 	return result >= 10*a;
 }
 
@@ -140,7 +137,7 @@ void Map::create_room(const int ax, const int ay) {
 		return;
 	}
 	world[ax][ay] = new Room();
-	int pos = chance(70, "") ? 47+rand()%5 : 50+rand()%4;
+	int pos = chance(70) ? 47+rand()%5 : 50+rand()%4;
 	generate(pos, 6, ax, ay);
 	is_room_exists[cantor_pairing(ax, ay)] = true;
 }
@@ -350,7 +347,7 @@ void Map::generate(int achance, int steps, int ax, int ay) {
 	GCoord coord;
 	for(int i = 0; i < MAP_HEIGHT; i++) {
 		for(int j = 0; j < MAP_WIDTH; j++) {
-			map_stencil[i][j] = chance(achance, "");
+			map_stencil[i][j] = chance(achance);
 		}
 	}
 	for(int i = 0; i < steps; i++) {

@@ -3,7 +3,7 @@
 #include <cmath>
 
 static const int MAP_HEIGHT = 30;
-static const int MAP_WIDTH  = 80;
+static const int MAP_WIDTH  = 96;
 static const int ST_ROOM = 0;
 static const int ST_CELL = 0;
 

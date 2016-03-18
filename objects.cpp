@@ -6,10 +6,10 @@ using namespace std;
 
 
 
-Object::Object(int arow, int acol) : BaseObject(arow, acol), direction(0, 0) {
+Object::Object(GCoord acoord) : BaseObject(acoord), direction(0, 0) {
 }
 
-Object::Object(int arow, int acol, GCoord dir) : BaseObject(arow, acol), direction(dir) {
+Object::Object(GCoord acoord, GCoord dir) : BaseObject(acoord), direction(dir) {
 }
 
 Object::~Object() {
@@ -42,7 +42,7 @@ void Object::impact(list<CharacterPtr>& characters, std::list<ObjectPtr>& object
 
 
 
-Wall::Wall(int arow, int acol) : Object(arow, acol) {
+Wall::Wall(GCoord acoord) : Object(acoord) {
 	fsymb = SYM_WALL | COLOR_PAIR(ID_WALL);
 }
 
@@ -66,7 +66,7 @@ void Wall::impact(list<CharacterPtr>& characters, std::list<ObjectPtr>& objects,
 
 
 
-Flame::Flame(int arow, int acol) : Object(arow, acol) {
+Flame::Flame(GCoord acoord) : Object(acoord) {
 	health = TIME_FLAME;
 	damage = DMG_FLAME;
 	fsymb = SYM_FLAME | A_BOLD | A_REVERSE | COLOR_PAIR(ID_FLAME);
@@ -93,7 +93,7 @@ void Flame::impact(list<CharacterPtr>& characters, std::list<ObjectPtr>& objects
 
 
 
-Swamp::Swamp(int arow, int acol) : Object(arow, acol) {
+Swamp::Swamp(GCoord acoord) : Object(acoord) {
 	health = TIME_SWAMP;
 	fsymb = SYM_SWAMP | A_BOLD | A_REVERSE | COLOR_PAIR(ID_SWAMP);
 }
@@ -115,19 +115,19 @@ void Swamp::impact(list<CharacterPtr>& characters, std::list<ObjectPtr>& objects
 
 
 // magic can heal knight
-Magic::Magic(int arow, int acol) : Object(arow, acol) {
+Magic::Magic(GCoord acoord) : Object(acoord) {
 	health = TIME_MAGIC;
 	damage = DMG_MAGIC;
 	fsymb = SYM_MAGIC | A_BOLD | A_REVERSE | COLOR_PAIR(ID_MAGIC) | A_BOLD;
 }
 
-Magic::Magic(int arow, int acol, int timelife) : Object(arow, acol) {
+Magic::Magic(GCoord acoord, int timelife) : Object(acoord) {
 	health = timelife;
 	damage = DMG_MAGIC;
 	fsymb = SYM_MAGIC | A_BOLD | A_REVERSE | COLOR_PAIR(ID_MAGIC) | A_BOLD;
 }
 
-Magic::Magic(int arow, int acol, int timelife, GCoord dir) : Object(arow, acol, dir) {
+Magic::Magic(GCoord acoord, int timelife, GCoord dir) : Object(acoord, dir) {
 	health = timelife;
 	damage = DMG_MAGIC;
 	fsymb = SYM_MAGIC | A_BOLD | A_REVERSE | COLOR_PAIR(ID_MAGIC) | A_BOLD;
@@ -161,25 +161,25 @@ void Magic::impact(list<CharacterPtr>& characters, std::list<ObjectPtr>& objects
 
 
 
-Curse::Curse(int arow, int acol) : Object(arow, acol), generation(0)  {
+Curse::Curse(GCoord acoord) : Object(acoord), generation(0)  {
 	health = TIME_CURSE;
 	damage = DMG_CURSE;
 	fsymb = SYM_CURSE | A_BOLD | A_REVERSE | COLOR_PAIR(ID_CURSE);
 }
 
-Curse::Curse(int arow, int acol, int timelife) : Object(arow, acol), generation(0)  {
+Curse::Curse(GCoord acoord, int timelife) : Object(acoord), generation(0)  {
 	health = timelife;
 	damage = DMG_CURSE;
 	fsymb = SYM_CURSE | A_BOLD | A_REVERSE | COLOR_PAIR(ID_CURSE);
 }
 
-Curse::Curse(int arow, int acol, int timelife, GCoord dir) : Object(arow, acol, dir), generation(0)  {
+Curse::Curse(GCoord acoord, int timelife, GCoord dir) : Object(acoord, dir), generation(0)  {
 	health = timelife;
 	damage = DMG_CURSE;
 	fsymb = SYM_CURSE | A_BOLD | A_REVERSE | COLOR_PAIR(ID_CURSE) | A_BOLD;
 }
 
-Curse::Curse(int arow, int acol, int timelife, int gener, GCoord dir) : Object(arow, acol, dir), generation(gener) {
+Curse::Curse(GCoord acoord, int timelife, int gener, GCoord dir) : Object(acoord, dir), generation(gener) {
 	health = timelife;
 	damage = DMG_CURSE;
 	fsymb = SYM_CURSE | A_BOLD | A_REVERSE | COLOR_PAIR(ID_CURSE) | A_BOLD;
@@ -198,7 +198,7 @@ void Curse::impact(list<CharacterPtr>& characters, std::list<ObjectPtr>& objects
 	static int dj[4] = {-1, 1, 1, -1};
 	if (generation < 3) {
 		for(int t = 0; t < 4; t++) {
-			objects.push_front(make_shared<Curse>(getrow() + di[t], getcol() + dj[t], 2, generation+1, GCoord(sgn0(di[t]), sgn0(dj[t]))));
+			objects.push_front(make_shared<Curse>(GCoord(getrow() + di[t], getcol() + dj[t]), 2, generation+1, GCoord(sgn0(di[t]), sgn0(dj[t]))));
 		}
 	}
 	for(auto ch: characters) {
@@ -214,13 +214,13 @@ void Curse::impact(list<CharacterPtr>& characters, std::list<ObjectPtr>& objects
 
 
 
-Medkit::Medkit(int arow, int acol) : Object(arow, acol) {
+Medkit::Medkit(GCoord acoord) : Object(acoord) {
 	health = TIME_MEDKIT;
 	damage = DMG_MEDKIT;
 	fsymb = SYM_MEDKIT | A_BOLD | A_REVERSE | COLOR_PAIR(ID_MEDKIT) | A_BOLD;
 }
 
-Medkit::Medkit(int arow, int acol, int timelife) : Object(arow, acol) {
+Medkit::Medkit(GCoord acoord, int timelife) : Object(acoord) {
 	health = timelife;
 	damage = DMG_MEDKIT;
 	fsymb = SYM_MEDKIT | A_BOLD | A_REVERSE | COLOR_PAIR(ID_MEDKIT) | A_BOLD;
@@ -248,7 +248,7 @@ void Medkit::impact(list<CharacterPtr>& characters, std::list<ObjectPtr>& object
 
 
 
-DragonNest::DragonNest(int arow, int acol) : Object(arow, acol), frequency(5+rand()%5) {
+DragonNest::DragonNest(GCoord acoord) : Object(acoord), frequency(5+rand()%5) {
 	health = TIME_DRGNEST;
 	fsymb = SYM_DRGNEST | A_BOLD | A_REVERSE | COLOR_PAIR(ID_DRGNEST) | A_BOLD;
 }
@@ -265,13 +265,13 @@ void DragonNest::impact(list<CharacterPtr>& characters, std::list<ObjectPtr>& ob
 	if (!(turn%frequency == 0)) {
 		return;
 	}
-
+	std::make_shared<Dragon>(get_coord());
 }
 
 
 
 
-Graveyard::Graveyard(int arow, int acol) : Object(arow, acol), frequency(5+rand()%5) {
+Graveyard::Graveyard(GCoord acoord) : Object(acoord), frequency(5+rand()%5) {
 	health = TIME_GRVYARD;
 	fsymb = SYM_GRVYARD | A_BOLD | A_REVERSE | COLOR_PAIR(ID_GRVYARD) | A_BOLD;
 }
@@ -288,5 +288,5 @@ void Graveyard::impact(list<CharacterPtr>& characters, std::list<ObjectPtr>& obj
 	if (!(turn%frequency == 0)) {
 		return;
 	}
-
+	characters.push_back(std::make_shared<Zombie>(get_coord()));
 }

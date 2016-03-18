@@ -12,11 +12,11 @@ int dz_2[5] = {-2, -1, 0, 1, 2};
 int dz_3[7] = {-3, -2, -1, 0, 1, 2, 3};
 
 
-Character::Character(int arow, int acol) : BaseObject(arow, acol) {
+Character::Character(GCoord acoord) : BaseObject(acoord) {
 	fcolor = Colored(BG_BLACK, FG_BLACK).to_string();
 }
 
-Character::Character(int arow, int acol, int hp, int dmg) : BaseObject(arow, acol) {
+Character::Character(GCoord acoord, int hp, int dmg) : BaseObject(acoord) {
 	damage = dmg;
 	health = hp;
 	fcolor = Colored(BG_BLACK, FG_BLACK).to_string();
@@ -56,11 +56,11 @@ bool Character::is_penetrable() {
 
 
 
-Knight::Knight(int arow, int acol) : Character(arow, acol) {
+Knight::Knight(GCoord acoord) : Character(acoord) {
 
 }
 
-Knight::Knight(int arow, int acol, int hp, int dmg) : Character(arow, acol, hp, dmg) {
+Knight::Knight(GCoord acoord, int hp, int dmg) : Character(acoord, hp, dmg) {
 	fcolor = Colored(BG_GREEN, FG_WHITE).to_string();
 	fsymb = SYM_KNIGHT | A_BOLD | COLOR_PAIR(ID_KNIGHT);
 }
@@ -141,12 +141,12 @@ void Knight::magic(list<ObjectPtr>& objects, char direction) {
 			di = di_around;
 			dj = dj_around;
 			for(unsigned int t = 0; t < 16; t++) {
-				objects.push_back(make_shared<Magic>(getrow() + di[t], getcol() + dj[t], 10, GCoord(sgn0(di[t]), sgn0(dj[t]))));
+				objects.push_back(make_shared<Magic>(GCoord(getrow() + di[t], getcol() + dj[t]), 10, GCoord(sgn0(di[t]), sgn0(dj[t]))));
 			}
 			return;
 	}
 	for(unsigned int t = 0; t < 5; t++) {
-		objects.push_back(make_shared<Magic>(getrow() + di[t], getcol() + dj[t], 10, GCoord(sgn0(di[t]), sgn0(dj[t]))));
+		objects.push_back(make_shared<Magic>(GCoord(getrow() + di[t], getcol() + dj[t]), 10, GCoord(sgn0(di[t]), sgn0(dj[t]))));
 	}
 }
 
@@ -256,12 +256,12 @@ bool Knight::suffer(int dmg) {
 
 
 
-Princess::Princess(int arow, int acol) : Character(arow, acol) {
+Princess::Princess(GCoord acoord) : Character(acoord) {
 	fcolor = Colored(BG_AQUA, FG_WHITE).to_string();
 	fsymb = SYM_PRINCESS | A_BOLD | COLOR_PAIR(ID_PRINCESS);
 }
 
-Princess::Princess(int arow, int acol, int hp, int dmg) : Character(arow, acol, hp, dmg) {
+Princess::Princess(GCoord acoord, int hp, int dmg) : Character(acoord, hp, dmg) {
 	fcolor = Colored(BG_AQUA, FG_WHITE).to_string();
 	fsymb = SYM_PRINCESS | A_BOLD | COLOR_PAIR(ID_PRINCESS);
 }
@@ -287,12 +287,10 @@ bool Princess::move(Map& m, std::list<CharacterPtr>& characters) {
 
 
 
-Monster::Monster(int arow, int acol) : Character(arow, acol) {
-	fcolor = Colored(BG_RED, FG_WHITE).to_string();
+Monster::Monster(GCoord acoord) : Character(acoord) {
 }
 
-Monster::Monster(int arow, int acol, int hp, int dmg) : Character(arow, acol, hp, dmg) {
-	fcolor = Colored(BG_RED, FG_WHITE).to_string();
+Monster::Monster(GCoord acoord, int hp, int dmg) : Character(acoord, hp, dmg) {
 }
 
 Monster::~Monster() {
@@ -328,12 +326,12 @@ IntIntPairList Monster::shortest_way_to(BaseObjectPtr obj, Map& m) {
 
 
 
-Dragon::Dragon(int arow, int acol) : Monster(arow, acol, HP_DRAGON, DMG_DRAGON) {
+Dragon::Dragon(GCoord acoord) : Monster(acoord, HP_DRAGON, DMG_DRAGON) {
 	fcolor = Colored(BG_RED, FG_WHITE).to_string();
 	fsymb = SYM_DRAGON | A_BOLD | COLOR_PAIR(ID_DRAGON);
 }
 
-Dragon::Dragon(int arow, int acol, int hp, int dmg) : Monster(arow, acol, hp, dmg) {
+Dragon::Dragon(GCoord acoord, int hp, int dmg) : Monster(acoord, hp, dmg) {
 	fcolor = Colored(BG_RED, FG_WHITE).to_string();
 	fsymb = SYM_DRAGON | A_BOLD | COLOR_PAIR(ID_DRAGON);
 }
@@ -345,7 +343,7 @@ Dragon::~Dragon() {
 void Dragon::magic(list<ObjectPtr>& objects) {
 	int flames_cnt = rand()%30 + 1;
 	for(int i = 0; i < flames_cnt; i++) {
-		objects.push_back(make_shared<Flame>( getrow() + (rand()%10-5), getcol() + (rand()%10-5) ));	
+		objects.push_back(make_shared<Flame>(GCoord(getrow() + (rand()%10-5), getcol() + (rand()%10-5))));	
 	}
 }
 
@@ -378,12 +376,12 @@ bool Dragon::suffer(int dmg) {
 
 
 
-Zombie::Zombie(int arow, int acol) : Monster(arow, acol, HP_ZOMBIE, DMG_ZOMBIE) {
+Zombie::Zombie(GCoord acoord) : Monster(acoord, HP_ZOMBIE, DMG_ZOMBIE) {
 	fcolor = Colored(BG_ORANGE, FG_WHITE).to_string();
 	fsymb = SYM_ZOMBIE | A_BOLD | COLOR_PAIR(ID_ZOMBIE);
 }
 
-Zombie::Zombie(int arow, int acol, int hp, int dmg) : Monster(arow, acol, hp, dmg) {
+Zombie::Zombie(GCoord acoord, int hp, int dmg) : Monster(acoord, hp, dmg) {
 	fcolor = Colored(BG_ORANGE, FG_WHITE).to_string();
 	fsymb = SYM_ZOMBIE | A_BOLD | COLOR_PAIR(ID_ZOMBIE);
 }
@@ -415,12 +413,12 @@ bool Zombie::attack(list<CharacterPtr>& characters, list<ObjectPtr>& objects, Ma
 
 
 
-Warlock::Warlock(int arow, int acol) : Monster(arow, acol, HP_WARLOCK, DMG_WARLOCK) {
+Warlock::Warlock(GCoord acoord) : Monster(acoord, HP_WARLOCK, DMG_WARLOCK) {
 	fcolor = Colored(BG_BLACK, FG_WHITE).to_string();
 	fsymb = SYM_WARLOCK | A_BOLD | COLOR_PAIR(ID_WARLOCK);
 }
 
-Warlock::Warlock(int arow, int acol, int hp, int dmg) : Monster(arow, acol, hp, dmg) {
+Warlock::Warlock(GCoord acoord, int hp, int dmg) : Monster(acoord, hp, dmg) {
 	fcolor = Colored(BG_BLACK, FG_WHITE).to_string();
 	fsymb = SYM_WARLOCK | A_BOLD | COLOR_PAIR(ID_WARLOCK);
 }
@@ -470,6 +468,6 @@ void Warlock::magic(list<CharacterPtr>& characters, list<ObjectPtr>& objects) {
 	CharacterPtr kn = characters.front();
 	GCoord dc = kn->get_coord() - coord;
 	objects.push_back(make_shared<Curse>(
-		getrow() + sgn0(dc.row), getcol() + sgn0(dc.col), 
+		GCoord(getrow() + sgn0(dc.row), getcol() + sgn0(dc.col)), 
 		2, GCoord(sgn0(dc.row), sgn0(dc.col))));
 }

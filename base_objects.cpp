@@ -14,6 +14,10 @@ unsigned int cantor_pairing(const int a, const int b) {
 	return ((A + B)*(A + B + 1))/2 + A;
 }
 
+unsigned int cantor_pairing(GCoord acoord) {
+	return cantor_pairing(acoord.row, acoord.col);
+}
+
 
 bool chance(int a) {
 	a = 101 - a;
@@ -25,7 +29,7 @@ BaseObject::BaseObject() {
 	fsymb = SYM_EMPTY | COLOR_PAIR(ID_EMPTY) | A_REVERSE | A_BOLD;
 }
 
-BaseObject::BaseObject(int arow, int acol) : coord(arow, acol), prev_coord(arow, acol) {
+BaseObject::BaseObject(GCoord acoord) : coord(acoord), prev_coord(acoord) {
 	fsymb = SYM_EMPTY | COLOR_PAIR(ID_EMPTY) | A_REVERSE | A_BOLD;	
 }
 
@@ -82,8 +86,7 @@ void BaseObject::moveto(GCoord acoord) {
 }
 
 void BaseObject::move_to_prev() {
-	coord.row = prev_coord.row;
-	coord.col = prev_coord.col;
+	coord = prev_coord;
 }
 
 bool BaseObject::is_alive() {
@@ -222,12 +225,13 @@ int Map::get_width() {
 
 IntIntPairList Map::shortest_way(IntIntPair from, IntIntPair to, int max_length) {
 	IntIntPairList way;
-	IntIntPairList temp_way;
 	int r = from.first;
 	int c = from.second;
 	if ((r - to.first)*(r - to.first) + (c - to.second)*(c - to.second) > max_length*max_length) {
 		return way;
 	}
+	IntIntPairList temp_way;
+	GCoord crd;
 	int d = 0;
 	bool found = false;
 	IntIntPair target;
@@ -240,16 +244,17 @@ IntIntPairList Map::shortest_way(IntIntPair from, IntIntPair to, int max_length)
 			target = IntIntPair(r, c);
 			break;
 		}
-		d = get_distance(r, c);
+		d = get_distance(GCoord(r, c));
 		temp_way.pop_front();
 		for(int i = -1; i <= 1; i++) {
 			for(int j = -1; j <= 1; j++) {
 				if (i == 0 && j == 0) {
 					continue;
 				}
-				if (is_on_the_map(r + i, c + j) && get_distance(r + i, c + j) == 0 && is_penetrable(GCoord(r + i, c + j))) {
+				crd = GCoord(r + i, c + j);
+				if (is_on_the_map(crd) && get_distance(crd) == 0 && is_penetrable(GCoord(crd))) {
 					temp_way.push_back(IntIntPair(r + i, c + j));
-					set_distance(r + i, c + j, d + 1);
+					set_distance(crd, d + 1);
 				}
 			}
 		}
@@ -257,7 +262,7 @@ IntIntPairList Map::shortest_way(IntIntPair from, IntIntPair to, int max_length)
 	if (found) {
 		r = target.first;
 		c = target.second;
-		d = get_distance(r, c);
+		d = get_distance(GCoord(r, c));
 		while (d > 0) {
 			bool continue_ij = true;
 			way.push_front(IntIntPair(r, c));
@@ -266,7 +271,7 @@ IntIntPairList Map::shortest_way(IntIntPair from, IntIntPair to, int max_length)
 					if (i == 0 && j == 0) {
 						continue;
 					}
-					if (get_distance(r + i, c + j) == d - 1) {
+					if (get_distance(GCoord(r + i, c + j)) == d - 1) {
 						r = r + i;
 						c = c + j;
 						--d;
@@ -280,12 +285,12 @@ IntIntPairList Map::shortest_way(IntIntPair from, IntIntPair to, int max_length)
 	return way;
 }
 
-void Map::set_distance(int arow, int acol, int value) {
-	distance[cantor_pairing(arow, acol)] = value;
+void Map::set_distance(GCoord acoord, int value) {
+	distance[cantor_pairing(acoord)] = value;
 }
 
-int Map::get_distance(int arow, int acol) {
-	return distance[cantor_pairing(arow, acol)];
+int Map::get_distance(GCoord acoord) {
+	return distance[cantor_pairing(acoord)];
 }
 
 BaseObjectPtr Map::nearest_symb(GCoord from, std::string targets, int max_length) {
@@ -294,6 +299,7 @@ BaseObjectPtr Map::nearest_symb(GCoord from, std::string targets, int max_length
 	int r = from.row;
 	int c = from.col;
 	int d = 0;
+	GCoord crd;
 	bool found = false;
 	IntIntPair target;
 	deque.push_back(IntIntPair(r, c));
@@ -308,16 +314,17 @@ BaseObjectPtr Map::nearest_symb(GCoord from, std::string targets, int max_length
 			target = IntIntPair(r, c);
 			break;
 		}
-		d = get_distance(r, c);
+		d = get_distance(GCoord(r, c));
 		deque.pop_front();
 		for(int i = -1; i <= 1; i++) {
 			for(int j = -1; j <= 1; j++) {
 				if (i == 0 && j == 0) {
 					continue;
 				}
-				if (is_on_the_map(r + i, c + j) && get_distance(r + i, c + j) == 0) {
+				crd = GCoord(r + i, c + j);
+				if (is_on_the_map(crd) && get_distance(crd) == 0) {
 					deque.push_back(IntIntPair(r + i, c + j));
-					set_distance(r + i, c + j, d + 1);
+					set_distance(crd, d + 1);
 				}
 			}
 		}
@@ -342,8 +349,17 @@ BaseList& Map::map(const int arow, const int acol) {
 	return room.map[coord.parts.row][coord.parts.col];
 }
 
+BaseList& Map::map(GCoord acoord) {
+	Room& room = *world[acoord.parts.x][acoord.parts.y];
+	return room.map[acoord.parts.row][acoord.parts.col];
+}
+
 BaseList& Map::operator()(const int row, const int col) {
 	return map(row, col);
+}
+
+BaseList& Map::operator()(GCoord acoord) {
+	return map(acoord);
 }
 
 void Map::generate(int achance, int steps, int ax, int ay) {
@@ -361,7 +377,7 @@ void Map::generate(int achance, int steps, int ax, int ay) {
 	for(int i = 0; i < MAP_HEIGHT; i++) {
 		for(int j = 0; j < MAP_WIDTH; j++) {
 			coord = GCoord(Coord(ax, ay, i, j));
-			relief.push_back(ObjectPtr(new Object(coord.row, coord.col)));
+			relief.push_back(make_shared<Object>(coord));
 			*this << relief.back();
 		}
 	}
@@ -370,7 +386,7 @@ void Map::generate(int achance, int steps, int ax, int ay) {
 		for(int j = 0; j < MAP_WIDTH; j++) {
 			if (gen_is_wall(i, j)) {
 				coord = GCoord(Coord(ax, ay, i, j));
-				relief.push_back(BaseObjectPtr(new Wall(coord.row, coord.col)));
+				relief.push_back(make_shared<Wall>(coord));
 				*this << relief.back(); 
 			}
 		}
@@ -416,7 +432,6 @@ void Map::gen_step() {
 	}
 }
 
-bool Map::is_on_the_map(int arow, int acol) {
-	GCoord coord(arow, acol);
-	return is_room_exists[cantor_pairing(coord.parts.x, coord.parts.y)];
+bool Map::is_on_the_map(GCoord acoord) {
+	return is_room_exists[cantor_pairing(acoord.parts.x, acoord.parts.y)];
 }

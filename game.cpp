@@ -31,7 +31,7 @@ struct {
 	unsigned int counter;
 
 	bool is_over() {
-		return characters.size() <= 2 || knight->hitpoints() <= 0 || princess->hitpoints() <= 0;
+		return characters.size() < 2 || knight->hitpoints() <= 0 || princess->hitpoints() <= 0;
 	}
 
 	bool is_lose() {
@@ -40,8 +40,8 @@ struct {
 
 	void kill_died_characters_objects() {
 		for(auto obj: dyn_objects) {
-			if (map->is_on_the_map(obj->getrow(), obj->getcol())) {
-				(*map)(obj->prevrow(), obj->prevcol()).remove(obj);
+			if (map->is_on_the_map(obj->get_coord())) {
+				(*map)(obj->get_prev()).remove(obj);
 			}
 			if (obj->is_alive()) {
 				*map << obj;
@@ -49,7 +49,7 @@ struct {
 		}
 		for(auto ch: characters) {
 			if (ch->hitpoints() <= 0) {
-				(*map)(ch->getrow(), ch->getcol()).remove(ch);
+				(*map)(ch->get_coord()).remove(ch);
 			}
 		}
 		characters.remove_if([&](CharacterPtr ch) {
@@ -70,7 +70,7 @@ struct {
 		}
 		did_attack.insert(CharacterBoolPair(knight, knight->attack(characters, dyn_objects, *map)));
 		for(auto obj: dyn_objects) {
-			if (map->is_on_the_map(obj->getrow(), obj->getcol())) {
+			if (map->is_on_the_map(obj->get_coord())) {
 				obj->impact(characters, dyn_objects, *map);
 				(*map)(obj->getrow(), obj->getcol()).remove(obj);
 				*map << obj;
@@ -84,7 +84,7 @@ struct {
 		for(auto ch: characters) {
 			if (!did_attack[ch]) {
 				ch->move(*map, characters);
-				if (!map->is_on_the_map(ch->getrow(), ch->getcol())) {
+				if (!map->is_on_the_map(ch->get_coord())) {
 					ch->move_to_prev();
 					ch->suffer(ch->hitpoints());
 				}
@@ -97,7 +97,7 @@ struct {
 				else {
 					// here we attach a cell to character
 					// so other characters can not step on it
-					(*map)(ch->prevrow(), ch->prevcol()).remove(ch);
+					(*map)(ch->get_prev()).remove(ch);
 					*map << ch;
 				}
 			}
@@ -141,9 +141,9 @@ struct {
 
 	void init() {
 		map = std::make_shared<Map>(relief);
-		knight = std::make_shared<Knight>(MAP_HEIGHT/2, MAP_WIDTH/2, HP_KNIGHT, DMG_KN_SWORD);
+		knight = std::make_shared<Knight>(GCoord(MAP_HEIGHT/2, MAP_WIDTH/2), HP_KNIGHT, DMG_KN_SWORD);
 		knight->moveto(map->nearest_symb(knight->get_coord(), " ", MAP_HEIGHT)->get_coord());
-		princess = std::make_shared<Princess>(1, MAP_WIDTH-2, HP_PRINCESS, DMG_PRINCESS);
+		princess = std::make_shared<Princess>(GCoord(1, MAP_WIDTH-2), HP_PRINCESS, DMG_PRINCESS);
 		princess->moveto(map->nearest_symb(princess->get_coord(), " ", MAP_HEIGHT)->get_coord());
 		counter = 0;
 		initscr();
@@ -169,17 +169,17 @@ struct {
 		
 		put_character(knight);
 		put_character(princess);
-		put_character(std::make_shared<Dragon>(4, MAP_WIDTH-4));
-		put_character(std::make_shared<Warlock>(10, MAP_WIDTH-10));
-		put_dynobject(std::make_shared<Medkit>(MAP_HEIGHT/2, MAP_WIDTH/2));
-		for(int i = 0; i < MAP_HEIGHT; i++) {
-			for(int j = 0; j < MAP_WIDTH; j++) {
-				if (map->is_penetrable(GCoord(i, j)) && chance(2)) {
-					characters.push_back(std::make_shared<Zombie>(i, j, HP_ZOMBIE, DMG_ZOMBIE));
-					*map << characters.back();
-				}
-			}
-		}
+		// put_character(std::make_shared<Dragon>(4, MAP_WIDTH-4));
+		put_character(std::make_shared<Warlock>(GCoord(10, MAP_WIDTH-10)));
+		// put_dynobject(std::make_shared<Medkit>(MAP_HEIGHT/2, MAP_WIDTH/2));
+		// for(int i = 0; i < MAP_HEIGHT; i++) {
+		// 	for(int j = 0; j < MAP_WIDTH; j++) {
+		// 		if (map->is_penetrable(GCoord(i, j)) && chance(2)) {
+		// 			characters.push_back(std::make_shared<Zombie>(i, j, HP_ZOMBIE, DMG_ZOMBIE));
+		// 			*map << characters.back();
+		// 		}
+		// 	}
+		// }
 	}
 
 	void stop() {

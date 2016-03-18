@@ -27,9 +27,9 @@ static const std::string ENEMIES("zDW");
 
 class Character : public BaseObject {
 public:
-	Character(int arow, int acol);
+	Character(GCoord acoord);
 
-	Character(int arow, int acol, int hp, int dmg);
+	Character(GCoord acoord, int hp, int dmg);
 
 	~Character() override;
 
@@ -52,9 +52,9 @@ public:
 
 class Knight : public Character {
 public:
-	Knight(int arow, int acol);
+	Knight(GCoord acoord);
 
-	Knight(int arow, int acol, int hp, int dmg);
+	Knight(GCoord acoord, int hp, int dmg);
 
 	~Knight() override;
 
@@ -83,9 +83,9 @@ private:
 
 class Princess : public Character {
 public:
-	Princess(int arow, int acol);
+	Princess(GCoord acoord);
 
-	Princess(int arow, int acol, int hp, int dmg);
+	Princess(GCoord acoord, int hp, int dmg);
 
 	~Princess() override;
 
@@ -102,9 +102,9 @@ public:
 
 class Monster : public Character {
 public:
-	Monster(int arow, int acol);
+	Monster(GCoord acoord);
 
-	Monster(int arow, int acol, int hp, int dmg);
+	Monster(GCoord acoord, int hp, int dmg);
 
 	~Monster() override;
 
@@ -123,9 +123,9 @@ protected:
 
 class Dragon : public Monster {
 public:
-	Dragon(int arow, int acol);
+	Dragon(GCoord acoord);
 
-	Dragon(int arow, int acol, int hp, int dmg);
+	Dragon(GCoord acoord, int hp, int dmg);
 
 	~Dragon() override;
 
@@ -144,9 +144,9 @@ public:
 
 class Zombie : public Monster {
 public:
-	Zombie(int arow, int acol);
+	Zombie(GCoord acoord);
 
-	Zombie(int arow, int acol, int hp, int dmg);
+	Zombie(GCoord acoord, int hp, int dmg);
 
 	~Zombie() override;
 
@@ -163,9 +163,9 @@ public:
 
 class Warlock : public Monster {
 public:
-	Warlock(int arow, int acol);
+	Warlock(GCoord acoord);
 
-	Warlock(int arow, int acol, int hp, int dmg);
+	Warlock(GCoord acoord, int hp, int dmg);
 
 	~Warlock() override;
 

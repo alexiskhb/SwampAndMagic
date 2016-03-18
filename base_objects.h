@@ -83,7 +83,7 @@ class BaseObject {
 public:
 	BaseObject();
 
-	BaseObject(int arow, int acol);
+	BaseObject(GCoord acoord);
 
 	virtual ~BaseObject();
 
@@ -169,7 +169,7 @@ public:
 
 	bool gen_is_wall(int arow, int acol);
 
-	bool is_on_the_map(int arow, int acol);
+	bool is_on_the_map(GCoord acoord);
 
 	void create_room(const int ax, const int ay);
 
@@ -181,9 +181,13 @@ public:
 
 	BaseList& map(const int arow, const int acol);
 
+	BaseList& map(GCoord acoord);
+
 	friend std::ostream& operator<<(std::ostream& display, Map& m);
 
 	BaseList& operator()(const int row, const int col);
+
+	BaseList& operator()(GCoord acoord);
 
 	void move_the_frame(GCoord shift);
 
@@ -193,9 +197,9 @@ private:
 
 	void gen_step();
 
-	void set_distance(int arow, int acol, int value);
+	void set_distance(GCoord acoord, int value);
 
-	int  get_distance(int arow, int acol);
+	int  get_distance(GCoord acoord);
 
 	BilateralArray2D<RoomPtr> world;
 	int height = MAP_HEIGHT;

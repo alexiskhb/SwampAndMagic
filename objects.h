@@ -22,9 +22,9 @@ static const int
 
 class Object : public BaseObject {
 public:
-	Object(int arow, int acol);
+	Object(GCoord acoord);
 
-	Object(int arow, int acol, GCoord dir);
+	Object(GCoord acoord, GCoord dir);
 
 	~Object() override;
 	
@@ -47,7 +47,7 @@ protected:
 
 class Wall : public Object {
 public:
-	Wall(int arow, int acol);
+	Wall(GCoord acoord);
 
 	~Wall() override;
 
@@ -64,7 +64,7 @@ public:
 
 class Flame : public Object {
 public:
-	Flame(int arow, int acol);
+	Flame(GCoord acoord);
 
 	~Flame() override;
 
@@ -79,7 +79,7 @@ public:
 
 class Swamp : public Object {
 public:
-	Swamp(int arow, int acol);
+	Swamp(GCoord acoord);
 
 	~Swamp() override;
 
@@ -94,11 +94,11 @@ public:
 // magic can heal knight
 class Magic : public Object {
 public:
-	Magic(int arow, int acol);
+	Magic(GCoord acoord);
 
-	Magic(int arow, int acol, int timelife);
+	Magic(GCoord acoord, int timelife);
 
-	Magic(int arow, int acol, int timelife, GCoord dir);
+	Magic(GCoord acoord, int timelife, GCoord dir);
 
 	~Magic() override;
 
@@ -112,13 +112,13 @@ public:
 
 class Curse : public Object {
 public:
-	Curse(int arow, int acol);
+	Curse(GCoord acoord);
 
-	Curse(int arow, int acol, int timelife);
+	Curse(GCoord acoord, int timelife);
 
-	Curse(int arow, int acol, int timelife, GCoord dir);
+	Curse(GCoord acoord, int timelife, GCoord dir);
 
-	Curse(int arow, int acol, int timelife, int generation, GCoord dir);
+	Curse(GCoord acoord, int timelife, int generation, GCoord dir);
 
 	~Curse() override;
 
@@ -134,9 +134,9 @@ private:
 
 class Medkit : public Object {
 public:
-	Medkit(int arow, int acol);
+	Medkit(GCoord acoord);
 
-	Medkit(int arow, int acol, int timelife);
+	Medkit(GCoord acoord, int timelife);
 
 	~Medkit() override;
 
@@ -150,7 +150,7 @@ public:
 
 
 class DragonNest : public Object {
-	DragonNest(int arow, int acol);
+	DragonNest(GCoord acoord);
 
 	~DragonNest() override;
 
@@ -163,7 +163,7 @@ private:
 
 
 class Graveyard : public Object {
-	Graveyard(int arow, int acol);
+	Graveyard(GCoord acoord);
 
 	~Graveyard() override;
 

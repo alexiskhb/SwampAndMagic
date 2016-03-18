@@ -147,21 +147,21 @@ struct {
 		initscr();
 		keypad(stdscr, true);
 		noecho();
-		curs_set(0);
 		start_color();
+		curs_set(0);
 
-		init_pair(ID_KNIGHT   ,COLOR_WHITE  ,COLOR_GREEN );
-		init_pair(ID_PRINCESS ,COLOR_WHITE  ,COLOR_CYAN  );
-		init_pair(ID_DRAGON   ,COLOR_WHITE  ,COLOR_RED   );
-		init_pair(ID_ZOMBIE   ,COLOR_WHITE  ,COLOR_YELLOW);
-		init_pair(ID_WARLOCK  ,COLOR_WHITE  ,COLOR_BLACK );
-		init_pair(ID_MAGIC    ,COLOR_BLUE   ,COLOR_WHITE );
-		init_pair(ID_FLAME    ,COLOR_RED    ,COLOR_WHITE );
-		init_pair(ID_SWAMP    ,COLOR_WHITE  ,COLOR_GREEN );
-		init_pair(ID_CURSE    ,COLOR_BLACK  ,COLOR_WHITE );
-		init_pair(ID_WALL     ,COLOR_BLACK  ,COLOR_WHITE );
-		init_pair(ID_EMPTY    ,COLOR_BLACK  ,COLOR_WHITE );
-		init_pair(ID_MEDKIT   ,COLOR_RED    ,COLOR_WHITE );
+		init_pair(ID_KNIGHT   , COLOR_WHITE , COLOR_GREEN  );
+		init_pair(ID_PRINCESS , COLOR_WHITE , COLOR_CYAN   );
+		init_pair(ID_DRAGON   , COLOR_WHITE , COLOR_RED    );
+		init_pair(ID_ZOMBIE   , COLOR_WHITE , COLOR_YELLOW );
+		init_pair(ID_WARLOCK  , COLOR_WHITE , COLOR_BLACK  );
+		init_pair(ID_MAGIC    , COLOR_WHITE , COLOR_BLUE   );
+		init_pair(ID_FLAME    , COLOR_WHITE , COLOR_RED    );
+		init_pair(ID_SWAMP    , COLOR_GREEN , COLOR_WHITE  );
+		init_pair(ID_CURSE    , COLOR_WHITE , COLOR_BLACK  );
+		init_pair(ID_WALL     , COLOR_BLACK , COLOR_WHITE  );
+		init_pair(ID_EMPTY    , COLOR_WHITE , COLOR_BLACK  );
+		init_pair(ID_MEDKIT   , COLOR_WHITE , COLOR_RED    );
 		
 		put_character(knight);
 		put_character(princess);

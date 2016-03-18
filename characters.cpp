@@ -62,7 +62,7 @@ Knight::Knight(int arow, int acol) : Character(arow, acol) {
 
 Knight::Knight(int arow, int acol, int hp, int dmg) : Character(arow, acol, hp, dmg) {
 	fcolor = Colored(BG_GREEN, FG_WHITE).to_string();
-	fsymb = SYM_KNIGHT | COLOR_PAIR(ID_KNIGHT);
+	fsymb = SYM_KNIGHT | A_BOLD | COLOR_PAIR(ID_KNIGHT);
 }
 
 Knight::~Knight() {
@@ -258,12 +258,12 @@ bool Knight::suffer(int dmg) {
 
 Princess::Princess(int arow, int acol) : Character(arow, acol) {
 	fcolor = Colored(BG_AQUA, FG_WHITE).to_string();
-	fsymb = SYM_PRINCESS | COLOR_PAIR(ID_PRINCESS);
+	fsymb = SYM_PRINCESS | A_BOLD | COLOR_PAIR(ID_PRINCESS);
 }
 
 Princess::Princess(int arow, int acol, int hp, int dmg) : Character(arow, acol, hp, dmg) {
 	fcolor = Colored(BG_AQUA, FG_WHITE).to_string();
-	fsymb = SYM_PRINCESS | COLOR_PAIR(ID_PRINCESS);
+	fsymb = SYM_PRINCESS | A_BOLD | COLOR_PAIR(ID_PRINCESS);
 }
 
 Princess::~Princess() {
@@ -330,12 +330,12 @@ IntIntPairList Monster::shortest_way_to(BaseObjectPtr obj, Map& m) {
 
 Dragon::Dragon(int arow, int acol) : Monster(arow, acol, HP_DRAGON, DMG_DRAGON) {
 	fcolor = Colored(BG_RED, FG_WHITE).to_string();
-	fsymb = SYM_DRAGON | COLOR_PAIR(ID_DRAGON);
+	fsymb = SYM_DRAGON | A_BOLD | COLOR_PAIR(ID_DRAGON);
 }
 
 Dragon::Dragon(int arow, int acol, int hp, int dmg) : Monster(arow, acol, hp, dmg) {
 	fcolor = Colored(BG_RED, FG_WHITE).to_string();
-	fsymb = SYM_DRAGON | COLOR_PAIR(ID_DRAGON);
+	fsymb = SYM_DRAGON | A_BOLD | COLOR_PAIR(ID_DRAGON);
 }
 
 Dragon::~Dragon() {
@@ -380,12 +380,12 @@ bool Dragon::suffer(int dmg) {
 
 Zombie::Zombie(int arow, int acol) : Monster(arow, acol, HP_ZOMBIE, DMG_ZOMBIE) {
 	fcolor = Colored(BG_ORANGE, FG_WHITE).to_string();
-	fsymb = SYM_ZOMBIE | COLOR_PAIR(ID_ZOMBIE);
+	fsymb = SYM_ZOMBIE | A_BOLD | COLOR_PAIR(ID_ZOMBIE);
 }
 
 Zombie::Zombie(int arow, int acol, int hp, int dmg) : Monster(arow, acol, hp, dmg) {
 	fcolor = Colored(BG_ORANGE, FG_WHITE).to_string();
-	fsymb = SYM_ZOMBIE | COLOR_PAIR(ID_ZOMBIE);
+	fsymb = SYM_ZOMBIE | A_BOLD | COLOR_PAIR(ID_ZOMBIE);
 }
 
 Zombie::~Zombie() {
@@ -417,12 +417,12 @@ bool Zombie::attack(list<CharacterPtr>& characters, list<ObjectPtr>& objects, Ma
 
 Warlock::Warlock(int arow, int acol) : Monster(arow, acol, HP_WARLOCK, DMG_WARLOCK) {
 	fcolor = Colored(BG_BLACK, FG_WHITE).to_string();
-	fsymb = SYM_WARLOCK | COLOR_PAIR(ID_WARLOCK);
+	fsymb = SYM_WARLOCK | A_BOLD | COLOR_PAIR(ID_WARLOCK);
 }
 
 Warlock::Warlock(int arow, int acol, int hp, int dmg) : Monster(arow, acol, hp, dmg) {
 	fcolor = Colored(BG_BLACK, FG_WHITE).to_string();
-	fsymb = SYM_WARLOCK | COLOR_PAIR(ID_WARLOCK);
+	fsymb = SYM_WARLOCK | A_BOLD | COLOR_PAIR(ID_WARLOCK);
 }
 
 Warlock::~Warlock() {

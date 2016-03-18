@@ -7,7 +7,6 @@ using namespace std;
 
 
 Object::Object(int arow, int acol) : BaseObject(arow, acol) {
-	fcolor = Colored(BG_WHITE, FG_BLACK).to_string();
 }
 
 Object::~Object() {
@@ -68,7 +67,7 @@ Flame::Flame(int arow, int acol) : Object(arow, acol) {
 	health = TIME_FLAME;
 	damage = DMG_FLAME;
 	fcolor = Colored(BG_WHITE, FG_RED).to_string();
-	fsymb = SYM_FLAME | COLOR_PAIR(ID_FLAME);
+	fsymb = SYM_FLAME | A_BOLD | A_REVERSE | COLOR_PAIR(ID_FLAME);
 }
 
 Flame::~Flame() {
@@ -95,7 +94,7 @@ void Flame::impact(list<CharacterPtr>& characters, std::list<ObjectPtr>& objects
 Swamp::Swamp(int arow, int acol) : Object(arow, acol) {
 	health = TIME_SWAMP;
 	fcolor = Colored(BG_WHITE, FG_YELLOW).to_string();
-	fsymb = SYM_SWAMP | COLOR_PAIR(ID_SWAMP);
+	fsymb = SYM_SWAMP | A_BOLD | A_REVERSE | COLOR_PAIR(ID_SWAMP);
 }
 
 Swamp::~Swamp() {
@@ -119,14 +118,14 @@ Magic::Magic(int arow, int acol) : Object(arow, acol) {
 	health = TIME_MAGIC;
 	damage = DMG_MAGIC;
 	fcolor = Colored(BG_WHITE, FG_B_BLUE).to_string();
-	fsymb = SYM_MAGIC | COLOR_PAIR(ID_MAGIC) | A_BOLD;
+	fsymb = SYM_MAGIC | A_BOLD | A_REVERSE | COLOR_PAIR(ID_MAGIC) | A_BOLD;
 }
 
 Magic::Magic(int arow, int acol, int timelife) : Object(arow, acol) {
 	health = timelife;
 	damage = DMG_MAGIC;
 	fcolor = Colored(BG_WHITE, FG_B_BLUE).to_string();
-	fsymb = SYM_MAGIC | COLOR_PAIR(ID_MAGIC) | A_BOLD;
+	fsymb = SYM_MAGIC | A_BOLD | A_REVERSE | COLOR_PAIR(ID_MAGIC) | A_BOLD;
 }
 
 Magic::~Magic() {
@@ -158,14 +157,14 @@ Curse::Curse(int arow, int acol) : Object(arow, acol) {
 	health = TIME_CURSE;
 	damage = DMG_CURSE;
 	fcolor = Colored(BG_WHITE, FG_B_BLUE).to_string();
-	fsymb = SYM_CURSE | COLOR_PAIR(ID_CURSE);
+	fsymb = SYM_CURSE | A_BOLD | A_REVERSE | COLOR_PAIR(ID_CURSE);
 }
 
 Curse::Curse(int arow, int acol, int timelife) : Object(arow, acol) {
 	health = timelife;
 	damage = DMG_CURSE;
 	fcolor = Colored(BG_WHITE, FG_B_BLUE).to_string();
-	fsymb = SYM_CURSE | COLOR_PAIR(ID_CURSE);
+	fsymb = SYM_CURSE | A_BOLD | A_REVERSE | COLOR_PAIR(ID_CURSE);
 }
 
 Curse::~Curse() {
@@ -191,14 +190,14 @@ Medkit::Medkit(int arow, int acol) : Object(arow, acol) {
 	health = TIME_MEDKIT;
 	damage = DMG_MEDKIT;
 	fcolor = Colored(BG_WHITE, FG_GREEN).to_string();
-	fsymb = SYM_MEDKIT | COLOR_PAIR(ID_MEDKIT) | A_BOLD;
+	fsymb = SYM_MEDKIT | A_BOLD | A_REVERSE | COLOR_PAIR(ID_MEDKIT) | A_BOLD;
 }
 
 Medkit::Medkit(int arow, int acol, int timelife) : Object(arow, acol) {
 	health = timelife;
 	damage = DMG_MEDKIT;
 	fcolor = Colored(BG_GREEN, FG_BLACK).to_string();
-	fsymb = SYM_MEDKIT | COLOR_PAIR(ID_MEDKIT) | A_BOLD;
+	fsymb = SYM_MEDKIT | A_BOLD | A_REVERSE | COLOR_PAIR(ID_MEDKIT) | A_BOLD;
 }
 
 Medkit::~Medkit() {

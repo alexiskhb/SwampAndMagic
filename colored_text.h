@@ -5,6 +5,7 @@
 #include <string>
 #include <curses.h>
 
+// static short COLOR_CLEAR_WHITE;
 
 enum ObjectID {
 	ID_KNIGHT   = 1,

@@ -19,13 +19,11 @@ bool chance(int a) {
 }
 
 BaseObject::BaseObject() {
-	fcolor = Colored(BG_WHITE, FG_BLACK).to_string();
-	fsymb = SYM_EMPTY | COLOR_PAIR(ID_EMPTY) | A_BOLD | A_BLINK;
+	fsymb = SYM_EMPTY | COLOR_PAIR(ID_EMPTY) | A_REVERSE | A_BOLD;
 }
 
 BaseObject::BaseObject(int arow, int acol) : coord(arow, acol), prev_coord(arow, acol) {
-	fcolor = Colored(BG_WHITE, FG_BLACK).to_string();
-	fsymb = SYM_EMPTY | COLOR_PAIR(ID_EMPTY) | A_BOLD | A_BLINK;	
+	fsymb = SYM_EMPTY | COLOR_PAIR(ID_EMPTY) | A_REVERSE | A_BOLD;	
 }
 
 BaseObject::~BaseObject() {

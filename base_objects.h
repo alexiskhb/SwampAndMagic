@@ -140,11 +140,24 @@ protected:
 
 class Room {
 public:
-	Room();
+	Room(GCoord acoord);
 
 	~Room();
 
-	BaseList map[MAP_HEIGHT][MAP_WIDTH];	
+	Room& generate(BaseList& relief, Map& m, int steps);
+
+	bool gen_is_wall(int arow, int acol);
+
+	BaseList map[MAP_HEIGHT][MAP_WIDTH];
+
+	static bool map_stencil[MAP_HEIGHT][MAP_WIDTH];
+	static bool newmap[MAP_HEIGHT][MAP_WIDTH];
+private:
+	int  gen_alive_count(int arow, int acol);
+
+	void gen_step();
+
+	GCoord coord;	
 };
 
 
@@ -164,10 +177,6 @@ public:
 	int get_height();
 
 	int get_width();
-
-	void generate(int achance, int steps, int ax, int ay);
-
-	bool gen_is_wall(int arow, int acol);
 
 	bool is_on_the_map(GCoord acoord);
 
@@ -193,10 +202,6 @@ public:
 
 	void display(int shift);
 private:
-	int  gen_alive_count(int arow, int acol);
-
-	void gen_step();
-
 	void set_distance(GCoord acoord, int value);
 
 	int  get_distance(GCoord acoord);
@@ -206,7 +211,6 @@ private:
 	int width  = MAP_WIDTH;
 	UIntIntMap distance;
 	UIntIntMap is_room_exists;
-	bool map_stencil[MAP_HEIGHT][MAP_WIDTH];
 	int shortest_distance = MAP_WIDTH*MAP_WIDTH + MAP_HEIGHT*MAP_HEIGHT;
 	GCoord upper_left_corner;
 	GCoord bottom_rgt_corner;

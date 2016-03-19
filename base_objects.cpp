@@ -7,6 +7,8 @@ using namespace std;
 
 int BaseObject::turn = 0;
 
+bool Room::map_stencil[MAP_HEIGHT][MAP_WIDTH];
+bool Room::newmap[MAP_HEIGHT][MAP_WIDTH];
 
 unsigned int cantor_pairing(const int a, const int b) {
 	unsigned int A = a >= 0 ? 2*static_cast<unsigned int>(a) : -2*static_cast<unsigned int>(a) - 1;
@@ -116,12 +118,83 @@ bool BaseObject::is_evil() {
 
 
 
-Room::Room() {
-
+Room::Room(GCoord acoord) : coord(acoord) {
+	
+	// generate(relief, m, pos, 6, acoord);
 }
 
 Room::~Room() {
 
+}
+
+Room& Room::generate(BaseList& relief, Map& m, int steps) {
+	srand(time(0));
+	int achance = chance(70) ? 47+rand()%5 : 50+rand()%4;
+	for(int i = 0; i < MAP_HEIGHT; i++) {
+		for(int j = 0; j < MAP_WIDTH; j++) {
+			Room::map_stencil[i][j] = chance(achance);
+		}
+	}
+	for(int i = 0; i < steps; i++) {
+		gen_step();
+	}
+
+	for(int i = 0; i < MAP_HEIGHT; i++) {
+		for(int j = 0; j < MAP_WIDTH; j++) {
+			Coord c(coord.parts.x, coord.parts.y, i, j);
+			relief.push_back(make_shared<Object>(GCoord(c)));
+			m << relief.back();
+		}
+	}
+
+	for(int i = 0; i < MAP_HEIGHT; i++) {
+		for(int j = 0; j < MAP_WIDTH; j++) {
+			if (gen_is_wall(i, j)) {
+				Coord c(coord.parts.x, coord.parts.y, i, j);
+				relief.push_back(make_shared<Wall>(GCoord(c)));
+				m << relief.back(); 
+			}
+		}
+	}
+	return *this;
+}
+
+bool Room::gen_is_wall(int arow, int acol) {
+	return Room::map_stencil[arow][acol];
+}
+
+int Room::gen_alive_count(int arow, int acol) {
+	int result = 0;
+	for(int i = -1; i <= 1; i++) {
+		for(int j = -1; j <= 1; j++) {
+			int nr = arow + i, nc = acol + j;
+			if (nr == arow && nc == acol) {
+				continue;
+			}
+			if (nr < 0 || nc < 0 || nr >= MAP_HEIGHT || nc >= MAP_WIDTH) {
+				// ++result;
+				continue;
+			}
+			if (Room::map_stencil[nr][nc]) {
+				++result;
+			}			
+		}
+	}
+	return result;
+}
+
+void Room::gen_step() {
+	for(int i = 0; i < MAP_HEIGHT; i++) {
+		for(int j = 0; j < MAP_WIDTH; j++) {
+			int alive_cnt = gen_alive_count(i, j);
+			Room::newmap[i][j] = Room::map_stencil[i][j] ? (alive_cnt >= 4) : (alive_cnt > 4);
+		}
+	}
+	for(int i = 0; i < MAP_HEIGHT; i++) {
+		for(int j = 0; j < MAP_WIDTH; j++) {
+			Room::map_stencil[i][j] = Room::newmap[i][j];
+		}
+	}
 }
 
 
@@ -132,20 +205,15 @@ Map::Map(BaseList& arelief) : upper_left_corner(0, 0), bottom_rgt_corner(MAP_HEI
 }
 
 Map::~Map() {
-	// for(auto iter = world.begin(); iter != world.end(); ++iter) {
-	// 	if (*iter != nullptr) {
-	// 		delete *iter;
-	// 	}
-	// }
+
 }
 
 void Map::create_room(const int ax, const int ay) {
 	if (is_room_exists[cantor_pairing(ax, ay)]) {
 		return;
 	}
-	world[ax][ay] = std::make_shared<Room>();
-	int pos = chance(70) ? 47+rand()%5 : 50+rand()%4;
-	generate(pos, 6, ax, ay);
+	world[ax][ay] = std::make_shared<Room>(GCoord(Coord(ax, ay, 0, 0)));
+	world[ax][ay]->generate(relief, *this, 6);
 	is_room_exists[cantor_pairing(ax, ay)] = true;
 }
 
@@ -360,76 +428,6 @@ BaseList& Map::operator()(const int row, const int col) {
 
 BaseList& Map::operator()(GCoord acoord) {
 	return map(acoord);
-}
-
-void Map::generate(int achance, int steps, int ax, int ay) {
-	srand(time(0));
-	GCoord coord;
-	for(int i = 0; i < MAP_HEIGHT; i++) {
-		for(int j = 0; j < MAP_WIDTH; j++) {
-			map_stencil[i][j] = chance(achance);
-		}
-	}
-	for(int i = 0; i < steps; i++) {
-		gen_step();
-	}
-
-	for(int i = 0; i < MAP_HEIGHT; i++) {
-		for(int j = 0; j < MAP_WIDTH; j++) {
-			coord = GCoord(Coord(ax, ay, i, j));
-			relief.push_back(make_shared<Object>(coord));
-			*this << relief.back();
-		}
-	}
-
-	for(int i = 0; i < MAP_HEIGHT; i++) {
-		for(int j = 0; j < MAP_WIDTH; j++) {
-			if (gen_is_wall(i, j)) {
-				coord = GCoord(Coord(ax, ay, i, j));
-				relief.push_back(make_shared<Wall>(coord));
-				*this << relief.back(); 
-			}
-		}
-	}
-}
-
-bool Map::gen_is_wall(int arow, int acol) {
-	return map_stencil[arow][acol];
-}
-
-int Map::gen_alive_count(int arow, int acol) {
-	int result = 0;
-	for(int i = -1; i <= 1; i++) {
-		for(int j = -1; j <= 1; j++) {
-			int nr = arow + i, nc = acol + j;
-			if (nr == arow && nc == acol) {
-				continue;
-			}
-			if (nr < 0 || nc < 0 || nr >= MAP_HEIGHT || nc >= MAP_WIDTH) {
-				// ++result;
-				continue;
-			}
-			if (map_stencil[nr][nc]) {
-				++result;
-			}			
-		}
-	}
-	return result;
-}
-
-void Map::gen_step() {
-	bool newmap[MAP_HEIGHT][MAP_WIDTH];
-	for(int i = 0; i < MAP_HEIGHT; i++) {
-		for(int j = 0; j < MAP_WIDTH; j++) {
-			int alive_cnt = gen_alive_count(i, j);
-			newmap[i][j] = map_stencil[i][j] ? (alive_cnt >= 4) : (alive_cnt > 4);
-		}
-	}
-	for(int i = 0; i < MAP_HEIGHT; i++) {
-		for(int j = 0; j < MAP_WIDTH; j++) {
-			map_stencil[i][j] = newmap[i][j];
-		}
-	}
 }
 
 bool Map::is_on_the_map(GCoord acoord) {

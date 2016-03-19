@@ -28,7 +28,6 @@ struct {
 	CharacterPtr princess;
 	MapPtr map;
 	std::string status;
-	unsigned int counter;
 
 	bool is_over() {
 		return characters.size() < 2 || knight->hitpoints() <= 0 || princess->hitpoints() <= 0;
@@ -42,9 +41,9 @@ struct {
 		for(auto obj: dyn_objects) {
 			if (map->is_on_the_map(obj->get_coord())) {
 				(*map)(obj->get_prev()).remove(obj);
-			}
-			if (obj->is_alive()) {
-				*map << obj;
+				if (obj->is_alive()) {
+					*map << obj;
+				}
 			}
 		}
 		for(auto ch: characters) {
@@ -53,23 +52,29 @@ struct {
 			}
 		}
 		characters.remove_if([&](CharacterPtr ch) {
-			return ch->hitpoints() <= 0 && ch != knight;
+			return (ch->hitpoints() <= 0 && ch != knight) || !map->is_on_the_map(ch->get_coord());
 		});
 		dyn_objects.remove_if([&](ObjectPtr obj) {
-			return !obj->is_alive();
+			return !obj->is_alive() || !map->is_on_the_map(obj->get_coord());
 		});
 	}
 
-	bool next_turn() {
-		++counter;
+	void next_turn() {
+		++BaseObject::turn;
 		map->move_the_frame(knight->get_coord() - knight->get_prev());
 		CharacterBoolMap did_attack;
 		for(auto ch_iter = std::next(characters.begin()); ch_iter != characters.end(); ch_iter++) {
 			auto ch = *ch_iter;
+			if (map->is_far(knight, ch)) {
+				continue;
+			}
 			did_attack.insert(CharacterBoolPair(ch, ch->attack(characters, dyn_objects, *map)));
 		}
 		did_attack.insert(CharacterBoolPair(knight, knight->attack(characters, dyn_objects, *map)));
 		for(auto obj: dyn_objects) {
+			if (map->is_far(knight, obj)) {
+				continue;
+			}
 			if (map->is_on_the_map(obj->get_coord())) {
 				obj->impact(characters, dyn_objects, *map);
 				(*map)(obj->getrow(), obj->getcol()).remove(obj);
@@ -82,6 +87,9 @@ struct {
 			}
 		}
 		for(auto ch: characters) {
+			if (map->is_far(knight, ch)) {
+				continue;
+			}
 			if (!did_attack[ch]) {
 				ch->move(*map, characters);
 				if (!map->is_on_the_map(ch->get_coord())) {
@@ -103,8 +111,7 @@ struct {
 			}
 		}
 		kill_died_characters_objects();
-		map->create_rooms();
-		return !knight->has_plans();
+		map->create_rooms(dyn_objects);
 	}
 
 	void gprint(int row, int col, const char* text) {
@@ -115,6 +122,8 @@ struct {
 
 	inline void render() {
 		int shift = 2;
+		status = "(" + std::to_string(princess->getcol()) + ", " + std::to_string(-princess->getrow()) + ")";
+		gprint(shift-1, shift + MAP_WIDTH - status.size(), status.c_str());
 		map->display(shift);
 		BaseObjectPtr obj = 
 			map->nearest_symb(
@@ -140,12 +149,18 @@ struct {
 	}
 
 	void init() {
+		srand(time(0));
 		map = std::make_shared<Map>(relief);
+		map->create_room(0, 0, dyn_objects);
 		knight = std::make_shared<Knight>(GCoord(MAP_HEIGHT/2, MAP_WIDTH/2), HP_KNIGHT, DMG_KN_SWORD);
 		knight->moveto(map->nearest_symb(knight->get_coord(), " ", MAP_HEIGHT)->get_coord());
-		princess = std::make_shared<Princess>(GCoord(1, MAP_WIDTH-2), HP_PRINCESS, DMG_PRINCESS);
-		princess->moveto(map->nearest_symb(princess->get_coord(), " ", MAP_HEIGHT)->get_coord());
-		counter = 0;
+		int pr_row = rand()%400 - 200;
+		int pr_col = rand()%400 - 200;
+		GCoord pr_coord = GCoord(pr_row, pr_col);
+		map->create_room(pr_coord.parts.x, pr_coord.parts.y, dyn_objects);
+		pr_coord = map->nearest_symb(pr_coord, std::string(1, SYM_EMPTY), MAP_HEIGHT/2)->get_coord();
+		princess = std::make_shared<Princess>(pr_coord, HP_PRINCESS, DMG_PRINCESS);
+		BaseObject::turn = 0;
 		initscr();
 		keypad(stdscr, true);
 		noecho();
@@ -166,20 +181,10 @@ struct {
 		init_pair(ID_MEDKIT   , COLOR_WHITE , COLOR_RED    );
 		init_pair(ID_DRGNEST  , COLOR_WHITE , COLOR_RED    );
 		init_pair(ID_GRVYARD  , COLOR_WHITE , COLOR_GREEN  );
+		init_pair(ID_ZIGGURAT , COLOR_WHITE , COLOR_BLACK  );
 		
 		put_character(knight);
 		put_character(princess);
-		// put_character(std::make_shared<Dragon>(4, MAP_WIDTH-4));
-		put_character(std::make_shared<Warlock>(GCoord(10, MAP_WIDTH-10)));
-		// put_dynobject(std::make_shared<Medkit>(MAP_HEIGHT/2, MAP_WIDTH/2));
-		// for(int i = 0; i < MAP_HEIGHT; i++) {
-		// 	for(int j = 0; j < MAP_WIDTH; j++) {
-		// 		if (map->is_penetrable(GCoord(i, j)) && chance(2)) {
-		// 			characters.push_back(std::make_shared<Zombie>(i, j, HP_ZOMBIE, DMG_ZOMBIE));
-		// 			*map << characters.back();
-		// 		}
-		// 	}
-		// }
 	}
 
 	void stop() {
@@ -191,9 +196,8 @@ struct {
 	void main_cycle() {
 		render();
 		while (!is_over()) {
-	 		if (next_turn()) {
-	 			render();
-	 		}
+	 		next_turn();
+	 		render();	 		
 	 	}
 	 	render();
 	}
@@ -207,6 +211,7 @@ struct {
 
 
 int main(int argc, char** argv) {
+	freopen("log", "w", stderr);
 	Game.init();
  	Game.main_cycle();
  	while (true) {

@@ -21,7 +21,8 @@ enum ObjectID {
 	ID_EMPTY    = 11,
 	ID_MEDKIT   = 12,
 	ID_DRGNEST  = 13,
-	ID_GRVYARD  = 14
+	ID_GRVYARD  = 14,
+	ID_ZIGGURAT = 15
 };
 
 

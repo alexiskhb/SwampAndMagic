@@ -6,18 +6,19 @@
 #include "coords.h"
 
 static const int 
-	DMG_FLAME  = 7,
-	DMG_CURSE  = 3,
-	DMG_MAGIC  = 7,
-	DMG_MEDKIT = -20,
-	TIME_SWAMP   = 15,
-	TIME_MAGIC   = 5,
-	TIME_CURSE   = 2,
-	TIME_FLAME   = 5,
-	TIME_INFTY   = -10000,
-	TIME_MEDKIT  = TIME_INFTY,
-	TIME_DRGNEST = TIME_INFTY,
-	TIME_GRVYARD = TIME_INFTY;
+	DMG_FLAME     = 3,
+	DMG_CURSE     = 5,
+	DMG_MAGIC     = 7,
+	DMG_MEDKIT    = -20,
+	TIME_SWAMP    = 15,
+	TIME_MAGIC    = 5,
+	TIME_CURSE    = 2,
+	TIME_FLAME    = 5,
+	TIME_INFTY    = -10000,
+	TIME_MEDKIT   = TIME_INFTY,
+	TIME_DRGNEST  = TIME_INFTY,
+	TIME_GRVYARD  = TIME_INFTY,
+	TIME_ZIGGURAT = TIME_INFTY;
 
 
 class Object : public BaseObject {
@@ -150,6 +151,7 @@ public:
 
 
 class DragonNest : public Object {
+public:
 	DragonNest(GCoord acoord);
 
 	~DragonNest() override;
@@ -163,6 +165,7 @@ private:
 
 
 class Graveyard : public Object {
+public:
 	Graveyard(GCoord acoord);
 
 	~Graveyard() override;
@@ -175,3 +178,15 @@ private:
 };
 
 
+class Ziggurat : public Object {
+public:
+	Ziggurat(GCoord acoord);
+
+	~Ziggurat() override;
+
+	char symbol() override;
+
+	void impact(std::list<CharacterPtr>& characters, std::list<ObjectPtr>& objects, Map& m) override;
+private:
+	int frequency;
+};

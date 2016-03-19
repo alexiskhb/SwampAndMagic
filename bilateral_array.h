@@ -278,6 +278,7 @@ public:
 		iterator& operator++() {
 			bool at_x = true;
 			do {
+				// log("iterate2D");
 				if (ux >= owner.area.size()) {
 					ux = owner.area.size() > 0 ? owner.area.size()-1 : 0;
 					uy = owner.area.size() > 0 ? owner.area.at(owner.area.utos(ux)).size() : 0;

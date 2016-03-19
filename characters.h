@@ -8,14 +8,14 @@
 #include "coords.h"
 
 
-static const int HP_KNIGHT   = 70; 
+static const int HP_KNIGHT   = 100; 
 static const int HP_PRINCESS = 2000;  
-static const int HP_DRAGON   = 200;
+static const int HP_DRAGON   = 150;
 static const int HP_ZOMBIE   = 20; 
 static const int HP_WARLOCK  = 40;
 
 
-static const int DMG_KN_SWORD = 14; 
+static const int DMG_KN_SWORD = 15; 
 static const int DMG_PRINCESS = 0; 
 static const int DMG_DRAGON   = 15;
 static const int DMG_ZOMBIE   = 2;
@@ -42,8 +42,6 @@ public:
 
 	virtual bool move(Map& m, std::list<CharacterPtr>& characters) = 0;
 
-	virtual bool has_plans();
-
 	// all characters are impenetrable
 	bool is_penetrable() override;
 };
@@ -57,8 +55,6 @@ public:
 	Knight(GCoord acoord, int hp, int dmg);
 
 	~Knight() override;
-
-	bool has_plans() override;
 
 	char symbol() override;
 
@@ -74,7 +70,6 @@ public:
 private:
 	char get_command();
 	char moved_on_attack;
-	std::string actions;
 };
 
 

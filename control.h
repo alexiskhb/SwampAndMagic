@@ -32,9 +32,7 @@ static const char
 
 static struct {
 public:
-	void put_commands() {
-
-	}
+	
 private:
 	std::string commands;
 } Control;

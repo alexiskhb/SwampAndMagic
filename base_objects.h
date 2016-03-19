@@ -12,8 +12,12 @@
 #include "coords.h"
 #include "bilateral_array.h"
 #include <curses.h>
+#include <iostream>
+#include <cstdio>
 
 // map is 8-connected area
+
+void log(const char* s);
 
 static const char 
 	SYM_EMPTY    = ' ',
@@ -29,6 +33,7 @@ static const char
 	SYM_CURSE    = 'X',
 	SYM_MEDKIT   = '+',
 	SYM_DRGNEST  = '@',
+	SYM_ZIGGURAT = '#',
 	SYM_GRVYARD  = '~';
 
 
@@ -112,8 +117,6 @@ public:
 
 	GCoord get_prev();
 
-	std::string& color();
-
 	chtype symb();
 
 	virtual bool is_alive();
@@ -126,7 +129,6 @@ public:
 
 	static int turn;
 protected:
-	std::string fcolor;
 	GCoord coord;
 	// we need prev_coords to remove reference to object
 	// from previous cell of map after move
@@ -144,7 +146,7 @@ public:
 
 	~Room();
 
-	Room& generate(BaseList& relief, Map& m, int steps);
+	Room& generate(BaseList& relief, Map& m, std::list<ObjectPtr>& objects, int steps);
 
 	bool gen_is_wall(int arow, int acol);
 
@@ -180,9 +182,9 @@ public:
 
 	bool is_on_the_map(GCoord acoord);
 
-	void create_room(const int ax, const int ay);
+	void create_room(const int ax, const int ay, std::list<ObjectPtr>& objects);
 
-	void create_rooms();
+	void create_rooms(std::list<ObjectPtr>& objects);
 
 	IntIntPairList shortest_way(IntIntPair from, IntIntPair to, int max_length);
 
@@ -201,6 +203,8 @@ public:
 	void move_the_frame(GCoord shift);
 
 	void display(int shift);
+
+	bool is_far(BaseObjectPtr obj1, BaseObjectPtr obj2);
 private:
 	void set_distance(GCoord acoord, int value);
 

@@ -4,6 +4,10 @@
 
 using namespace std;
 
+void log(const char* s) {
+	return;
+	fprintf(stderr, "%s\n", s);
+}
 
 int BaseObject::turn = 0;
 
@@ -103,10 +107,6 @@ chtype BaseObject::symb() {
 	return fsymb;
 }
 
-std::string& BaseObject::color() {
-	return fcolor;
-}
-
 bool BaseObject::is_penetrable() {
 	return true;
 }
@@ -119,15 +119,14 @@ bool BaseObject::is_evil() {
 
 
 Room::Room(GCoord acoord) : coord(acoord) {
-	
-	// generate(relief, m, pos, 6, acoord);
+	log("room");
 }
 
 Room::~Room() {
-
+	log("destroy room");
 }
 
-Room& Room::generate(BaseList& relief, Map& m, int steps) {
+Room& Room::generate(BaseList& relief, Map& m, std::list<ObjectPtr>& objects, int steps) {
 	srand(time(0));
 	int achance = chance(70) ? 47+rand()%5 : 50+rand()%4;
 	for(int i = 0; i < MAP_HEIGHT; i++) {
@@ -135,6 +134,7 @@ Room& Room::generate(BaseList& relief, Map& m, int steps) {
 			Room::map_stencil[i][j] = chance(achance);
 		}
 	}
+
 	for(int i = 0; i < steps; i++) {
 		gen_step();
 	}
@@ -156,6 +156,21 @@ Room& Room::generate(BaseList& relief, Map& m, int steps) {
 			}
 		}
 	}
+
+	int row = rand()%MAP_HEIGHT;
+	int col = rand()%MAP_WIDTH;
+	GCoord crd = m.nearest_symb(GCoord(Coord(coord.parts.x, coord.parts.y, row, col)), string(1, SYM_EMPTY), MAP_HEIGHT/2)->get_coord();
+	objects.push_back(make_shared<DragonNest>(crd));
+
+	row = rand()%MAP_HEIGHT;
+	col = rand()%MAP_WIDTH;
+	crd = m.nearest_symb(GCoord(Coord(coord.parts.x, coord.parts.y, row, col)), string(1, SYM_EMPTY), MAP_HEIGHT/2)->get_coord();
+	objects.push_back(make_shared<Graveyard>(crd));
+
+	row = rand()%MAP_HEIGHT;
+	col = rand()%MAP_WIDTH;
+	crd = m.nearest_symb(GCoord(Coord(coord.parts.x, coord.parts.y, row, col)), string(1, SYM_EMPTY), MAP_HEIGHT/2)->get_coord();
+	objects.push_back(make_shared<Ziggurat>(crd));
 	return *this;
 }
 
@@ -201,19 +216,19 @@ void Room::gen_step() {
 
 
 Map::Map(BaseList& arelief) : upper_left_corner(0, 0), bottom_rgt_corner(MAP_HEIGHT-1, MAP_WIDTH-1), relief(arelief) {
-	create_room(0, 0);
+
 }
 
 Map::~Map() {
 
 }
 
-void Map::create_room(const int ax, const int ay) {
+void Map::create_room(const int ax, const int ay, std::list<ObjectPtr>& objects) {
 	if (is_room_exists[cantor_pairing(ax, ay)]) {
 		return;
 	}
 	world[ax][ay] = std::make_shared<Room>(GCoord(Coord(ax, ay, 0, 0)));
-	world[ax][ay]->generate(relief, *this, 6);
+	world[ax][ay]->generate(relief, *this, objects, 6);
 	is_room_exists[cantor_pairing(ax, ay)] = true;
 }
 
@@ -236,11 +251,11 @@ BaseObjectPtr Map::operator<<(BaseObjectPtr obj) {
 	return obj;
 }
 
-void Map::create_rooms() {
-	create_room(upper_left_corner.parts.x, upper_left_corner.parts.y);
-	create_room(bottom_rgt_corner.parts.x, upper_left_corner.parts.y);
-	create_room(bottom_rgt_corner.parts.x, bottom_rgt_corner.parts.y);
-	create_room(upper_left_corner.parts.x, bottom_rgt_corner.parts.y);
+void Map::create_rooms(std::list<ObjectPtr>& objects) {
+	create_room(upper_left_corner.parts.x, upper_left_corner.parts.y, objects);
+	create_room(bottom_rgt_corner.parts.x, upper_left_corner.parts.y, objects);
+	create_room(bottom_rgt_corner.parts.x, bottom_rgt_corner.parts.y, objects);
+	create_room(upper_left_corner.parts.x, bottom_rgt_corner.parts.y, objects);
 }
 
 void Map::display(const int shift) {
@@ -264,21 +279,21 @@ void Map::display(const int shift) {
 }
 
 ostream& operator<<(ostream& display, Map& m) {
-	static GCoord coords[MAP_HEIGHT][MAP_WIDTH];
+	// static GCoord coords[MAP_HEIGHT][MAP_WIDTH];
 	for(int i = m.upper_left_corner.row, ii = 0; i <= m.bottom_rgt_corner.row; i++, ii++) {
 		for(int j = m.upper_left_corner.col, jj = 0; j <= m.bottom_rgt_corner.col; j++, jj++) {
-			coords[ii][jj] = GCoord(i, j);
+			// coords[ii][jj] = GCoord(i, j);
 		}
 	}
-	GCoord cur_coord;
+	// GCoord cur_coord;
 	for(int i = 0; i < MAP_HEIGHT; i++) {
 		for(int j = 0; j < MAP_WIDTH; j++) {
-			cur_coord = coords[i][j];
-			Room& room = *m.world[cur_coord.parts.x][cur_coord.parts.y];
-			display << room.map[cur_coord.parts.row][cur_coord.parts.col].back()->color();
-			display << room.map[cur_coord.parts.row][cur_coord.parts.col].back()->symbol();
+			// cur_coord = coords[i][j];
+			// Room& room = *m.world[cur_coord.parts.x][cur_coord.parts.y];
+			// display << room.map[cur_coord.parts.row][cur_coord.parts.col].back()->color();
+			// display << room.map[cur_coord.parts.row][cur_coord.parts.col].back()->symbol();
 		}
-		display << Colored() << endl;
+		// display << Colored() << endl;
 	}
 	return display;
 }
@@ -305,6 +320,7 @@ IntIntPairList Map::shortest_way(IntIntPair from, IntIntPair to, int max_length)
 	IntIntPair target;
 	temp_way.push_back(IntIntPair(r, c));
 	while (temp_way.size() > 0) {
+		log("shortest");
 		r = temp_way.front().first;
 		c = temp_way.front().second;
 		if (abs(r - to.first) <= 1 && abs(c - to.second) <= 1) {
@@ -331,7 +347,10 @@ IntIntPairList Map::shortest_way(IntIntPair from, IntIntPair to, int max_length)
 		r = target.first;
 		c = target.second;
 		d = get_distance(GCoord(r, c));
-		while (d > 0) {
+		// Without bound it sometimes get into infinite loop, hz
+		int bound = 0;
+		while (d > 0 && bound < 300) {
+			++bound;
 			bool continue_ij = true;
 			way.push_front(IntIntPair(r, c));
 			for(int i = -1; i <= 1 && continue_ij; i++) {
@@ -363,7 +382,6 @@ int Map::get_distance(GCoord acoord) {
 
 BaseObjectPtr Map::nearest_symb(GCoord from, std::string targets, int max_length) {
 	IntIntPairList deque;
-	GCoord coord;
 	int r = from.row;
 	int c = from.col;
 	int d = 0;
@@ -372,6 +390,7 @@ BaseObjectPtr Map::nearest_symb(GCoord from, std::string targets, int max_length
 	IntIntPair target;
 	deque.push_back(IntIntPair(r, c));
 	while (deque.size() > 0) {
+		log("nearest");
 		r = deque.front().first;
 		c = deque.front().second;
 		char p = map(r, c).back()->symbol();
@@ -409,6 +428,12 @@ BaseObjectPtr Map::nearest_symb(GCoord from, std::string targets, int max_length
 bool Map::is_penetrable(GCoord acoord) {
 	// we know that impenetrable objects should be in the back of the list
 	return map(acoord.row, acoord.col).back()->is_penetrable();
+}
+
+bool Map::is_far(BaseObjectPtr obj1, BaseObjectPtr obj2) {
+	return 
+		abs(obj1->get_coord().parts.x - obj2->get_coord().parts.x) > 1 ||
+		abs(obj1->get_coord().parts.y - obj2->get_coord().parts.y) > 1;
 }
 
 BaseList& Map::map(const int arow, const int acol) {

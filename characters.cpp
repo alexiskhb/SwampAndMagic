@@ -13,17 +13,17 @@ int dz_3[7] = {-3, -2, -1, 0, 1, 2, 3};
 
 
 Character::Character(GCoord acoord) : BaseObject(acoord) {
-	fcolor = Colored(BG_BLACK, FG_BLACK).to_string();
+	log("character");
 }
 
 Character::Character(GCoord acoord, int hp, int dmg) : BaseObject(acoord) {
+	log("character");
 	damage = dmg;
 	health = hp;
-	fcolor = Colored(BG_BLACK, FG_BLACK).to_string();
 }
 
 Character::~Character() {
-
+	log("destroy character");
 }
 
 void Character::slash(list<CharacterPtr>& characters) {
@@ -43,10 +43,6 @@ bool Character::suffer(int dmg) {
 	return (health -= dmg) <= 0;
 }
 
-bool Character::has_plans() {
-	return false;
-}
-
 // all characters are impenetrable
 bool Character::is_penetrable() {
 	return false;
@@ -57,16 +53,16 @@ bool Character::is_penetrable() {
 
 
 Knight::Knight(GCoord acoord) : Character(acoord) {
-
+	log("knight");
 }
 
 Knight::Knight(GCoord acoord, int hp, int dmg) : Character(acoord, hp, dmg) {
-	fcolor = Colored(BG_GREEN, FG_WHITE).to_string();
+	log("knight");
 	fsymb = SYM_KNIGHT | A_BOLD | COLOR_PAIR(ID_KNIGHT);
 }
 
 Knight::~Knight() {
-
+	log("destroy knight");
 }
 
 char Knight::symbol() {
@@ -178,10 +174,6 @@ bool Knight::attack(list<CharacterPtr>& characters, list<ObjectPtr>& objects, Ma
 	return true;
 }
 
-bool Knight::has_plans() {
-	return actions.size() > 0;
-}
-
 char Knight::get_command() {
 	return getch();
 }
@@ -257,17 +249,17 @@ bool Knight::suffer(int dmg) {
 
 
 Princess::Princess(GCoord acoord) : Character(acoord) {
-	fcolor = Colored(BG_AQUA, FG_WHITE).to_string();
+	log("princess");
 	fsymb = SYM_PRINCESS | A_BOLD | COLOR_PAIR(ID_PRINCESS);
 }
 
 Princess::Princess(GCoord acoord, int hp, int dmg) : Character(acoord, hp, dmg) {
-	fcolor = Colored(BG_AQUA, FG_WHITE).to_string();
+	log("princess");
 	fsymb = SYM_PRINCESS | A_BOLD | COLOR_PAIR(ID_PRINCESS);
 }
 
 Princess::~Princess() {
-	// cout << ">> Princess died\n";
+	log("destroy princess");
 }
 
 char Princess::symbol() {
@@ -288,28 +280,29 @@ bool Princess::move(Map& m, std::list<CharacterPtr>& characters) {
 
 
 Monster::Monster(GCoord acoord) : Character(acoord) {
+	log("monster");
 }
 
 Monster::Monster(GCoord acoord, int hp, int dmg) : Character(acoord, hp, dmg) {
+	log("monster");
 }
 
 Monster::~Monster() {
-
+	log("destroy monster");
 }
 
 bool Monster::move(Map& m, std::list<CharacterPtr>& characters) {
 	prev_coord = coord;
-	if (chance(30)) {
-		coord.row += dz_1[rand()%3];
-		coord.col += dz_1[rand()%3];
-	}
-	else {
-		if (way.size() > 0) {
+	if (way.size() > 0) {
+		if (chance(70)) {
 			coord.row = way.front().first;
 			coord.col = way.front().second;
 			way.pop_front();
+			return false;
 		}
 	}
+	coord.row += dz_1[rand()%3];
+	coord.col += dz_1[rand()%3];
 	return false;
 }
 
@@ -327,17 +320,17 @@ IntIntPairList Monster::shortest_way_to(BaseObjectPtr obj, Map& m) {
 
 
 Dragon::Dragon(GCoord acoord) : Monster(acoord, HP_DRAGON, DMG_DRAGON) {
-	fcolor = Colored(BG_RED, FG_WHITE).to_string();
+	log("dragon");
 	fsymb = SYM_DRAGON | A_BOLD | COLOR_PAIR(ID_DRAGON);
 }
 
 Dragon::Dragon(GCoord acoord, int hp, int dmg) : Monster(acoord, hp, dmg) {
-	fcolor = Colored(BG_RED, FG_WHITE).to_string();
+	log("dragon");
 	fsymb = SYM_DRAGON | A_BOLD | COLOR_PAIR(ID_DRAGON);
 }
 
 Dragon::~Dragon() {
-	// cout << "Dragon died\n";
+	log("destroy dragon");
 }
 
 void Dragon::magic(list<ObjectPtr>& objects) {
@@ -377,17 +370,17 @@ bool Dragon::suffer(int dmg) {
 
 
 Zombie::Zombie(GCoord acoord) : Monster(acoord, HP_ZOMBIE, DMG_ZOMBIE) {
-	fcolor = Colored(BG_ORANGE, FG_WHITE).to_string();
+	log("zombie");
 	fsymb = SYM_ZOMBIE | A_BOLD | COLOR_PAIR(ID_ZOMBIE);
 }
 
 Zombie::Zombie(GCoord acoord, int hp, int dmg) : Monster(acoord, hp, dmg) {
-	fcolor = Colored(BG_ORANGE, FG_WHITE).to_string();
+	log("zombie");
 	fsymb = SYM_ZOMBIE | A_BOLD | COLOR_PAIR(ID_ZOMBIE);
 }
 
 Zombie::~Zombie() {
-
+	log("destroy zombie");
 }
 
 char Zombie::symbol() {
@@ -414,17 +407,17 @@ bool Zombie::attack(list<CharacterPtr>& characters, list<ObjectPtr>& objects, Ma
 
 
 Warlock::Warlock(GCoord acoord) : Monster(acoord, HP_WARLOCK, DMG_WARLOCK) {
-	fcolor = Colored(BG_BLACK, FG_WHITE).to_string();
+	log("warlock");
 	fsymb = SYM_WARLOCK | A_BOLD | COLOR_PAIR(ID_WARLOCK);
 }
 
 Warlock::Warlock(GCoord acoord, int hp, int dmg) : Monster(acoord, hp, dmg) {
-	fcolor = Colored(BG_BLACK, FG_WHITE).to_string();
+	log("warlock");
 	fsymb = SYM_WARLOCK | A_BOLD | COLOR_PAIR(ID_WARLOCK);
 }
 
 Warlock::~Warlock() {
-	// cout << "Warlock died\n";
+	log("destroy warlock");
 }
 
 char Warlock::symbol() {

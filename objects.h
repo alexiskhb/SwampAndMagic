@@ -28,8 +28,6 @@ public:
 	Object(GCoord acoord, GCoord dir);
 
 	~Object() override;
-	
-	virtual void destroy();
 
 	virtual void make_turn();
 
@@ -149,8 +147,17 @@ public:
 
 
 
+class Respawn : public Object {
+public:
+	Respawn(GCoord acoord, int freq);
 
-class DragonNest : public Object {
+	void destroy() override;
+protected:
+	int frequency;
+};
+
+
+class DragonNest : public Respawn {
 public:
 	DragonNest(GCoord acoord);
 
@@ -159,12 +166,10 @@ public:
 	char symbol() override;
 
 	void impact(std::list<CharacterPtr>& characters, std::list<ObjectPtr>& objects, Map& m) override;
-private:
-	int frequency;
 };
 
 
-class Graveyard : public Object {
+class Graveyard : public Respawn {
 public:
 	Graveyard(GCoord acoord);
 
@@ -173,12 +178,10 @@ public:
 	char symbol() override;
 
 	void impact(std::list<CharacterPtr>& characters, std::list<ObjectPtr>& objects, Map& m) override;
-private:
-	int frequency;
 };
 
 
-class Ziggurat : public Object {
+class Ziggurat : public Respawn {
 public:
 	Ziggurat(GCoord acoord);
 
@@ -187,6 +190,4 @@ public:
 	char symbol() override;
 
 	void impact(std::list<CharacterPtr>& characters, std::list<ObjectPtr>& objects, Map& m) override;
-private:
-	int frequency;
 };

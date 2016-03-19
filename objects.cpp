@@ -18,10 +18,6 @@ Object::~Object() {
 	// log("destroy obj");
 }
 
-void Object::destroy() {
-	health = 0;
-}
-
 bool Object::is_penetrable() {
 	return true;
 }
@@ -158,7 +154,8 @@ void Magic::impact(list<CharacterPtr>& characters, std::list<ObjectPtr>& objects
 	for(auto obj: objects) {
 		if (*obj == *this && obj->symbol() == SYM_FLAME) {
 			obj->destroy();
-			health = 3*TIME_MAGIC;
+			health = 4*TIME_MAGIC;
+			direction = GCoord(0, 0);
 		}
 	}
 	if (!m.is_penetrable(coord)) {
@@ -262,7 +259,15 @@ void Medkit::impact(list<CharacterPtr>& characters, std::list<ObjectPtr>& object
 
 
 
-DragonNest::DragonNest(GCoord acoord) : Object(acoord), frequency(25+rand()%15) {
+Respawn::Respawn(GCoord acoord, int freq) : Object(acoord), frequency(freq) {
+}
+
+void Respawn::destroy() {
+}
+
+
+
+DragonNest::DragonNest(GCoord acoord) : Respawn(acoord, 25+rand()%15) {
 	log("dragonnest");
 	health = TIME_DRGNEST;
 	fsymb = SYM_DRGNEST | A_BOLD | A_REVERSE | COLOR_PAIR(ID_DRGNEST) | A_BOLD;
@@ -270,7 +275,6 @@ DragonNest::DragonNest(GCoord acoord) : Object(acoord), frequency(25+rand()%15) 
 
 DragonNest::~DragonNest() {
 	log("destroy dragonnest");
-
 }
 
 char DragonNest::symbol() {
@@ -286,7 +290,7 @@ void DragonNest::impact(list<CharacterPtr>& characters, std::list<ObjectPtr>& ob
 
 
 
-Graveyard::Graveyard(GCoord acoord) : Object(acoord), frequency(5+rand()%5) {
+Graveyard::Graveyard(GCoord acoord) : Respawn(acoord, 5+rand()%5) {
 	log("graveyard");
 	health = TIME_GRVYARD;
 	fsymb = SYM_GRVYARD | A_BOLD | A_REVERSE | COLOR_PAIR(ID_GRVYARD) | A_BOLD;
@@ -310,7 +314,7 @@ void Graveyard::impact(list<CharacterPtr>& characters, std::list<ObjectPtr>& obj
 
 
 
-Ziggurat::Ziggurat(GCoord acoord) : Object(acoord), frequency(60+rand()%50) {
+Ziggurat::Ziggurat(GCoord acoord) : Respawn(acoord, 60+rand()%50) {
 	log("ziggurat");
 	health = TIME_ZIGGURAT;
 	fsymb = SYM_ZIGGURAT | A_BOLD | A_REVERSE | COLOR_PAIR(ID_ZIGGURAT) | A_BOLD;

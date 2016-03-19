@@ -44,6 +44,8 @@ public:
 
 	// all characters are impenetrable
 	bool is_penetrable() override;
+private:
+	int max_health;
 };
 
 
@@ -65,8 +67,6 @@ public:
 	bool attack(std::list<CharacterPtr>& characters, std::list<ObjectPtr>& objects, Map& m) override;
 
 	bool move(Map& m, std::list<CharacterPtr>& characters) override;
-
-	bool suffer(int dmg) override;
 private:
 	char get_command();
 	char moved_on_attack;
@@ -84,9 +84,9 @@ public:
 
 	~Princess() override;
 
+	void destroy() override;
+
 	char symbol() override;
-	
-	bool suffer(int dmg) override;
 
 	bool move(Map& m, std::list<CharacterPtr>& characters) override;
 };
@@ -129,8 +129,6 @@ public:
 	bool attack(std::list<CharacterPtr>& characters, std::list<ObjectPtr>& objects, Map& m) override;
 
 	char symbol() override;
-
-	bool suffer(int dmg) override;
 };
 
 
@@ -146,8 +144,6 @@ public:
 	~Zombie() override;
 
 	char symbol() override;
-
-	bool suffer(int dmg) override;
 
 	bool attack(std::list<CharacterPtr>& characters, std::list<ObjectPtr>& objects, Map& m) override;
 };
@@ -169,8 +165,6 @@ public:
 	bool move(Map& m, std::list<CharacterPtr>& characters) override;
 
 	char symbol() override;
-
-	bool suffer(int dmg) override;
 
 	bool attack(std::list<CharacterPtr>& characters, std::list<ObjectPtr>& objects, Map& m) override;	
 };

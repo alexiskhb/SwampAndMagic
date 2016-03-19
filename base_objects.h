@@ -119,6 +119,8 @@ public:
 
 	chtype symb();
 
+	virtual void destroy();
+
 	virtual bool is_alive();
 
 	virtual char symbol();
@@ -148,18 +150,23 @@ public:
 
 	Room& generate(BaseList& relief, Map& m, std::list<ObjectPtr>& objects, int steps);
 
-	bool gen_is_wall(int arow, int acol);
+	GCoord get_coord();
 
-	BaseList map[MAP_HEIGHT][MAP_WIDTH];
-
-	static bool map_stencil[MAP_HEIGHT][MAP_WIDTH];
-	static bool newmap[MAP_HEIGHT][MAP_WIDTH];
+	BaseList* operator[](int arow);
 private:
 	int  gen_alive_count(int arow, int acol);
 
 	void gen_step();
 
-	GCoord coord;	
+	bool gen_is_wall(int arow, int acol);
+
+	BaseList map[MAP_HEIGHT][MAP_WIDTH];
+
+	static bool map_stencil[MAP_HEIGHT][MAP_WIDTH];
+
+	static bool newmap[MAP_HEIGHT][MAP_WIDTH];
+
+	GCoord coord;
 };
 
 
@@ -172,13 +179,7 @@ public:
 
 	BaseObjectPtr operator<<(BaseObjectPtr obj);
 
-	// std::list<BaseObjectPtr>* operator[](int index);
-
 	bool is_penetrable(GCoord acoord);
-
-	int get_height();
-
-	int get_width();
 
 	bool is_on_the_map(GCoord acoord);
 
@@ -194,8 +195,6 @@ public:
 
 	BaseList& map(GCoord acoord);
 
-	friend std::ostream& operator<<(std::ostream& display, Map& m);
-
 	BaseList& operator()(const int row, const int col);
 
 	BaseList& operator()(GCoord acoord);
@@ -204,15 +203,19 @@ public:
 
 	void display(int shift);
 
-	bool is_far(BaseObjectPtr obj1, BaseObjectPtr obj2);
+	void show_global_map();
+
+	bool is_far(BaseObjectPtr obj1, BaseObjectPtr obj2, int distance);
+
+	bool is_out_of_display(BaseObjectPtr obj);
+
+	void remove(BaseObjectPtr obj);
 private:
 	void set_distance(GCoord acoord, int value);
 
 	int  get_distance(GCoord acoord);
 
 	BilateralArray2D<RoomPtr> world;
-	int height = MAP_HEIGHT;
-	int width  = MAP_WIDTH;
 	UIntIntMap distance;
 	UIntIntMap is_room_exists;
 	int shortest_distance = MAP_WIDTH*MAP_WIDTH + MAP_HEIGHT*MAP_HEIGHT;

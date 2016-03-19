@@ -23,7 +23,24 @@ struct Coord {
 	Coord() : x(ST_ROOM), y(ST_ROOM), row(ST_CELL), col(ST_CELL) {
 	}
 
+	Coord(const Coord& other) : x(other.x), y(other.y), row(other.row), col(other.col) {
+	}
+
+	Coord(const int a, const int b) : x(a), y(b), row(a), col(b) {
+	}
+
 	Coord(const int ax, const int ay, const int arow, const int acol) : x(ax), y(ay), row(arow), col(acol) {
+	}
+
+	~Coord() {
+	}
+
+	Coord& operator=(const Coord& other) {
+		x   = other.x;
+		y   = other.y;
+		row = other.row;
+		col = other.col;
+		return *this;
 	}
 	// Room coordinates
 	int x, y;
@@ -34,6 +51,12 @@ struct Coord {
 struct GCoord {
 	GCoord() : row(ST_CELL), col(ST_CELL) {
 
+	}
+
+	GCoord(const GCoord& other) :
+		row(other.row),
+		col(other.col),
+		parts(other.parts) {
 	}
 
 	GCoord(const int arow, const int acol) : row(arow), col(acol) {
@@ -47,6 +70,9 @@ struct GCoord {
 
 		row = grow_st + c.row;
 		col = gcol_st + c.col;
+	}
+
+	~GCoord() {
 	}
 
 	void recalculate(const int arow, const int acol) {
@@ -76,6 +102,13 @@ struct GCoord {
 
 	GCoord operator-(const GCoord& other) const {
 		return GCoord(row - other.row, col - other.col);
+	}
+
+	GCoord& operator=(const GCoord& other) {
+		row = other.row;
+		col = other.col;
+		parts = other.parts;
+		return *this;
 	}
 
 	// Global coordinates

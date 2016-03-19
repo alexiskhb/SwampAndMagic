@@ -19,7 +19,7 @@ Character::Character(GCoord acoord) : BaseObject(acoord) {
 Character::Character(GCoord acoord, int hp, int dmg) : BaseObject(acoord) {
 	log("character");
 	damage = dmg;
-	health = hp;
+	max_health = health = hp;
 }
 
 Character::~Character() {
@@ -40,7 +40,8 @@ bool Character::attack(list<CharacterPtr>& characters, list<ObjectPtr>& objects,
 
 // returns True if character died
 bool Character::suffer(int dmg) {
-	return (health -= dmg) <= 0;
+	health = std::min(health - dmg, max_health);
+	return health <= 0;
 }
 
 // all characters are impenetrable
@@ -240,11 +241,6 @@ bool Knight::move(Map& m, std::list<CharacterPtr>& characters) {
 	return false;
 }
 
-bool Knight::suffer(int dmg) {
-	return (health -= dmg) <= 0;
-}
-
-
 
 
 
@@ -266,13 +262,13 @@ char Princess::symbol() {
 	return SYM_PRINCESS;
 }
 
-bool Princess::suffer(int dmg) {
-	return (health -= dmg) <= 0;
-}
-
 bool Princess::move(Map& m, std::list<CharacterPtr>& characters) {
 	prev_coord = coord;
 	return false;
+}
+
+void Princess::destroy() {
+	
 }
 
 
@@ -313,7 +309,7 @@ void Monster::refresh_way(Map& m, std::list<CharacterPtr>& characters) {
 IntIntPairList Monster::shortest_way_to(BaseObjectPtr obj, Map& m) {
 	return m.shortest_way(
 		IntIntPair(this->getrow(), this->getcol()), 
-		IntIntPair(obj ->getrow(), obj ->getcol()), 2*(std::min(MAP_HEIGHT, MAP_WIDTH)/3));
+		IntIntPair(obj ->getrow(), obj ->getcol()), std::min(MAP_HEIGHT, MAP_WIDTH)/3);
 }
 
 
@@ -360,12 +356,6 @@ char Dragon::symbol() {
 	return SYM_DRAGON;
 }
 
-bool Dragon::suffer(int dmg) {
-	return (health -= dmg) <= 0;
-}
-
-
-
 
 
 
@@ -385,10 +375,6 @@ Zombie::~Zombie() {
 
 char Zombie::symbol() {
 	return SYM_ZOMBIE;
-}
-
-bool Zombie::suffer(int dmg) {
-	return (health -= dmg) <= 0;
 }
 
 bool Zombie::attack(list<CharacterPtr>& characters, list<ObjectPtr>& objects, Map& m) {
@@ -422,10 +408,6 @@ Warlock::~Warlock() {
 
 char Warlock::symbol() {
 	return SYM_WARLOCK;
-}
-
-bool Warlock::suffer(int dmg) {
-	return (health -= dmg) <= 0;
 }
 
 bool Warlock::attack(list<CharacterPtr>& characters, list<ObjectPtr>& objects, Map& m) {

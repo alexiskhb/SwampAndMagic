@@ -95,6 +95,10 @@ void BaseObject::move_to_prev() {
 	coord = prev_coord;
 }
 
+void BaseObject::destroy() {
+	health = 0;
+}
+
 bool BaseObject::is_alive() {
 	return health > 0;
 }
@@ -212,6 +216,14 @@ void Room::gen_step() {
 	}
 }
 
+GCoord Room::get_coord() {
+	return coord;
+}
+
+BaseList* Room::operator[](int arow) {
+	return map[arow];
+}
+
 
 
 
@@ -240,8 +252,8 @@ void Map::move_the_frame(GCoord shift) {
 BaseObjectPtr Map::operator<<(BaseObjectPtr obj) {
 	GCoord coord(obj->getrow(), obj->getcol());
 	Room& room = *world[coord.parts.x][coord.parts.y];
-	BaseList& cell = room.map[coord.parts.row][coord.parts.col];
-	// impenetrable objects should be in the back of the list
+	BaseList& cell = room[coord.parts.row][coord.parts.col];
+	// non-penetrable objects should be in the back of the list
 	if (obj->is_penetrable()) {
 		cell.insert(next(cell.begin()), obj);
 	}
@@ -266,44 +278,15 @@ void Map::display(const int shift) {
 		}
 	}
 	GCoord cur_coord;
-	// clear();
 	for(int i = 0; i < MAP_HEIGHT; i++) {
 		for(int j = 0; j < MAP_WIDTH; j++) {
 			cur_coord = coords[i][j];
 			move(i + shift, j + shift);
 			Room& room = *world[cur_coord.parts.x][cur_coord.parts.y];
-			addch(room.map[cur_coord.parts.row][cur_coord.parts.col].back()->symb());
+			addch(room[cur_coord.parts.row][cur_coord.parts.col].back()->symb());
 		}
 	}
 	refresh();
-}
-
-ostream& operator<<(ostream& display, Map& m) {
-	// static GCoord coords[MAP_HEIGHT][MAP_WIDTH];
-	for(int i = m.upper_left_corner.row, ii = 0; i <= m.bottom_rgt_corner.row; i++, ii++) {
-		for(int j = m.upper_left_corner.col, jj = 0; j <= m.bottom_rgt_corner.col; j++, jj++) {
-			// coords[ii][jj] = GCoord(i, j);
-		}
-	}
-	// GCoord cur_coord;
-	for(int i = 0; i < MAP_HEIGHT; i++) {
-		for(int j = 0; j < MAP_WIDTH; j++) {
-			// cur_coord = coords[i][j];
-			// Room& room = *m.world[cur_coord.parts.x][cur_coord.parts.y];
-			// display << room.map[cur_coord.parts.row][cur_coord.parts.col].back()->color();
-			// display << room.map[cur_coord.parts.row][cur_coord.parts.col].back()->symbol();
-		}
-		// display << Colored() << endl;
-	}
-	return display;
-}
-
-int Map::get_height() {
-	return height;
-}
-
-int Map::get_width() {
-	return width;
 }
 
 IntIntPairList Map::shortest_way(IntIntPair from, IntIntPair to, int max_length) {
@@ -320,10 +303,9 @@ IntIntPairList Map::shortest_way(IntIntPair from, IntIntPair to, int max_length)
 	IntIntPair target;
 	temp_way.push_back(IntIntPair(r, c));
 	while (temp_way.size() > 0) {
-		log("shortest");
 		r = temp_way.front().first;
 		c = temp_way.front().second;
-		if (abs(r - to.first) <= 1 && abs(c - to.second) <= 1) {
+		if ((abs(r - to.first) <= 1 && abs(c - to.second) <= 1) || d >= max_length) {
 			found = true;
 			target = IntIntPair(r, c);
 			break;
@@ -336,7 +318,7 @@ IntIntPairList Map::shortest_way(IntIntPair from, IntIntPair to, int max_length)
 					continue;
 				}
 				crd = GCoord(r + i, c + j);
-				if (is_on_the_map(crd) && get_distance(crd) == 0 && is_penetrable(GCoord(crd))) {
+				if (is_on_the_map(crd) && get_distance(crd) == 0 && is_penetrable(crd)) {
 					temp_way.push_back(IntIntPair(r + i, c + j));
 					set_distance(crd, d + 1);
 				}
@@ -370,14 +352,6 @@ IntIntPairList Map::shortest_way(IntIntPair from, IntIntPair to, int max_length)
 	}
 	distance.clear();
 	return way;
-}
-
-void Map::set_distance(GCoord acoord, int value) {
-	distance[cantor_pairing(acoord)] = value;
-}
-
-int Map::get_distance(GCoord acoord) {
-	return distance[cantor_pairing(acoord)];
 }
 
 BaseObjectPtr Map::nearest_symb(GCoord from, std::string targets, int max_length) {
@@ -430,21 +404,27 @@ bool Map::is_penetrable(GCoord acoord) {
 	return map(acoord.row, acoord.col).back()->is_penetrable();
 }
 
-bool Map::is_far(BaseObjectPtr obj1, BaseObjectPtr obj2) {
+bool Map::is_far(BaseObjectPtr obj1, BaseObjectPtr obj2, int distance) {
 	return 
-		abs(obj1->get_coord().parts.x - obj2->get_coord().parts.x) > 1 ||
-		abs(obj1->get_coord().parts.y - obj2->get_coord().parts.y) > 1;
+		abs(obj1->get_coord().parts.x - obj2->get_coord().parts.x) >= distance ||
+		abs(obj1->get_coord().parts.y - obj2->get_coord().parts.y) >= distance;
 }
 
-BaseList& Map::map(const int arow, const int acol) {
-	GCoord coord(arow, acol);
-	Room& room = *world[coord.parts.x][coord.parts.y];
-	return room.map[coord.parts.row][coord.parts.col];
+bool Map::is_out_of_display(BaseObjectPtr obj) {
+	return
+		obj->get_coord().row < upper_left_corner.row ||
+		obj->get_coord().col < upper_left_corner.col ||
+		obj->get_coord().row > bottom_rgt_corner.row ||
+		obj->get_coord().col > bottom_rgt_corner.col;
 }
 
 BaseList& Map::map(GCoord acoord) {
 	Room& room = *world[acoord.parts.x][acoord.parts.y];
-	return room.map[acoord.parts.row][acoord.parts.col];
+	return room[acoord.parts.row][acoord.parts.col];
+}
+
+BaseList& Map::map(const int arow, const int acol) {
+	return map(GCoord(arow, acol));
 }
 
 BaseList& Map::operator()(const int row, const int col) {
@@ -457,4 +437,20 @@ BaseList& Map::operator()(GCoord acoord) {
 
 bool Map::is_on_the_map(GCoord acoord) {
 	return is_room_exists[cantor_pairing(acoord.parts.x, acoord.parts.y)];
+}
+
+void Map::show_global_map() {
+
+}
+
+void Map::set_distance(GCoord acoord, int value) {
+	distance[cantor_pairing(acoord)] = value;
+}
+
+int Map::get_distance(GCoord acoord) {
+	return distance[cantor_pairing(acoord)];
+}
+
+void Map::remove(BaseObjectPtr obj) {
+	(*this)(obj->get_prev()).remove(obj);
 }

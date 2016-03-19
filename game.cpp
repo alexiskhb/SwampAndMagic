@@ -39,16 +39,22 @@ struct {
 
 	void kill_died_characters_objects() {
 		for(auto obj: dyn_objects) {
+			if (map->is_far(knight, obj, 2)) {
+				obj->destroy();
+			}
 			if (map->is_on_the_map(obj->get_coord())) {
-				(*map)(obj->get_prev()).remove(obj);
+				map->remove(obj);
 				if (obj->is_alive()) {
 					*map << obj;
 				}
 			}
 		}
 		for(auto ch: characters) {
+			if (map->is_far(knight, ch, 2)) {
+				ch->destroy();
+			}
 			if (ch->hitpoints() <= 0) {
-				(*map)(ch->get_coord()).remove(ch);
+				map->remove(ch);
 			}
 		}
 		characters.remove_if([&](CharacterPtr ch) {
@@ -65,19 +71,19 @@ struct {
 		CharacterBoolMap did_attack;
 		for(auto ch_iter = std::next(characters.begin()); ch_iter != characters.end(); ch_iter++) {
 			auto ch = *ch_iter;
-			if (map->is_far(knight, ch)) {
+			if (map->is_out_of_display(ch)) {
 				continue;
 			}
 			did_attack.insert(CharacterBoolPair(ch, ch->attack(characters, dyn_objects, *map)));
 		}
 		did_attack.insert(CharacterBoolPair(knight, knight->attack(characters, dyn_objects, *map)));
 		for(auto obj: dyn_objects) {
-			if (map->is_far(knight, obj)) {
+			if (map->is_out_of_display(obj)) {
 				continue;
 			}
 			if (map->is_on_the_map(obj->get_coord())) {
 				obj->impact(characters, dyn_objects, *map);
-				(*map)(obj->getrow(), obj->getcol()).remove(obj);
+				map->remove(obj);
 				*map << obj;
 				obj->make_turn();
 			}
@@ -87,7 +93,7 @@ struct {
 			}
 		}
 		for(auto ch: characters) {
-			if (map->is_far(knight, ch)) {
+			if (map->is_out_of_display(ch)) {
 				continue;
 			}
 			if (!did_attack[ch]) {
@@ -105,7 +111,7 @@ struct {
 				else {
 					// here we attach a cell to character
 					// so other characters can not step on it
-					(*map)(ch->get_prev()).remove(ch);
+					map->remove(ch);
 					*map << ch;
 				}
 			}
@@ -122,18 +128,23 @@ struct {
 
 	inline void render() {
 		int shift = 2;
+
 		status = "(" + std::to_string(princess->getcol()) + ", " + std::to_string(-princess->getrow()) + ")";
 		gprint(shift-1, shift + MAP_WIDTH - status.size(), status.c_str());
+
 		map->display(shift);
-		BaseObjectPtr obj = 
-			map->nearest_symb(
+
+		BaseObjectPtr obj = map->nearest_symb(
 				knight->get_coord(), 
 				std::string(ENEMIES), 
 				std::min(MAP_HEIGHT, MAP_WIDTH)/2);
+
 		status = "HP: " + std::to_string(characters.front()->hitpoints());
 		gprint(MAP_HEIGHT+shift, MAP_WIDTH/2 - status.size()/2 - status.size()%2, status.c_str());
+
 		status = "(" + std::to_string(knight->getcol()) + ", " + std::to_string(-knight->getrow()) + ")";
 		gprint(MAP_HEIGHT+shift, shift + MAP_WIDTH - status.size(), status.c_str());
+
 		status = "NEAREST CHARACTER: " + std::to_string(obj->hitpoints());
 		gprint(MAP_HEIGHT+shift+1, MAP_WIDTH/2 - status.size()/2 - status.size()%2, status.c_str());
 	}
@@ -150,16 +161,19 @@ struct {
 
 	void init() {
 		srand(time(0));
+
 		map = std::make_shared<Map>(relief);
 		map->create_room(0, 0, dyn_objects);
 		knight = std::make_shared<Knight>(GCoord(MAP_HEIGHT/2, MAP_WIDTH/2), HP_KNIGHT, DMG_KN_SWORD);
 		knight->moveto(map->nearest_symb(knight->get_coord(), " ", MAP_HEIGHT)->get_coord());
-		int pr_row = rand()%400 - 200;
-		int pr_col = rand()%400 - 200;
+
+		int pr_row = rand()%200 - 100; pr_row += pr_row > 0 ? 100 : -100;
+		int pr_col = rand()%200 - 100; pr_col += pr_col > 0 ? 100 : -100;
 		GCoord pr_coord = GCoord(pr_row, pr_col);
 		map->create_room(pr_coord.parts.x, pr_coord.parts.y, dyn_objects);
 		pr_coord = map->nearest_symb(pr_coord, std::string(1, SYM_EMPTY), MAP_HEIGHT/2)->get_coord();
 		princess = std::make_shared<Princess>(pr_coord, HP_PRINCESS, DMG_PRINCESS);
+		
 		BaseObject::turn = 0;
 		initscr();
 		keypad(stdscr, true);

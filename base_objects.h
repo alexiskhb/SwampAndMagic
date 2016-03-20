@@ -76,6 +76,10 @@ typedef std::map<unsigned int, bool> UIntBoolMap;
 
 typedef std::pair<unsigned int, bool> UIntBoolPair;
 
+typedef std::pair<BaseObjectPtr, chtype> GMapSpecPair;
+
+typedef std::list<GMapSpecPair> GMapSpecialList;
+
 
 
 extern unsigned int cantor_pairing(const int a, const int b);
@@ -203,7 +207,7 @@ public:
 
 	void display(int shift);
 
-	void show_global_map();
+	void show_global_map(GMapSpecialList& gmsl, int drawrow, int drawcol);
 
 	bool is_far(BaseObjectPtr obj1, BaseObjectPtr obj2, int distance);
 

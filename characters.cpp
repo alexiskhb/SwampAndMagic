@@ -84,54 +84,55 @@ void Knight::magic(list<ObjectPtr>& objects, char direction) {
 	int* di = di_around;
 	int* dj = dj_around;
 	switch (direction) {
+		break;
 		case CMD_NUP: 
 		case CMD_UP: 
 			di = di_dec;
 			dj = consts;
-			break;	
-		
+
+		break;
 		case CMD_NDOWN: 
 		case CMD_DOWN: 
 			di = di_inc;
 			dj = consts;
-			break;
-		
+
+		break;
 		case CMD_NLEFT: 
 		case CMD_LEFT: 
 			di = consts;
 			dj = dj_dec;
-			break;
-		
+
+		break;
 		case CMD_NRIGHT: 
 		case CMD_RIGHT: 
 			di = consts;
 			dj = dj_inc;
-			break;
-		
+
+		break;
 		case CMD_NLUP: 
 		case CMD_LUP: 
 			di = di_dec;
 			dj = dj_dec;
-			break;	
-		
+
+		break;
 		case CMD_NLDOWN: 
 		case CMD_LDOWN: 
 			di = di_inc;
 			dj = dj_dec;
-			break;
-		
+
+		break;
 		case CMD_NRUP: 
 		case CMD_RUP: 
 			di = di_dec;
 			dj = dj_inc;
-			break;
-		
+
+		break;
 		case CMD_NRDOWN: 
 		case CMD_RDOWN: 
 			di = di_inc;
 			dj = dj_inc;
-			break;
-		
+
+		break;
 		case CMD_NAROUND: 
 		case CMD_AROUND: 
 			di = di_around;
@@ -156,17 +157,20 @@ bool Knight::attack(list<CharacterPtr>& characters, list<ObjectPtr>& objects, Ma
 		return false;
 	}	
 	switch (action) {
+		break;
 		case CMD_ATTACK: {
 			slash(characters);
 			prev_coord = coord;
 			return true;	
 		}
+		break;
 		case CMD_MAGIC: {
 			char direction = get_command();
 			magic(objects, direction);
 			prev_coord = coord;
 			return true;
 		}
+		break;
 		case CMD_QUIT: {
 			health = 0;
 		}
@@ -188,49 +192,58 @@ bool Knight::move(Map& m, std::list<CharacterPtr>& characters) {
 		action = moved_on_attack;
 	}
 	switch (action) { 
+		break;
 		case CMD_NUP: 
 		case CMD_UP:
 			--coord.row;
 			return true;	
 		
+		break;
 		case CMD_NDOWN: 
 		case CMD_DOWN: 
 			++coord.row;
 			return true;
 		
+		break;
 		case CMD_NAROUND: 
 		case CMD_AROUND: 
 			++coord.row;
 			return true;
 		
+		break;
 		case CMD_NLEFT: 
 		case CMD_LEFT: 
 			--coord.col;
 			return true;
 		
+		break;
 		case CMD_NRIGHT: 
 		case CMD_RIGHT: 
 			++coord.col;
 			return true;
 		
+		break;
 		case CMD_NLUP: 
 		case CMD_LUP: 
 			--coord.row;
 			--coord.col;
 			return true;	
 		
+		break;
 		case CMD_NLDOWN: 
 		case CMD_LDOWN: 
 			++coord.row;
 			--coord.col;
 			return true;
 		
+		break;
 		case CMD_NRUP: 
 		case CMD_RUP: 
 			--coord.row;
 			++coord.col;
 			return true;
 		
+		break;
 		case CMD_NRDOWN: 
 		case CMD_RDOWN: 
 			++coord.row;

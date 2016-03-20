@@ -31,7 +31,13 @@ struct {
 	
 	std::string status;
 
+	GMapSpecialList glob_map_special;
+
 	Mode mode;
+
+	struct {
+		bool show_dynamic_glob_map = false;
+	} Settings;
 
 
 	bool is_over() {
@@ -207,12 +213,16 @@ struct {
 		init_pair(ID_ZIGGURAT , COLOR_WHITE , COLOR_BLACK  );
 
 		mode = M_GAME;
+
+		glob_map_special.push_back(GMapSpecPair(knight, knight->symb()));
+		glob_map_special.push_back(GMapSpecPair(princess, princess->symb()));
 	}
 
 	void stop() {
 		characters.clear();
 		dyn_objects.clear();
 		relief.clear();
+		glob_map_special.clear();
 	}
 
 	void main_cycle() {
@@ -220,13 +230,34 @@ struct {
 		while (!is_over()) {
 			mode = Control::instance().put_command();
 			switch (mode) {
+				break;
 				case M_GAME: {
 					next_turn();
 	 				render();
+	 				if (Settings.show_dynamic_glob_map) {
+	 					map->show_global_map(glob_map_special, 2, MAP_WIDTH + 4);
+	 				}
 				}
+				break;
 				case M_MAP: {
-					map->show_global_map();
-				} 
+					clear();
+					map->show_global_map(glob_map_special, 4, 4);
+				}
+				break;
+				case M_SETTINGS: {
+					char sg = Control::instance().get_command();
+					switch (sg) {
+						break;
+						case CMD_MAP: {
+							if ((Settings.show_dynamic_glob_map = !Settings.show_dynamic_glob_map)) {
+								map->show_global_map(glob_map_special, 2, MAP_WIDTH + 4);
+							}
+							else {
+								render();
+							}
+						}
+					}
+				}
 			}	 		
 	 	}
 	 	render();

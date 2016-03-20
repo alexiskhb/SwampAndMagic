@@ -4,36 +4,38 @@
 #include <curses.h>
 
 static const char 
-	CMD_UP      = 'w',
-	CMD_DOWN    = 'x',
-	CMD_LEFT    = 'a',
-	CMD_RIGHT   = 'd',
-	CMD_LUP     = 'q',
-	CMD_LDOWN   = 'z',
-	CMD_RUP     = 'e',
-	CMD_RDOWN   = 'c',
-	CMD_AROUND  = 's',
-	CMD_NUP     = '8',
-	CMD_NDOWN   = '2',
-	CMD_NLEFT   = '4',
-	CMD_NRIGHT  = '6',
-	CMD_NLUP    = '7',
-	CMD_NLDOWN  = '1',
-	CMD_NRUP    = '9',
-	CMD_NRDOWN  = '3',
-	CMD_NAROUND = '5',
-	CMD_ATTACK  = 'f',
-	CMD_MAGIC   = 'r',
-	CMD_NONE    = 'n',
-	CMD_QUIT    = 'Q',
-	CMD_REPLAY  = 'R',
-	CMD_MAP     = 'M';
+	CMD_UP       = 'w',
+	CMD_DOWN     = 'x',
+	CMD_LEFT     = 'a',
+	CMD_RIGHT    = 'd',
+	CMD_LUP      = 'q',
+	CMD_LDOWN    = 'z',
+	CMD_RUP      = 'e',
+	CMD_RDOWN    = 'c',
+	CMD_AROUND   = 's',
+	CMD_NUP      = '8',
+	CMD_NDOWN    = '2',
+	CMD_NLEFT    = '4',
+	CMD_NRIGHT   = '6',
+	CMD_NLUP     = '7',
+	CMD_NLDOWN   = '1',
+	CMD_NRUP     = '9',
+	CMD_NRDOWN   = '3',
+	CMD_NAROUND  = '5',
+	CMD_ATTACK   = 'f',
+	CMD_MAGIC    = 'r',
+	CMD_NONE     = 'n',
+	CMD_QUIT     = 'Q',
+	CMD_REPLAY   = 'R',
+	CMD_MAP      = 'M',
+	CMD_SETTINGS = '.';
 
 static const char* STR_MOVES  = "wasdqezcx";
 
 enum Mode {
-	M_GAME = 1,
-	M_MAP  = 2
+	M_GAME     = 1,
+	M_MAP      = 2,
+	M_SETTINGS = 3
 };
 
 
@@ -65,6 +67,10 @@ public:
 				commands.push_back(CMD_MAGIC);
 				put_second(CMD_MAGIC);
 				return M_GAME;
+			}
+			case CMD_SETTINGS: {
+				put_second(CMD_SETTINGS);
+				return M_SETTINGS;
 			}
 		}
 		commands.push_back(c);

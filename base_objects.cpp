@@ -439,8 +439,25 @@ bool Map::is_on_the_map(GCoord acoord) {
 	return is_room_exists[cantor_pairing(acoord.parts.x, acoord.parts.y)];
 }
 
-void Map::show_global_map() {
-
+void Map::show_global_map(GMapSpecialList& glob_map_spec, int drawrow, int drawcol) {
+	int most_left = world.most_left_used();
+	int most_up   = world.most_up_used();
+	int x, y;
+	chtype ch = SYM_WALL | COLOR_PAIR(ID_WALL);
+	for(auto room = world.begin(); room != world.end(); ++room) {
+		x = room->get_coord().parts.x;
+		y = room->get_coord().parts.y;
+		move(drawrow + y - most_up, drawcol + x - most_left);
+		addch(ch);
+	}
+	for(auto p: glob_map_spec) {
+		x = p.first->get_coord().parts.x;
+		y = p.first->get_coord().parts.y;
+		ch = p.second;
+		move(drawrow + y - most_up, drawcol + x - most_left);
+		addch(ch);
+	}
+	refresh();
 }
 
 void Map::set_distance(GCoord acoord, int value) {

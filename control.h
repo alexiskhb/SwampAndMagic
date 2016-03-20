@@ -29,10 +29,67 @@ static const char
 	CMD_REPLAY  = 'R',
 	CMD_MAP     = 'M';
 
+static const char* STR_MOVES  = "wasdqezcx";
 
-static struct {
+enum Mode {
+	M_GAME = 1,
+	M_MAP  = 2
+};
+
+
+class Control {
 public:
-	
+	static Control& instance() {
+		static Control inst;
+		return inst;
+	}
+
+	char get_command() {
+		if (commands.size() > 0) {
+			char result = commands.front();
+			commands.erase(0, 1);
+			return result;
+		}
+		else {
+			return CMD_QUIT;
+		}
+	}
+
+	Mode put_command() {
+		char c = getch();
+		switch (c) {
+			case CMD_MAP: {
+				return M_MAP;
+			}
+			case CMD_MAGIC: {
+				commands.push_back(CMD_MAGIC);
+				put_second(CMD_MAGIC);
+				return M_GAME;
+			}
+		}
+		commands.push_back(c);
+		return M_GAME;
+	}
+
+	void clear() {
+		commands.clear();
+	}
 private:
+	Control() {
+	}
+
+	void put_second(char first) {
+		char c = getch();
+		switch (first) {
+			case CMD_MAGIC: {
+				if (std::string(STR_MOVES).find(c) == std::string::npos) {
+					c = CMD_AROUND;
+				}
+				break;
+			}
+		}
+		commands.push_back(c);
+	}
+
 	std::string commands;
-} Control;
+};

@@ -3,7 +3,6 @@
 #include <curses.h>
 #include "control.h"
 
-static const char* STR_MOVES  = "wasdqezcx"; 
 
 using namespace std;
 
@@ -151,7 +150,7 @@ bool Knight::attack(list<CharacterPtr>& characters, list<ObjectPtr>& objects, Ma
 	static std::string moves(STR_MOVES);
 	moved_on_attack = CMD_NONE;
 	char action = get_command();
-	// condition means player wants to move
+	// This condition means there is one of WASDQEZXC in moves
 	if (moves.find(action) != std::string::npos) {
 		moved_on_attack = action;
 		return false;
@@ -176,7 +175,7 @@ bool Knight::attack(list<CharacterPtr>& characters, list<ObjectPtr>& objects, Ma
 }
 
 char Knight::get_command() {
-	return getch();
+	return Control::instance().get_command();
 }
 
 bool Knight::move(Map& m, std::list<CharacterPtr>& characters) {
@@ -268,7 +267,7 @@ bool Princess::move(Map& m, std::list<CharacterPtr>& characters) {
 }
 
 void Princess::destroy() {
-	
+
 }
 
 

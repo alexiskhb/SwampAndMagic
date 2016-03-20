@@ -453,4 +453,5 @@ int Map::get_distance(GCoord acoord) {
 
 void Map::remove(BaseObjectPtr obj) {
 	(*this)(obj->get_prev()).remove(obj);
+	(*this)(obj->get_coord()).remove(obj);
 }

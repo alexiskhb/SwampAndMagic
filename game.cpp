@@ -17,24 +17,29 @@ typedef std::pair<CharacterPtr, bool> CharacterBoolPair;
 
 
 struct {
-	// CHARACTERS
-	// first : player(knight)
-	// next  : princess
-	// >2    : monsters
 	std::list<CharacterPtr> characters;
+	
 	std::list<ObjectPtr> dyn_objects;
+	
 	std::list<BaseObjectPtr> relief;
+	
 	CharacterPtr knight;
+	
 	CharacterPtr princess;
+	
 	MapPtr map;
+	
 	std::string status;
+
+	Mode mode;
+
 
 	bool is_over() {
 		return characters.size() < 2 || knight->hitpoints() <= 0 || princess->hitpoints() <= 0;
 	}
 
-	bool is_lose() {
-		return knight->hitpoints() <= 0 || princess->hitpoints() <= 0;
+	bool is_win() {
+		return *knight % *princess;
 	}
 
 	void kill_died_characters_objects() {
@@ -44,9 +49,9 @@ struct {
 			}
 			if (map->is_on_the_map(obj->get_coord())) {
 				map->remove(obj);
-				if (obj->is_alive()) {
-					*map << obj;
-				}
+			}
+			if (obj->is_alive()) {
+				*map << obj;
 			}
 		}
 		for(auto ch: characters) {
@@ -161,7 +166,6 @@ struct {
 
 	void init() {
 		srand(time(0));
-
 		map = std::make_shared<Map>(relief);
 		map->create_room(0, 0, dyn_objects);
 		knight = std::make_shared<Knight>(GCoord(MAP_HEIGHT/2, MAP_WIDTH/2), HP_KNIGHT, DMG_KN_SWORD);
@@ -173,6 +177,11 @@ struct {
 		map->create_room(pr_coord.parts.x, pr_coord.parts.y, dyn_objects);
 		pr_coord = map->nearest_symb(pr_coord, std::string(1, SYM_EMPTY), MAP_HEIGHT/2)->get_coord();
 		princess = std::make_shared<Princess>(pr_coord, HP_PRINCESS, DMG_PRINCESS);
+		
+		characters.push_front(knight);
+		*map << knight;
+
+		put_character(princess);
 		
 		BaseObject::turn = 0;
 		initscr();
@@ -196,9 +205,8 @@ struct {
 		init_pair(ID_DRGNEST  , COLOR_WHITE , COLOR_RED    );
 		init_pair(ID_GRVYARD  , COLOR_WHITE , COLOR_GREEN  );
 		init_pair(ID_ZIGGURAT , COLOR_WHITE , COLOR_BLACK  );
-		
-		put_character(knight);
-		put_character(princess);
+
+		mode = M_GAME;
 	}
 
 	void stop() {
@@ -210,8 +218,16 @@ struct {
 	void main_cycle() {
 		render();
 		while (!is_over()) {
-	 		next_turn();
-	 		render();	 		
+			mode = Control::instance().put_command();
+			switch (mode) {
+				case M_GAME: {
+					next_turn();
+	 				render();
+				}
+				case M_MAP: {
+					map->show_global_map();
+				} 
+			}	 		
 	 	}
 	 	render();
 	}

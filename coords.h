@@ -20,16 +20,16 @@ int sgn0(Type val) {
 
 
 struct Coord {
-	Coord() : x(ST_ROOM), y(ST_ROOM), row(ST_CELL), col(ST_CELL) {
+	Coord() : x(ST_ROOM), y(ST_ROOM), frow(ST_CELL), fcol(ST_CELL) {
 	}
 
-	Coord(const Coord& other) : x(other.x), y(other.y), row(other.row), col(other.col) {
+	Coord(const Coord& other) : x(other.x), y(other.y), frow(other.frow), fcol(other.fcol) {
 	}
 
-	Coord(const int a, const int b) : x(a), y(b), row(a), col(b) {
+	Coord(const int a, const int b) : x(a), y(b), frow(a), fcol(b) {
 	}
 
-	Coord(const int ax, const int ay, const int arow, const int acol) : x(ax), y(ay), row(arow), col(acol) {
+	Coord(const int ax, const int ay, const int afrow, const int afcol) : x(ax), y(ay), frow(afrow), fcol(afcol) {
 	}
 
 	~Coord() {
@@ -38,80 +38,103 @@ struct Coord {
 	Coord& operator=(const Coord& other) {
 		x   = other.x;
 		y   = other.y;
-		row = other.row;
-		col = other.col;
+		frow = other.frow;
+		fcol = other.fcol;
 		return *this;
 	}
 	// Room coordinates
 	int x, y;
 	// Cell coordinates
-	int row, col;
+	int frow, fcol;
 };
 
 struct GCoord {
-	GCoord() : row(ST_CELL), col(ST_CELL) {
+	GCoord() : frow(ST_CELL), fcol(ST_CELL) {
 
 	}
 
 	GCoord(const GCoord& other) :
-		row(other.row),
-		col(other.col),
+		frow(other.frow),
+		fcol(other.fcol),
 		parts(other.parts) {
 	}
 
-	GCoord(const int arow, const int acol) : row(arow), col(acol) {
-		recalculate(arow, acol);
+	GCoord(const int afrow, const int afcol) : frow(afrow), fcol(afcol) {
+		recalculate(afrow, afcol);
 	}
 
 	GCoord(const Coord c) : parts(c) {
 		// Translate cell's (0;0) to global coordinates
-		int grow_st = c.y*MAP_HEIGHT;
-		int gcol_st = c.x*MAP_WIDTH;
+		int gfrow_st = c.y*MAP_HEIGHT;
+		int gfcol_st = c.x*MAP_WIDTH;
 
-		row = grow_st + c.row;
-		col = gcol_st + c.col;
+		frow = gfrow_st + c.frow;
+		fcol = gfcol_st + c.fcol;
 	}
 
 	~GCoord() {
 	}
 
-	void recalculate(const int arow, const int acol) {
-		row = arow;
-		col = acol;
+	void recalculate(const int afrow, const int afcol) {
+		frow = afrow;
+		fcol = afcol;
 
-		int absrow = abs(arow);
-		int abscol = abs(acol);
+		int absfrow = abs(afrow);
+		int absfcol = abs(afcol);
 		
-		parts.y = ((absrow - (arow < 0 ? 1 : 0))/MAP_HEIGHT + 1)*sgn(arow);
-		parts.x = ((abscol - (acol < 0 ? 1 : 0))/MAP_WIDTH  + 1)*sgn(acol);
-		parts.y -= (arow >= 0 ? 1 : 0);
-		parts.x -= (acol >= 0 ? 1 : 0);
+		parts.y = ((absfrow - (afrow < 0 ? 1 : 0))/MAP_HEIGHT + 1)*sgn(afrow);
+		parts.x = ((absfcol - (afcol < 0 ? 1 : 0))/MAP_WIDTH  + 1)*sgn(afcol);
+		parts.y -= (afrow >= 0 ? 1 : 0);
+		parts.x -= (afcol >= 0 ? 1 : 0);
 	
-		parts.row = arow >= 0 ? absrow%MAP_HEIGHT : MAP_HEIGHT - 1 - (absrow-1)%MAP_HEIGHT;
-		parts.col = acol >= 0 ? abscol%MAP_WIDTH  : MAP_WIDTH  - 1 - (abscol-1)%MAP_WIDTH;
+		parts.frow = afrow >= 0 ? absfrow%MAP_HEIGHT : MAP_HEIGHT - 1 - (absfrow-1)%MAP_HEIGHT;
+		parts.fcol = afcol >= 0 ? absfcol%MAP_WIDTH  : MAP_WIDTH  - 1 - (absfcol-1)%MAP_WIDTH;
 	}
 
 	GCoord operator+(const GCoord& other) const {
-		return GCoord(row + other.row, col + other.col);
+		return GCoord(frow + other.frow, fcol + other.fcol);
 	}
 
 	GCoord& operator+=(const GCoord& other) {
-		recalculate(row + other.row, col + other.col);
+		recalculate(frow + other.frow, fcol + other.fcol);
 		return *this;
 	}
 
 	GCoord operator-(const GCoord& other) const {
-		return GCoord(row - other.row, col - other.col);
+		return GCoord(frow - other.frow, fcol - other.fcol);
 	}
 
 	GCoord& operator=(const GCoord& other) {
-		row = other.row;
-		col = other.col;
+		frow = other.frow;
+		fcol = other.fcol;
 		parts = other.parts;
 		return *this;
 	}
 
-	// Global coordinates
-	int row, col;
+	int row() const {
+		return frow;
+	}
+
+	int col() const {
+		return fcol;
+	}
+
+	int cellrow() const {
+		return parts.frow;
+	}
+
+	int cellcol() const {
+		return parts.fcol;
+	}
+
+	int roomx() const {
+		return parts.x;
+	}
+
+	int roomy() const {
+		return parts.y;
+	}
+private:
+	int frow, fcol;
 	Coord parts;
 };

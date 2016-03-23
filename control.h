@@ -28,6 +28,7 @@ static const char
 	CMD_QUIT     = 'Q',
 	CMD_REPLAY   = 'R',
 	CMD_MAP      = 'M',
+	CMD_COORD    = 'C',
 	CMD_SETTINGS = '.';
 
 static const char* STR_MOVES  = "wasdqezcx";
@@ -60,14 +61,17 @@ public:
 	Mode put_command() {
 		char c = getch();
 		switch (c) {
+			break;
 			case CMD_MAP: {
 				return M_MAP;
 			}
+			break;
 			case CMD_MAGIC: {
 				commands.push_back(CMD_MAGIC);
 				put_second(CMD_MAGIC);
 				return M_GAME;
 			}
+			break;
 			case CMD_SETTINGS: {
 				put_second(CMD_SETTINGS);
 				return M_SETTINGS;
@@ -87,11 +91,11 @@ private:
 	void put_second(char first) {
 		char c = getch();
 		switch (first) {
+			break;
 			case CMD_MAGIC: {
 				if (std::string(STR_MOVES).find(c) == std::string::npos) {
 					c = CMD_AROUND;
 				}
-				break;
 			}
 		}
 		commands.push_back(c);

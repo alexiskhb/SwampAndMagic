@@ -1,13 +1,7 @@
 #include "base_objects.h"
 #include "objects.h"
 
-
 using namespace std;
-
-void log(const char* s) {
-	return;
-	fprintf(stderr, "%s\n", s);
-}
 
 int BaseObject::turn = 0;
 
@@ -21,9 +15,13 @@ unsigned int cantor_pairing(const int a, const int b) {
 }
 
 unsigned int cantor_pairing(GCoord acoord) {
-	return cantor_pairing(acoord.row, acoord.col);
+	return cantor_pairing(acoord.row(), acoord.col());
 }
 
+void log(const char* s) {
+	return;
+	fprintf(stderr, "%s\n", s);
+}
 
 bool chance(int a) {
 	a = 101 - a;
@@ -31,9 +29,8 @@ bool chance(int a) {
 	return result >= 10*a;
 }
 
-BaseObject::BaseObject() {
-	fsymb = SYM_EMPTY | COLOR_PAIR(ID_EMPTY) | A_REVERSE | A_BOLD;
-}
+
+
 
 BaseObject::BaseObject(GCoord acoord) : coord(acoord), prev_coord(acoord) {
 	fsymb = SYM_EMPTY | COLOR_PAIR(ID_EMPTY) | A_REVERSE | A_BOLD;	
@@ -46,28 +43,28 @@ BaseObject::~BaseObject() {
 // if two objects are NEAR but do not match
 bool BaseObject::operator%(const BaseObject& obj) {
 	return 
-		(abs(coord.row - obj.coord.row) <= 1 && abs(coord.col - obj.coord.col) <= 1) &&
-		!(coord.row == obj.coord.row && coord.col == obj.coord.col);
+		(abs(coord.row() - obj.coord.row()) <= 1 && abs(coord.col() - obj.coord.col()) <= 1) &&
+		!(coord.row() == obj.coord.row() && coord.col() == obj.coord.col());
 }
 
 bool BaseObject::operator==(const BaseObject& obj) {
-	return coord.row == obj.coord.row && coord.col == obj.coord.col;
+	return coord.row() == obj.coord.row() && coord.col() == obj.coord.col();
 }
 
 int BaseObject::getrow() {
-	return coord.row;
+	return coord.row();
 }
 
 int BaseObject::getcol() {
-	return coord.col;
+	return coord.col();
 }
 
 int BaseObject::prevrow() {
-	return prev_coord.row;
+	return prev_coord.row();
 }
 
 int BaseObject::prevcol() {
-	return prev_coord.col;
+	return prev_coord.col();
 }
 
 int BaseObject::hitpoints() {
@@ -122,7 +119,7 @@ bool BaseObject::is_evil() {
 
 
 
-Room::Room(GCoord acoord) : coord(acoord) {
+Room::Room(GCoord acoord) : coord(acoord), gen_randseed(0) {
 	log("room");
 }
 
@@ -130,9 +127,10 @@ Room::~Room() {
 	log("destroy room");
 }
 
-Room& Room::generate(BaseList& relief, Map& m, std::list<ObjectPtr>& objects, int steps) {
-	srand(time(0));
-	int achance = chance(70) ? 47+rand()%5 : 50+rand()%4;
+Room& Room::generate(BaseList& relief, Map& m, std::list<ObjectPtr>& objects, int steps, int seed) {
+	gen_randseed = seed;
+	srand(gen_randseed);
+	int achance = chance(50) ? 48+rand()%5 : 50+rand()%4;
 	for(int i = 0; i < MAP_HEIGHT; i++) {
 		for(int j = 0; j < MAP_WIDTH; j++) {
 			Room::map_stencil[i][j] = chance(achance);
@@ -145,7 +143,7 @@ Room& Room::generate(BaseList& relief, Map& m, std::list<ObjectPtr>& objects, in
 
 	for(int i = 0; i < MAP_HEIGHT; i++) {
 		for(int j = 0; j < MAP_WIDTH; j++) {
-			Coord c(coord.parts.x, coord.parts.y, i, j);
+			Coord c(coord.roomx(), coord.roomy(), i, j);
 			relief.push_back(make_shared<Object>(GCoord(c)));
 			m << relief.back();
 		}
@@ -154,7 +152,7 @@ Room& Room::generate(BaseList& relief, Map& m, std::list<ObjectPtr>& objects, in
 	for(int i = 0; i < MAP_HEIGHT; i++) {
 		for(int j = 0; j < MAP_WIDTH; j++) {
 			if (gen_is_wall(i, j)) {
-				Coord c(coord.parts.x, coord.parts.y, i, j);
+				Coord c(coord.roomx(), coord.roomy(), i, j);
 				relief.push_back(make_shared<Wall>(GCoord(c)));
 				m << relief.back(); 
 			}
@@ -163,17 +161,17 @@ Room& Room::generate(BaseList& relief, Map& m, std::list<ObjectPtr>& objects, in
 
 	int row = rand()%MAP_HEIGHT;
 	int col = rand()%MAP_WIDTH;
-	GCoord crd = m.nearest_symb(GCoord(Coord(coord.parts.x, coord.parts.y, row, col)), string(1, SYM_EMPTY), MAP_HEIGHT/2)->get_coord();
+	GCoord crd = m.nearest_symb(GCoord(Coord(coord.roomx(), coord.roomy(), row, col)), string(1, SYM_EMPTY), MAP_HEIGHT/2)->get_coord();
 	objects.push_back(make_shared<DragonNest>(crd));
 
 	row = rand()%MAP_HEIGHT;
 	col = rand()%MAP_WIDTH;
-	crd = m.nearest_symb(GCoord(Coord(coord.parts.x, coord.parts.y, row, col)), string(1, SYM_EMPTY), MAP_HEIGHT/2)->get_coord();
+	crd = m.nearest_symb(GCoord(Coord(coord.roomx(), coord.roomy(), row, col)), string(1, SYM_EMPTY), MAP_HEIGHT/2)->get_coord();
 	objects.push_back(make_shared<Graveyard>(crd));
 
 	row = rand()%MAP_HEIGHT;
 	col = rand()%MAP_WIDTH;
-	crd = m.nearest_symb(GCoord(Coord(coord.parts.x, coord.parts.y, row, col)), string(1, SYM_EMPTY), MAP_HEIGHT/2)->get_coord();
+	crd = m.nearest_symb(GCoord(Coord(coord.roomx(), coord.roomy(), row, col)), string(1, SYM_EMPTY), MAP_HEIGHT/2)->get_coord();
 	objects.push_back(make_shared<Ziggurat>(crd));
 	return *this;
 }
@@ -240,7 +238,7 @@ void Map::create_room(const int ax, const int ay, std::list<ObjectPtr>& objects)
 		return;
 	}
 	world[ax][ay] = std::make_shared<Room>(GCoord(Coord(ax, ay, 0, 0)));
-	world[ax][ay]->generate(relief, *this, objects, 6);
+	world[ax][ay]->generate(relief, *this, objects, 5, time(0));
 	is_room_exists[cantor_pairing(ax, ay)] = true;
 }
 
@@ -251,8 +249,8 @@ void Map::move_the_frame(GCoord shift) {
 
 BaseObjectPtr Map::operator<<(BaseObjectPtr obj) {
 	GCoord coord(obj->getrow(), obj->getcol());
-	Room& room = *world[coord.parts.x][coord.parts.y];
-	BaseList& cell = room[coord.parts.row][coord.parts.col];
+	Room& room = *world[coord.roomx()][coord.roomy()];
+	BaseList& cell = room[coord.cellrow()][coord.cellcol()];
 	// non-penetrable objects should be in the back of the list
 	if (obj->is_penetrable()) {
 		cell.insert(next(cell.begin()), obj);
@@ -264,16 +262,16 @@ BaseObjectPtr Map::operator<<(BaseObjectPtr obj) {
 }
 
 void Map::create_rooms(std::list<ObjectPtr>& objects) {
-	create_room(upper_left_corner.parts.x, upper_left_corner.parts.y, objects);
-	create_room(bottom_rgt_corner.parts.x, upper_left_corner.parts.y, objects);
-	create_room(bottom_rgt_corner.parts.x, bottom_rgt_corner.parts.y, objects);
-	create_room(upper_left_corner.parts.x, bottom_rgt_corner.parts.y, objects);
+	create_room(upper_left_corner.roomx(), upper_left_corner.roomy(), objects);
+	create_room(bottom_rgt_corner.roomx(), upper_left_corner.roomy(), objects);
+	create_room(bottom_rgt_corner.roomx(), bottom_rgt_corner.roomy(), objects);
+	create_room(upper_left_corner.roomx(), bottom_rgt_corner.roomy(), objects);
 }
 
 void Map::display(const int shift) {
 	static GCoord coords[MAP_HEIGHT][MAP_WIDTH];
-	for(int i = upper_left_corner.row, ii = 0; i <= bottom_rgt_corner.row; i++, ii++) {
-		for(int j = upper_left_corner.col, jj = 0; j <= bottom_rgt_corner.col; j++, jj++) {
+	for(int i = upper_left_corner.row(), ii = 0; i <= bottom_rgt_corner.row(); i++, ii++) {
+		for(int j = upper_left_corner.col(), jj = 0; j <= bottom_rgt_corner.col(); j++, jj++) {
 			coords[ii][jj] = GCoord(i, j);
 		}
 	}
@@ -282,8 +280,8 @@ void Map::display(const int shift) {
 		for(int j = 0; j < MAP_WIDTH; j++) {
 			cur_coord = coords[i][j];
 			move(i + shift, j + shift);
-			Room& room = *world[cur_coord.parts.x][cur_coord.parts.y];
-			addch(room[cur_coord.parts.row][cur_coord.parts.col].back()->symb());
+			Room& room = *world[cur_coord.roomx()][cur_coord.roomy()];
+			addch(room[cur_coord.cellrow()][cur_coord.cellcol()].back()->symb());
 		}
 	}
 	refresh();
@@ -356,8 +354,8 @@ IntIntPairList Map::shortest_way(IntIntPair from, IntIntPair to, int max_length)
 
 BaseObjectPtr Map::nearest_symb(GCoord from, std::string targets, int max_length) {
 	IntIntPairList deque;
-	int r = from.row;
-	int c = from.col;
+	int r = from.row();
+	int c = from.col();
 	int d = 0;
 	GCoord crd;
 	bool found = false;
@@ -395,40 +393,40 @@ BaseObjectPtr Map::nearest_symb(GCoord from, std::string targets, int max_length
 		return map(r, c).back();
 	}
 	else {
-		return map(from.row, from.col).back();
+		return map(from.row(), from.col()).back();
 	}
 }
 
 bool Map::is_penetrable(GCoord acoord) {
 	// we know that impenetrable objects should be in the back of the list
-	return map(acoord.row, acoord.col).back()->is_penetrable();
+	return map(acoord.row(), acoord.col()).back()->is_penetrable();
 }
 
 bool Map::is_far(BaseObjectPtr obj1, BaseObjectPtr obj2, int distance) {
 	return 
-		abs(obj1->get_coord().parts.x - obj2->get_coord().parts.x) >= distance ||
-		abs(obj1->get_coord().parts.y - obj2->get_coord().parts.y) >= distance;
+		abs(obj1->get_coord().roomx() - obj2->get_coord().roomx()) >= distance ||
+		abs(obj1->get_coord().roomy() - obj2->get_coord().roomy()) >= distance;
 }
 
 bool Map::is_out_of_display(BaseObjectPtr obj) {
 	return
-		obj->get_coord().row < upper_left_corner.row ||
-		obj->get_coord().col < upper_left_corner.col ||
-		obj->get_coord().row > bottom_rgt_corner.row ||
-		obj->get_coord().col > bottom_rgt_corner.col;
+		obj->get_coord().row() < upper_left_corner.row() ||
+		obj->get_coord().col() < upper_left_corner.col() ||
+		obj->get_coord().row() > bottom_rgt_corner.row() ||
+		obj->get_coord().col() > bottom_rgt_corner.col();
 }
 
 BaseList& Map::map(GCoord acoord) {
-	Room& room = *world[acoord.parts.x][acoord.parts.y];
-	return room[acoord.parts.row][acoord.parts.col];
+	Room& room = *world[acoord.roomx()][acoord.roomy()];
+	return room[acoord.cellrow()][acoord.cellcol()];
 }
 
 BaseList& Map::map(const int arow, const int acol) {
 	return map(GCoord(arow, acol));
 }
 
-BaseList& Map::operator()(const int row, const int col) {
-	return map(row, col);
+BaseList& Map::operator()(const int arow, const int acol) {
+	return map(arow, acol);
 }
 
 BaseList& Map::operator()(GCoord acoord) {
@@ -436,7 +434,7 @@ BaseList& Map::operator()(GCoord acoord) {
 }
 
 bool Map::is_on_the_map(GCoord acoord) {
-	return is_room_exists[cantor_pairing(acoord.parts.x, acoord.parts.y)];
+	return is_room_exists[cantor_pairing(acoord.roomx(), acoord.roomy())];
 }
 
 void Map::show_global_map(GMapSpecialList& glob_map_spec, int drawrow, int drawcol) {
@@ -445,14 +443,14 @@ void Map::show_global_map(GMapSpecialList& glob_map_spec, int drawrow, int drawc
 	int x, y;
 	chtype ch = SYM_WALL | COLOR_PAIR(ID_WALL);
 	for(auto room = world.begin(); room != world.end(); ++room) {
-		x = room->get_coord().parts.x;
-		y = room->get_coord().parts.y;
+		x = room->get_coord().roomx();
+		y = room->get_coord().roomy();
 		move(drawrow + y - most_up, drawcol + x - most_left);
 		addch(ch);
 	}
 	for(auto p: glob_map_spec) {
-		x = p.first->get_coord().parts.x;
-		y = p.first->get_coord().parts.y;
+		x = p.first->get_coord().roomx();
+		y = p.first->get_coord().roomy();
 		ch = p.second;
 		move(drawrow + y - most_up, drawcol + x - most_left);
 		addch(ch);

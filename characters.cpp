@@ -11,10 +11,6 @@ int dz_2[5] = {-2, -1, 0, 1, 2};
 int dz_3[7] = {-3, -2, -1, 0, 1, 2, 3};
 
 
-Character::Character(GCoord acoord) : BaseObject(acoord) {
-	log("character");
-}
-
 Character::Character(GCoord acoord, int hp, int dmg) : BaseObject(acoord) {
 	log("character");
 	damage = dmg;
@@ -37,10 +33,8 @@ bool Character::attack(list<CharacterPtr>& characters, list<ObjectPtr>& objects,
 	return false;
 }
 
-// returns True if character died
-bool Character::suffer(int dmg) {
+void Character::suffer(int dmg) {
 	health = std::min(health - dmg, max_health);
-	return health <= 0;
 }
 
 // all characters are impenetrable
@@ -52,11 +46,7 @@ bool Character::is_penetrable() {
 
 
 
-Knight::Knight(GCoord acoord) : Character(acoord) {
-	log("knight");
-}
-
-Knight::Knight(GCoord acoord, int hp, int dmg) : Character(acoord, hp, dmg) {
+Knight::Knight(GCoord acoord) : Character(acoord, HP_KNIGHT, DMG_KN_SWORD) {
 	log("knight");
 	fsymb = SYM_KNIGHT | A_BOLD | COLOR_PAIR(ID_KNIGHT);
 }
@@ -185,6 +175,7 @@ char Knight::get_command() {
 bool Knight::move(Map& m, std::list<CharacterPtr>& characters) {
 	prev_coord = coord;
 	char action;
+	GCoord delta;
 	if (moved_on_attack == CMD_NONE) {
 		action = get_command();
 	}
@@ -195,59 +186,55 @@ bool Knight::move(Map& m, std::list<CharacterPtr>& characters) {
 		break;
 		case CMD_NUP: 
 		case CMD_UP:
-			--coord.row;
+			coord += GCoord(-1, 0);
 			return true;	
 		
 		break;
 		case CMD_NDOWN: 
-		case CMD_DOWN: 
-			++coord.row;
+		case CMD_DOWN:
+			coord += GCoord(1, 0);
 			return true;
 		
 		break;
 		case CMD_NAROUND: 
-		case CMD_AROUND: 
-			++coord.row;
+		case CMD_AROUND:
+			coord += GCoord(1, 0);
 			return true;
 		
 		break;
 		case CMD_NLEFT: 
 		case CMD_LEFT: 
-			--coord.col;
+			coord += GCoord(0, -1);
 			return true;
 		
 		break;
 		case CMD_NRIGHT: 
-		case CMD_RIGHT: 
-			++coord.col;
+		case CMD_RIGHT:
+			coord += GCoord(0, 1);
 			return true;
 		
 		break;
 		case CMD_NLUP: 
-		case CMD_LUP: 
-			--coord.row;
-			--coord.col;
+		case CMD_LUP:
+			coord += GCoord(-1, -1);
 			return true;	
 		
 		break;
 		case CMD_NLDOWN: 
-		case CMD_LDOWN: 
-			++coord.row;
-			--coord.col;
+		case CMD_LDOWN:
+			coord += GCoord(1, -1);
 			return true;
 		
 		break;
 		case CMD_NRUP: 
 		case CMD_RUP: 
-			--coord.row;
-			++coord.col;
+			coord += GCoord(-1, 1);
 			return true;
 		
 		break;
 		case CMD_NRDOWN: 
 		case CMD_RDOWN: 
-			++coord.row;
-			++coord.col;
+			coord += GCoord(1, 1);
 			return true;	
 	}
 	return false;
@@ -256,12 +243,7 @@ bool Knight::move(Map& m, std::list<CharacterPtr>& characters) {
 
 
 
-Princess::Princess(GCoord acoord) : Character(acoord) {
-	log("princess");
-	fsymb = SYM_PRINCESS | A_BOLD | COLOR_PAIR(ID_PRINCESS);
-}
-
-Princess::Princess(GCoord acoord, int hp, int dmg) : Character(acoord, hp, dmg) {
+Princess::Princess(GCoord acoord) : Character(acoord, HP_PRINCESS, DMG_PRINCESS) {
 	log("princess");
 	fsymb = SYM_PRINCESS | A_BOLD | COLOR_PAIR(ID_PRINCESS);
 }
@@ -287,10 +269,6 @@ void Princess::destroy() {
 
 
 
-Monster::Monster(GCoord acoord) : Character(acoord) {
-	log("monster");
-}
-
 Monster::Monster(GCoord acoord, int hp, int dmg) : Character(acoord, hp, dmg) {
 	log("monster");
 }
@@ -303,14 +281,12 @@ bool Monster::move(Map& m, std::list<CharacterPtr>& characters) {
 	prev_coord = coord;
 	if (way.size() > 0) {
 		if (chance(70)) {
-			coord.row = way.front().first;
-			coord.col = way.front().second;
+			coord = GCoord(way.front().first, way.front().second);
 			way.pop_front();
 			return false;
 		}
 	}
-	coord.row += dz_1[rand()%3];
-	coord.col += dz_1[rand()%3];
+	coord += GCoord(dz_1[rand()%3], dz_1[rand()%3]);
 	return false;
 }
 
@@ -328,11 +304,6 @@ IntIntPairList Monster::shortest_way_to(BaseObjectPtr obj, Map& m) {
 
 
 Dragon::Dragon(GCoord acoord) : Monster(acoord, HP_DRAGON, DMG_DRAGON) {
-	log("dragon");
-	fsymb = SYM_DRAGON | A_BOLD | COLOR_PAIR(ID_DRAGON);
-}
-
-Dragon::Dragon(GCoord acoord, int hp, int dmg) : Monster(acoord, hp, dmg) {
 	log("dragon");
 	fsymb = SYM_DRAGON | A_BOLD | COLOR_PAIR(ID_DRAGON);
 }
@@ -376,11 +347,6 @@ Zombie::Zombie(GCoord acoord) : Monster(acoord, HP_ZOMBIE, DMG_ZOMBIE) {
 	fsymb = SYM_ZOMBIE | A_BOLD | COLOR_PAIR(ID_ZOMBIE);
 }
 
-Zombie::Zombie(GCoord acoord, int hp, int dmg) : Monster(acoord, hp, dmg) {
-	log("zombie");
-	fsymb = SYM_ZOMBIE | A_BOLD | COLOR_PAIR(ID_ZOMBIE);
-}
-
 Zombie::~Zombie() {
 	log("destroy zombie");
 }
@@ -409,11 +375,6 @@ Warlock::Warlock(GCoord acoord) : Monster(acoord, HP_WARLOCK, DMG_WARLOCK) {
 	fsymb = SYM_WARLOCK | A_BOLD | COLOR_PAIR(ID_WARLOCK);
 }
 
-Warlock::Warlock(GCoord acoord, int hp, int dmg) : Monster(acoord, hp, dmg) {
-	log("warlock");
-	fsymb = SYM_WARLOCK | A_BOLD | COLOR_PAIR(ID_WARLOCK);
-}
-
 Warlock::~Warlock() {
 	log("destroy warlock");
 }
@@ -438,13 +399,11 @@ bool Warlock::attack(list<CharacterPtr>& characters, list<ObjectPtr>& objects, M
 bool Warlock::move(Map& m, std::list<CharacterPtr>& characters) {
 	prev_coord = coord;
 	if (chance(20)) {
-		coord.row += dz_2[rand()%5];
-		coord.col += dz_2[rand()%5];
+		coord += GCoord(dz_2[rand()%5], dz_2[rand()%5]);
 	}
 	else {
 		if (way.size() > 0) {
-			coord.row = way.front().first;
-			coord.col = way.front().second;
+			coord = GCoord(way.front().first, way.front().second);
 			way.pop_front();
 		}
 	}
@@ -455,6 +414,6 @@ void Warlock::magic(list<CharacterPtr>& characters, list<ObjectPtr>& objects) {
 	CharacterPtr kn = characters.front();
 	GCoord dc = kn->get_coord() - coord;
 	objects.push_back(make_shared<Curse>(
-		GCoord(getrow() + sgn0(dc.row), getcol() + sgn0(dc.col)), 
-		2, GCoord(sgn0(dc.row), sgn0(dc.col))));
+		GCoord(getrow() + sgn0(dc.row()), getcol() + sgn0(dc.col())), 
+		2, GCoord(sgn0(dc.row()), sgn0(dc.col()))));
 }

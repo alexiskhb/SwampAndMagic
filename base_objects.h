@@ -17,8 +17,6 @@
 
 // map is 8-connected area
 
-void log(const char* s);
-
 static const char 
 	SYM_EMPTY    = ' ',
 	SYM_WALL     = '.',
@@ -86,12 +84,11 @@ extern unsigned int cantor_pairing(const int a, const int b);
 
 extern bool chance(int a);
 
+void log(const char* s);
 
 
 class BaseObject {
 public:
-	BaseObject();
-
 	BaseObject(GCoord acoord);
 
 	virtual ~BaseObject();
@@ -152,7 +149,7 @@ public:
 
 	~Room();
 
-	Room& generate(BaseList& relief, Map& m, std::list<ObjectPtr>& objects, int steps);
+	Room& generate(BaseList& relief, Map& m, std::list<ObjectPtr>& objects, int steps, int seed);
 
 	GCoord get_coord();
 
@@ -171,6 +168,8 @@ private:
 	static bool newmap[MAP_HEIGHT][MAP_WIDTH];
 
 	GCoord coord;
+
+	int gen_randseed;
 };
 
 

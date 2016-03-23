@@ -37,11 +37,12 @@ struct {
 
 	struct {
 		bool show_dynamic_glob_map = false;
+		bool show_coordinates      = false;
 	} Settings;
 
 
 	bool is_over() {
-		return characters.size() < 2 || knight->hitpoints() <= 0 || princess->hitpoints() <= 0;
+		return characters.size() < 2 || knight->hitpoints() <= 0 || princess->hitpoints() <= 0 || is_win();
 	}
 
 	bool is_win() {
@@ -87,6 +88,8 @@ struct {
 			}
 			did_attack.insert(CharacterBoolPair(ch, ch->attack(characters, dyn_objects, *map)));
 		}
+		// Monsters attack before the Knight does because they looking for the shortest way
+		// in this procedure. It takes a long time which player spends thinking about next move
 		did_attack.insert(CharacterBoolPair(knight, knight->attack(characters, dyn_objects, *map)));
 		for(auto obj: dyn_objects) {
 			if (map->is_out_of_display(obj)) {
@@ -120,15 +123,15 @@ struct {
 					ch->move_to_prev();
 				}
 				else {
-					// here we attach a cell to character
+					// here we attach a character to cell
 					// so other characters can not step on it
 					map->remove(ch);
 					*map << ch;
 				}
 			}
 		}
-		kill_died_characters_objects();
 		map->create_rooms(dyn_objects);
+		kill_died_characters_objects();
 	}
 
 	void gprint(int row, int col, const char* text) {
@@ -140,8 +143,11 @@ struct {
 	inline void render() {
 		int shift = 2;
 
-		status = "(" + std::to_string(princess->getcol()) + ", " + std::to_string(-princess->getrow()) + ")";
-		gprint(shift-1, shift + MAP_WIDTH - status.size(), status.c_str());
+		gprint(shift - 1, 0, " ");
+		if (Settings.show_coordinates) {
+			status = "(" + std::to_string(princess->getcol()) + ", " + std::to_string(-princess->getrow()) + ")";
+			gprint(shift - 1, shift + MAP_WIDTH - status.size(), status.c_str());
+		}
 
 		map->display(shift);
 
@@ -153,11 +159,18 @@ struct {
 		status = "HP: " + std::to_string(characters.front()->hitpoints());
 		gprint(MAP_HEIGHT+shift, MAP_WIDTH/2 - status.size()/2 - status.size()%2, status.c_str());
 
-		status = "(" + std::to_string(knight->getcol()) + ", " + std::to_string(-knight->getrow()) + ")";
-		gprint(MAP_HEIGHT+shift, shift + MAP_WIDTH - status.size(), status.c_str());
+		if (Settings.show_coordinates) {
+			status = "(" + std::to_string(knight->getcol()) + ", " + std::to_string(-knight->getrow()) + ")";
+			gprint(MAP_HEIGHT+shift, shift + MAP_WIDTH - status.size(), status.c_str());
+		}
 
 		status = "NEAREST CHARACTER: " + std::to_string(obj->hitpoints());
 		gprint(MAP_HEIGHT+shift+1, MAP_WIDTH/2 - status.size()/2 - status.size()%2, status.c_str());
+
+		if (is_win()) {
+	 		status = "And they lived happily ever after";
+			gprint(MAP_HEIGHT+shift, MAP_WIDTH/2 - status.size()/2 - status.size()%2, status.c_str());
+	 	}
 	}
 
 	void put_character(CharacterPtr ch) {
@@ -174,15 +187,15 @@ struct {
 		srand(time(0));
 		map = std::make_shared<Map>(relief);
 		map->create_room(0, 0, dyn_objects);
-		knight = std::make_shared<Knight>(GCoord(MAP_HEIGHT/2, MAP_WIDTH/2), HP_KNIGHT, DMG_KN_SWORD);
+		knight = std::make_shared<Knight>(GCoord(MAP_HEIGHT/2, MAP_WIDTH/2));
 		knight->moveto(map->nearest_symb(knight->get_coord(), " ", MAP_HEIGHT)->get_coord());
 
-		int pr_row = rand()%200 - 100; pr_row += pr_row > 0 ? 100 : -100;
-		int pr_col = rand()%200 - 100; pr_col += pr_col > 0 ? 100 : -100;
+		int pr_row = rand()%200 - 100; pr_row += pr_row > 0 ? 200 : -200;
+		int pr_col = rand()%200 - 100; pr_col += pr_col > 0 ? 200 : -200;
 		GCoord pr_coord = GCoord(pr_row, pr_col);
-		map->create_room(pr_coord.parts.x, pr_coord.parts.y, dyn_objects);
+		map->create_room(pr_coord.roomx(), pr_coord.roomy(), dyn_objects);
 		pr_coord = map->nearest_symb(pr_coord, std::string(1, SYM_EMPTY), MAP_HEIGHT/2)->get_coord();
-		princess = std::make_shared<Princess>(pr_coord, HP_PRINCESS, DMG_PRINCESS);
+		princess = std::make_shared<Princess>(pr_coord);
 		
 		characters.push_front(knight);
 		*map << knight;
@@ -233,10 +246,6 @@ struct {
 				break;
 				case M_GAME: {
 					next_turn();
-	 				render();
-	 				if (Settings.show_dynamic_glob_map) {
-	 					map->show_global_map(glob_map_special, 2, MAP_WIDTH + 4);
-	 				}
 				}
 				break;
 				case M_MAP: {
@@ -249,18 +258,20 @@ struct {
 					switch (sg) {
 						break;
 						case CMD_MAP: {
-							if ((Settings.show_dynamic_glob_map = !Settings.show_dynamic_glob_map)) {
-								map->show_global_map(glob_map_special, 2, MAP_WIDTH + 4);
-							}
-							else {
-								render();
-							}
+							Settings.show_dynamic_glob_map = !Settings.show_dynamic_glob_map;						
+						}
+						break;
+						case CMD_COORD: {
+							Settings.show_coordinates = !Settings.show_coordinates;
 						}
 					}
 				}
-			}	 		
+			}
+			render();
+			if (Settings.show_dynamic_glob_map) {
+	 			map->show_global_map(glob_map_special, 2, MAP_WIDTH + 4);
+	 		} 		
 	 	}
-	 	render();
 	}
 
 	void replay() {
@@ -270,7 +281,8 @@ struct {
 	}
 } Game;
 
-
+#include <iostream>
+using namespace std;
 int main(int argc, char** argv) {
 	freopen("log", "w", stderr);
 	Game.init();

@@ -27,8 +27,6 @@ static const std::string ENEMIES("zDW");
 
 class Character : public BaseObject {
 public:
-	Character(GCoord acoord);
-
 	Character(GCoord acoord, int hp, int dmg);
 
 	~Character() override;
@@ -37,8 +35,7 @@ public:
 
 	virtual bool attack(std::list<CharacterPtr>& characters, std::list<ObjectPtr>& objects, Map& m);
 
-	// returns True if character died
-	virtual bool suffer(int dmg);
+	virtual void suffer(int dmg);
 
 	virtual bool move(Map& m, std::list<CharacterPtr>& characters) = 0;
 
@@ -53,8 +50,6 @@ private:
 class Knight : public Character {
 public:
 	Knight(GCoord acoord);
-
-	Knight(GCoord acoord, int hp, int dmg);
 
 	~Knight() override;
 
@@ -80,8 +75,6 @@ class Princess : public Character {
 public:
 	Princess(GCoord acoord);
 
-	Princess(GCoord acoord, int hp, int dmg);
-
 	~Princess() override;
 
 	void destroy() override;
@@ -97,8 +90,6 @@ public:
 
 class Monster : public Character {
 public:
-	Monster(GCoord acoord);
-
 	Monster(GCoord acoord, int hp, int dmg);
 
 	~Monster() override;
@@ -120,8 +111,6 @@ class Dragon : public Monster {
 public:
 	Dragon(GCoord acoord);
 
-	Dragon(GCoord acoord, int hp, int dmg);
-
 	~Dragon() override;
 
 	void magic(std::list<ObjectPtr>& objects);
@@ -139,8 +128,6 @@ class Zombie : public Monster {
 public:
 	Zombie(GCoord acoord);
 
-	Zombie(GCoord acoord, int hp, int dmg);
-
 	~Zombie() override;
 
 	char symbol() override;
@@ -155,8 +142,6 @@ public:
 class Warlock : public Monster {
 public:
 	Warlock(GCoord acoord);
-
-	Warlock(GCoord acoord, int hp, int dmg);
 
 	~Warlock() override;
 

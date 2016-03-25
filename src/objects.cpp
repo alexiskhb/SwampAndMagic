@@ -185,12 +185,40 @@ char Curse::symbol() {
 }
 
 void Curse::impact(list<CharacterPtr>& characters, std::list<ObjectPtr>& objects, Map& m) {
-	static int di[4] = {-1, -1, 1, 1};
-	static int dj[4] = {-1, 1, 1, -1};
-	if (generation < 3) {
-		for(int t = 0; t < 4; t++) {
-			objects.push_front(make_shared<Curse>(GCoord(getrow() + di[t], getcol() + dj[t]), 2, generation+1, GCoord(sgn0(di[t]), sgn0(dj[t]))));
+	Coord crd1, crd2;
+	if (abs(direction.row()) == abs(direction.col())) {
+		crd1.row = 0;
+		crd2.row = direction.row();
+		crd1.col = direction.col();
+		crd2.col = 0;
+	}
+	else {
+		if (direction.row() == 0) {
+			crd1.row = -1;
+			crd2.row = 1;
+			crd1.col = crd2.col = direction.col();
 		}
+		if (direction.col() == 0) {
+			crd1.col = -1;
+			crd2.col = 1;
+			crd1.row = crd2.row = direction.row();
+		}
+	}
+	if (generation < 4) {
+		objects.push_front(make_shared<Curse>(
+			get_coord() + GCoord(crd1.row, crd1.col), 
+			2, 
+			generation+1, 
+			GCoord(crd1.row, crd1.col) 
+			)
+		);
+		objects.push_front(make_shared<Curse>(
+			get_coord() + GCoord(crd2.row, crd2.col),
+			2, 
+			generation+1, 
+			GCoord(crd2.row, crd2.col)
+			)
+		);
 	}
 	for(auto ch: characters) {
 		if (*ch == *this) {

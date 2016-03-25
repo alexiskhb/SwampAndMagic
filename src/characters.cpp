@@ -406,6 +406,11 @@ void Warlock::magic(list<CharacterPtr>& characters, list<ObjectPtr>& objects) {
 	CharacterPtr kn = characters.front();
 	GCoord dc = kn->get_coord() - coord;
 	objects.push_back(make_shared<Curse>(
-		GCoord(getrow() + sgn0(dc.row()), getcol() + sgn0(dc.col())), 
-		2, GCoord(sgn0(dc.row()), sgn0(dc.col()))));
+		GCoord(
+			getrow() + sgn0(dc.row()), 
+			getcol() + sgn0(dc.col())), 
+		2, 
+		GCoord(sgn0(dc.row()), sgn0(dc.col()))
+		)
+	);
 }

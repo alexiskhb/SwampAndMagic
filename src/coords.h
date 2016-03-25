@@ -20,16 +20,16 @@ int sgn0(Type val) {
 
 
 struct Coord {
-	Coord() : x(ST_ROOM), y(ST_ROOM), frow(ST_CELL), fcol(ST_CELL) {
+	Coord() : x(ST_ROOM), y(ST_ROOM), row(ST_CELL), col(ST_CELL) {
 	}
 
-	Coord(const Coord& other) : x(other.x), y(other.y), frow(other.frow), fcol(other.fcol) {
+	Coord(const Coord& other) : x(other.x), y(other.y), row(other.row), col(other.col) {
 	}
 
-	Coord(const int a, const int b) : x(a), y(b), frow(a), fcol(b) {
+	Coord(const int a, const int b) : x(a), y(b), row(a), col(b) {
 	}
 
-	Coord(const int ax, const int ay, const int afrow, const int afcol) : x(ax), y(ay), frow(afrow), fcol(afcol) {
+	Coord(const int ax, const int ay, const int arow, const int acol) : x(ax), y(ay), row(arow), col(acol) {
 	}
 
 	~Coord() {
@@ -38,14 +38,14 @@ struct Coord {
 	Coord& operator=(const Coord& other) {
 		x   = other.x;
 		y   = other.y;
-		frow = other.frow;
-		fcol = other.fcol;
+		row = other.row;
+		col = other.col;
 		return *this;
 	}
 	// Room coordinates
 	int x, y;
 	// Cell coordinates
-	int frow, fcol;
+	int row, col;
 };
 
 struct GCoord {
@@ -68,8 +68,8 @@ struct GCoord {
 		int gfrow_st = c.y*MAP_HEIGHT;
 		int gfcol_st = c.x*MAP_WIDTH;
 
-		frow = gfrow_st + c.frow;
-		fcol = gfcol_st + c.fcol;
+		frow = gfrow_st + c.row;
+		fcol = gfcol_st + c.col;
 	}
 
 	~GCoord() {
@@ -87,8 +87,8 @@ struct GCoord {
 		parts.y -= (afrow >= 0 ? 1 : 0);
 		parts.x -= (afcol >= 0 ? 1 : 0);
 	
-		parts.frow = afrow >= 0 ? absfrow%MAP_HEIGHT : MAP_HEIGHT - 1 - (absfrow-1)%MAP_HEIGHT;
-		parts.fcol = afcol >= 0 ? absfcol%MAP_WIDTH  : MAP_WIDTH  - 1 - (absfcol-1)%MAP_WIDTH;
+		parts.row = afrow >= 0 ? absfrow%MAP_HEIGHT : MAP_HEIGHT - 1 - (absfrow-1)%MAP_HEIGHT;
+		parts.col = afcol >= 0 ? absfcol%MAP_WIDTH  : MAP_WIDTH  - 1 - (absfcol-1)%MAP_WIDTH;
 	}
 
 	GCoord operator+(const GCoord& other) const {
@@ -120,11 +120,11 @@ struct GCoord {
 	}
 
 	int cellrow() const {
-		return parts.frow;
+		return parts.row;
 	}
 
 	int cellcol() const {
-		return parts.fcol;
+		return parts.col;
 	}
 
 	int roomx() const {

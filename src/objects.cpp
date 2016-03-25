@@ -358,10 +358,7 @@ char Hospital::symbol() {
 
 void Hospital::impact(list<CharacterPtr>& characters, std::list<ObjectPtr>& objects, Map& m) {
 	static IntIntPair paired = make_pair(get_coord().roomx(), get_coord().roomy());
-	int randrow = rand()%MAP_HEIGHT;
-	int randcol = rand()%MAP_WIDTH;
-	Coord randcrd(get_coord().roomx(), get_coord().roomy(), randrow, randcol);
-	if (turn%frequency == 0 && Medkit::count[paired] < LIM_MEDKIT && m.is_penetrable(GCoord(randcrd))) {
-		objects.push_back(std::make_shared<Medkit>(GCoord(randcrd)));
+	if (turn%frequency == 0 && Medkit::count[paired] < LIM_MEDKIT) {
+		objects.push_back(std::make_shared<Medkit>(m.get_rand_free_cell(coord)));
 	}
 }

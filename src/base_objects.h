@@ -62,6 +62,8 @@ typedef std::shared_ptr<std::list<BaseObjectPtr>> ListBaseObjPtr;
 
 typedef std::list<BaseObjectPtr> BaseList;
 
+typedef std::vector<BaseObjectPtr> BaseVector;
+
 typedef std::pair<int,int> IntIntPair;
 
 typedef std::map<IntIntPair, int> PairKeyMap;
@@ -157,6 +159,8 @@ public:
 	GCoord get_coord();
 
 	BaseList* operator[](int arow);
+
+	GCoord get_rand_free_cell();
 private:
 	int  gen_alive_count(int arow, int acol);
 
@@ -171,6 +175,8 @@ private:
 	static bool newmap[MAP_HEIGHT][MAP_WIDTH];
 
 	GCoord coord;
+
+	BaseVector free_cells;
 
 	int gen_randseed;
 };
@@ -216,6 +222,9 @@ public:
 	bool is_out_of_display(BaseObjectPtr obj);
 
 	void remove(BaseObjectPtr obj);
+
+// Returns random free cell in the same room
+	GCoord get_rand_free_cell(GCoord acoord);
 private:
 	void set_distance(GCoord acoord, int value);
 

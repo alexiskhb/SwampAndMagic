@@ -120,6 +120,7 @@ bool BaseObject::is_evil() {
 
 
 Room::Room(GCoord acoord) : coord(acoord), gen_randseed(0) {
+	free_cells.reserve(MAP_HEIGHT*MAP_WIDTH);
 	log("room");
 }
 
@@ -156,23 +157,17 @@ Room& Room::generate(BaseList& relief, Map& m, std::list<ObjectPtr>& objects, in
 				relief.push_back(make_shared<Wall>(GCoord(c)));
 				m << relief.back(); 
 			}
+			else {
+				free_cells.push_back(map[i][j].front());
+			}
 		}
 	}
 
-	int row = rand()%MAP_HEIGHT;
-	int col = rand()%MAP_WIDTH;
-	GCoord crd = m.nearest_symb(GCoord(Coord(coord.roomx(), coord.roomy(), row, col)), string(1, SYM_EMPTY), MAP_HEIGHT/2)->get_coord();
-	objects.push_back(make_shared<DragonNest>(crd));
+	objects.push_back(make_shared<DragonNest>(get_rand_free_cell()));
 
-	row = rand()%MAP_HEIGHT;
-	col = rand()%MAP_WIDTH;
-	crd = m.nearest_symb(GCoord(Coord(coord.roomx(), coord.roomy(), row, col)), string(1, SYM_EMPTY), MAP_HEIGHT/2)->get_coord();
-	objects.push_back(make_shared<Graveyard>(crd));
+	objects.push_back(make_shared<Graveyard>(get_rand_free_cell()));
 
-	row = rand()%MAP_HEIGHT;
-	col = rand()%MAP_WIDTH;
-	crd = m.nearest_symb(GCoord(Coord(coord.roomx(), coord.roomy(), row, col)), string(1, SYM_EMPTY), MAP_HEIGHT/2)->get_coord();
-	objects.push_back(make_shared<Ziggurat>(crd));
+	objects.push_back(make_shared<Ziggurat>(get_rand_free_cell()));
 
 	objects.push_back(make_shared<Hospital>(coord));
 	return *this;
@@ -218,6 +213,11 @@ void Room::gen_step() {
 
 GCoord Room::get_coord() {
 	return coord;
+}
+
+GCoord Room::get_rand_free_cell() {
+	int index = rand()%free_cells.size();
+	return free_cells.at(index)->get_coord();
 }
 
 BaseList* Room::operator[](int arow) {
@@ -464,6 +464,10 @@ void Map::set_distance(GCoord acoord, int value) {
 
 int Map::get_distance(GCoord acoord) {
 	return distance[cantor_pairing(acoord)];
+}
+
+GCoord Map::get_rand_free_cell(GCoord acoord) {
+	return world[acoord.roomx()][acoord.roomy()]->get_rand_free_cell();
 }
 
 void Map::remove(BaseObjectPtr obj) {

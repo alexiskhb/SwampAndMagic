@@ -183,26 +183,7 @@ struct {
 		*map << obj;	
 	}
 
-	void init() {
-		srand(time(0));
-		map = std::make_shared<Map>(relief);
-		map->create_room(0, 0, dyn_objects);
-		knight = std::make_shared<Knight>(GCoord(MAP_HEIGHT/2, MAP_WIDTH/2));
-		knight->moveto(map->nearest_symb(knight->get_coord(), " ", MAP_HEIGHT)->get_coord());
-
-		int pr_row = rand()%250 - 125; pr_row += pr_row > 0 ? 250 : -250;
-		int pr_col = rand()%250 - 125; pr_col += pr_col > 0 ? 250 : -250;
-		GCoord pr_coord = GCoord(pr_row, pr_col);
-		map->create_room(pr_coord.roomx(), pr_coord.roomy(), dyn_objects);
-		pr_coord = map->nearest_symb(pr_coord, std::string(1, SYM_EMPTY), MAP_HEIGHT/2)->get_coord();
-		princess = std::make_shared<Princess>(pr_coord);
-		
-		characters.push_front(knight);
-		*map << knight;
-
-		put_character(princess);
-		
-		BaseObject::turn = 0;
+	void init_curses() {
 		initscr();
 		keypad(stdscr, true);
 		noecho();
@@ -224,11 +205,32 @@ struct {
 		init_pair(ID_DRGNEST  , COLOR_WHITE , COLOR_RED    );
 		init_pair(ID_GRVYARD  , COLOR_WHITE , COLOR_GREEN  );
 		init_pair(ID_ZIGGURAT , COLOR_WHITE , COLOR_BLACK  );
+	}
 
-		mode = M_GAME;
+	void init() {
+		srand(time(0));
+		map = std::make_shared<Map>(relief);
+		map->create_room(0, 0, dyn_objects);
 
+		knight = std::make_shared<Knight>(map->get_rand_free_cell(GCoord(0, 0)));
+		characters.push_front(knight);
+		*map << knight;
+
+		int pr_row = rand()%300 - 150; pr_row += pr_row > 0 ? 300 : -300;
+		int pr_col = rand()%300 - 150; pr_col += pr_col > 0 ? 300 : -300;
+		GCoord pr_coord = GCoord(pr_row, pr_col);
+		map->create_room(pr_coord.roomx(), pr_coord.roomy(), dyn_objects);
+		princess = std::make_shared<Princess>(map->get_rand_free_cell(pr_coord));
+		put_character(princess);
+		
 		glob_map_special.push_back(GMapSpecPair(knight, knight->symb()));
 		glob_map_special.push_back(GMapSpecPair(princess, princess->symb()));
+
+		BaseObject::turn = 0;
+		mode = M_GAME;
+
+		map->move_the_frame(knight->get_coord() - GCoord(MAP_HEIGHT/2, MAP_WIDTH/2));
+		map->create_rooms(dyn_objects);
 	}
 
 	void stop() {
@@ -285,6 +287,7 @@ struct {
 
 int main(int argc, char** argv) {
 	freopen("log", "w", stderr);
+	Game.init_curses();
 	Game.init();
  	Game.main_cycle();
  	while (true) {

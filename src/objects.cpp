@@ -7,15 +7,12 @@ using namespace std;
 PairKeyMap Medkit::count;
 
 Object::Object(GCoord acoord) : BaseObject(acoord), direction(0, 0) {
-	// log("obj");
 }
 
 Object::Object(GCoord acoord, GCoord dir) : BaseObject(acoord), direction(dir) {
-	// log("obj");
 }
 
 Object::~Object() {
-	// log("destroy obj");
 }
 
 bool Object::is_penetrable() {
@@ -42,11 +39,9 @@ void Object::impact(list<CharacterPtr>& characters, std::list<ObjectPtr>& object
 
 Wall::Wall(GCoord acoord) : Object(acoord) {
 	fsymb = SYM_WALL | COLOR_PAIR(ID_WALL);
-// 	log("wall");
 }
 
 Wall::~Wall() {
-	// log("destroy wall");
 }
 
 char Wall::symbol() {
@@ -66,14 +61,12 @@ void Wall::impact(list<CharacterPtr>& characters, std::list<ObjectPtr>& objects,
 
 
 Flame::Flame(GCoord acoord) : Object(acoord) {
-	log("flame");
 	health = TIME_FLAME;
 	damage = DMG_FLAME;
 	fsymb = SYM_FLAME | A_BOLD | A_REVERSE | COLOR_PAIR(ID_FLAME);
 }
 
 Flame::~Flame() {
-	log("destroy flame");	
 }
 
 char Flame::symbol() {
@@ -94,13 +87,11 @@ void Flame::impact(list<CharacterPtr>& characters, std::list<ObjectPtr>& objects
 
 
 Swamp::Swamp(GCoord acoord) : Object(acoord) {
-	log("swamp");
 	health = TIME_SWAMP;
 	fsymb = SYM_SWAMP | A_BOLD | A_REVERSE | COLOR_PAIR(ID_SWAMP);
 }
 
 Swamp::~Swamp() {
-	log("destroy swamp");
 }
 
 char Swamp::symbol() {
@@ -117,28 +108,24 @@ void Swamp::impact(list<CharacterPtr>& characters, std::list<ObjectPtr>& objects
 
 // magic can heal knight
 Magic::Magic(GCoord acoord) : Object(acoord) {
-	log("magic");
 	health = TIME_MAGIC;
 	damage = DMG_MAGIC;
 	fsymb = SYM_MAGIC | A_BOLD | A_REVERSE | COLOR_PAIR(ID_MAGIC) | A_BOLD;
 }
 
 Magic::Magic(GCoord acoord, int timelife) : Object(acoord) {
-	log("magic");
 	health = timelife;
 	damage = DMG_MAGIC;
 	fsymb = SYM_MAGIC | A_BOLD | A_REVERSE | COLOR_PAIR(ID_MAGIC) | A_BOLD;
 }
 
 Magic::Magic(GCoord acoord, int timelife, GCoord dir) : Object(acoord, dir) {
-	log("magic");
 	health = timelife;
 	damage = DMG_MAGIC;
 	fsymb = SYM_MAGIC | A_BOLD | A_REVERSE | COLOR_PAIR(ID_MAGIC) | A_BOLD;
 }
 
 Magic::~Magic() {
-	log("destroy magic");
 }
 
 char Magic::symbol() {
@@ -167,35 +154,30 @@ void Magic::impact(list<CharacterPtr>& characters, std::list<ObjectPtr>& objects
 
 
 Curse::Curse(GCoord acoord) : Object(acoord), generation(0)  {
-	log("curse");
 	health = TIME_CURSE;
 	damage = DMG_CURSE;
 	fsymb = SYM_CURSE | A_BOLD | A_REVERSE | COLOR_PAIR(ID_CURSE);
 }
 
 Curse::Curse(GCoord acoord, int timelife) : Object(acoord), generation(0)  {
-	log("curse");
 	health = timelife;
 	damage = DMG_CURSE;
 	fsymb = SYM_CURSE | A_BOLD | A_REVERSE | COLOR_PAIR(ID_CURSE);
 }
 
 Curse::Curse(GCoord acoord, int timelife, GCoord dir) : Object(acoord, dir), generation(0)  {
-	log("curse");
 	health = timelife;
 	damage = DMG_CURSE;
 	fsymb = SYM_CURSE | A_BOLD | A_REVERSE | COLOR_PAIR(ID_CURSE) | A_BOLD;
 }
 
 Curse::Curse(GCoord acoord, int timelife, int gener, GCoord dir) : Object(acoord, dir), generation(gener) {
-	log("curse");
 	health = timelife;
 	damage = DMG_CURSE;
 	fsymb = SYM_CURSE | A_BOLD | A_REVERSE | COLOR_PAIR(ID_CURSE) | A_BOLD;
 }
 
 Curse::~Curse() {
-	log("destroy curse");
 }
 
 char Curse::symbol() {
@@ -224,7 +206,6 @@ void Curse::impact(list<CharacterPtr>& characters, std::list<ObjectPtr>& objects
 
 
 Medkit::Medkit(GCoord acoord) : Object(acoord) {
-	log("medkit");
 	health = TIME_MEDKIT;
 	damage = DMG_MEDKIT;
 	fsymb = SYM_MEDKIT | A_BOLD | A_REVERSE | COLOR_PAIR(ID_MEDKIT) | A_BOLD;
@@ -232,7 +213,6 @@ Medkit::Medkit(GCoord acoord) : Object(acoord) {
 }
 
 Medkit::Medkit(GCoord acoord, int timelife) : Object(acoord) {
-	log("medkit");
 	health = timelife;
 	damage = DMG_MEDKIT;
 	fsymb = SYM_MEDKIT | A_BOLD | A_REVERSE | COLOR_PAIR(ID_MEDKIT) | A_BOLD;
@@ -240,7 +220,6 @@ Medkit::Medkit(GCoord acoord, int timelife) : Object(acoord) {
 }
 
 Medkit::~Medkit() {
-	log("destroy medkit");
 	Medkit::count[IntIntPair(initial_coord.roomx(), initial_coord.roomy())] -= 1;
 }
 
@@ -274,13 +253,11 @@ void Spawn::destroy() {
 
 
 DragonNest::DragonNest(GCoord acoord) : Spawn(acoord, 25+rand()%15) {
-	log("dragonnest");
 	health = TIME_DRGNEST;
 	fsymb = SYM_DRGNEST | A_BOLD | A_REVERSE | COLOR_PAIR(ID_DRGNEST) | A_BOLD;
 }
 
 DragonNest::~DragonNest() {
-	log("destroy dragonnest");
 }
 
 char DragonNest::symbol() {
@@ -297,13 +274,11 @@ void DragonNest::impact(list<CharacterPtr>& characters, std::list<ObjectPtr>& ob
 
 
 Graveyard::Graveyard(GCoord acoord) : Spawn(acoord, 5+rand()%5) {
-	log("graveyard");
 	health = TIME_GRVYARD;
 	fsymb = SYM_GRVYARD | A_BOLD | A_REVERSE | COLOR_PAIR(ID_GRVYARD) | A_BOLD;
 }
 
 Graveyard::~Graveyard() {
-	log("destroy graveyard");
 }
 
 char Graveyard::symbol() {
@@ -321,13 +296,11 @@ void Graveyard::impact(list<CharacterPtr>& characters, std::list<ObjectPtr>& obj
 
 
 Ziggurat::Ziggurat(GCoord acoord) : Spawn(acoord, 60+rand()%50) {
-	log("ziggurat");
 	health = TIME_ZIGGURAT;
 	fsymb = SYM_ZIGGURAT | A_BOLD | A_REVERSE | COLOR_PAIR(ID_ZIGGURAT) | A_BOLD;
 }
 
 Ziggurat::~Ziggurat() {
-	log("destroy ziggurat");
 }
 
 char Ziggurat::symbol() {
@@ -343,13 +316,11 @@ void Ziggurat::impact(list<CharacterPtr>& characters, std::list<ObjectPtr>& obje
 
 
 Hospital::Hospital(GCoord acoord) : Spawn(acoord, 10) {
-	log("ziggurat");
 	health = TIME_HOSPITAL;
 	fsymb = SYM_EMPTY | COLOR_PAIR(ID_EMPTY) | A_REVERSE | A_BOLD;
 }
 
 Hospital::~Hospital() {
-	log("destroy ziggurat");
 }
 
 char Hospital::symbol() {
@@ -357,8 +328,8 @@ char Hospital::symbol() {
 }
 
 void Hospital::impact(list<CharacterPtr>& characters, std::list<ObjectPtr>& objects, Map& m) {
-	static IntIntPair paired = make_pair(get_coord().roomx(), get_coord().roomy());
-	if (turn%frequency == 0 && Medkit::count[paired] < LIM_MEDKIT) {
+	static IntIntPair spawn_coord = make_pair(get_coord().roomx(), get_coord().roomy());
+	if (turn%frequency == 0 && Medkit::count[spawn_coord] < LIM_MEDKIT) {
 		objects.push_back(std::make_shared<Medkit>(m.get_rand_free_cell(coord)));
 	}
 }

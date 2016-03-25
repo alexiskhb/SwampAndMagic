@@ -18,11 +18,6 @@ unsigned int cantor_pairing(GCoord acoord) {
 	return cantor_pairing(acoord.row(), acoord.col());
 }
 
-void log(const char* s) {
-	return;
-	fprintf(stderr, "%s\n", s);
-}
-
 bool chance(int a) {
 	a = 101 - a;
 	int result = rand()%1000 + 1;
@@ -121,11 +116,9 @@ bool BaseObject::is_evil() {
 
 Room::Room(GCoord acoord) : coord(acoord), gen_randseed(0) {
 	free_cells.reserve(MAP_HEIGHT*MAP_WIDTH);
-	log("room");
 }
 
 Room::~Room() {
-	log("destroy room");
 }
 
 Room& Room::generate(BaseList& relief, Map& m, std::list<ObjectPtr>& objects, int steps, int seed) {
@@ -363,7 +356,6 @@ BaseObjectPtr Map::nearest_symb(GCoord from, std::string targets, int max_length
 	bool found = false;
 	deque.push_back(IntIntPair(r, c));
 	while (deque.size() > 0) {
-		log("nearest");
 		r = deque.front().first;
 		c = deque.front().second;
 		deque.pop_front();

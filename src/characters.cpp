@@ -12,13 +12,11 @@ int dz_3[7] = {-3, -2, -1, 0, 1, 2, 3};
 
 
 Character::Character(GCoord acoord, int hp, int dmg) : BaseObject(acoord) {
-	log("character");
 	damage = dmg;
 	max_health = health = hp;
 }
 
 Character::~Character() {
-	log("destroy character");
 }
 
 void Character::slash(list<CharacterPtr>& characters) {
@@ -47,12 +45,10 @@ bool Character::is_penetrable() {
 
 
 Knight::Knight(GCoord acoord) : Character(acoord, HP_KNIGHT, DMG_KN_SWORD) {
-	log("knight");
 	fsymb = SYM_KNIGHT | A_BOLD | COLOR_PAIR(ID_KNIGHT);
 }
 
 Knight::~Knight() {
-	log("destroy knight");
 }
 
 char Knight::symbol() {
@@ -244,12 +240,10 @@ bool Knight::move(Map& m, std::list<CharacterPtr>& characters) {
 
 
 Princess::Princess(GCoord acoord) : Character(acoord, HP_PRINCESS, DMG_PRINCESS) {
-	log("princess");
 	fsymb = SYM_PRINCESS | A_BOLD | COLOR_PAIR(ID_PRINCESS);
 }
 
 Princess::~Princess() {
-	log("destroy princess");
 }
 
 char Princess::symbol() {
@@ -270,11 +264,9 @@ void Princess::destroy() {
 
 
 Monster::Monster(GCoord acoord, int hp, int dmg) : Character(acoord, hp, dmg) {
-	log("monster");
 }
 
 Monster::~Monster() {
-	log("destroy monster");
 }
 
 bool Monster::move(Map& m, std::list<CharacterPtr>& characters) {
@@ -307,12 +299,10 @@ chtype Monster::symb() {
 
 
 Dragon::Dragon(GCoord acoord) : Monster(acoord, HP_DRAGON, DMG_DRAGON) {
-	log("dragon");
 	fsymb = SYM_DRAGON | COLOR_PAIR(ID_DRAGON);
 }
 
 Dragon::~Dragon() {
-	log("destroy dragon");
 }
 
 void Dragon::magic(list<ObjectPtr>& objects) {
@@ -334,9 +324,8 @@ bool Dragon::attack(list<CharacterPtr>& characters, list<ObjectPtr>& objects, Ma
 		if (chance(45)) {
 			magic(objects);
 		}
-		return false;
 	}
-	return false;
+	return chance(15);
 }
 
 char Dragon::symbol() {
@@ -347,12 +336,10 @@ char Dragon::symbol() {
 
 
 Zombie::Zombie(GCoord acoord) : Monster(acoord, HP_ZOMBIE, DMG_ZOMBIE) {
-	log("zombie");
 	fsymb = SYM_ZOMBIE | COLOR_PAIR(ID_ZOMBIE);
 }
 
 Zombie::~Zombie() {
-	log("destroy zombie");
 }
 
 char Zombie::symbol() {
@@ -376,12 +363,10 @@ bool Zombie::attack(list<CharacterPtr>& characters, list<ObjectPtr>& objects, Ma
 
 
 Warlock::Warlock(GCoord acoord) : Monster(acoord, HP_WARLOCK, DMG_WARLOCK) {
-	log("warlock");
 	fsymb = SYM_WARLOCK | COLOR_PAIR(ID_WARLOCK);
 }
 
 Warlock::~Warlock() {
-	log("destroy warlock");
 }
 
 char Warlock::symbol() {
@@ -394,6 +379,7 @@ bool Warlock::attack(list<CharacterPtr>& characters, list<ObjectPtr>& objects, M
 	aggro = way.size() > 0 || *this % *knight;
 	if (chance(30)) {
 		magic(characters, objects);
+		return true;
 	}
 	if (*this % *knight) {
 		slash(characters);

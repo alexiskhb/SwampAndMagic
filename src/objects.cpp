@@ -1,6 +1,22 @@
 #include "objects.h"
 #include "characters.h"
 
+int 
+	DMG_FLAME     = 3,
+	DMG_CURSE     = 5,
+	DMG_MAGIC     = 7,
+	DMG_MEDKIT    = -20,
+	TIME_SWAMP    = 15,
+	TIME_MAGIC    = 5,
+	TIME_CURSE    = 2,
+	TIME_FLAME    = 5,
+	TIME_INFTY    = -10000,
+	TIME_MEDKIT   = TIME_INFTY,
+	TIME_DRGNEST  = TIME_INFTY,
+	TIME_GRVYARD  = TIME_INFTY,
+	TIME_ZIGGURAT = TIME_INFTY,
+	TIME_HOSPITAL = TIME_INFTY,
+	LIM_MEDKIT    = 5;
 
 using namespace std;
 
@@ -204,17 +220,17 @@ void Curse::impact(list<CharacterPtr>& characters, std::list<ObjectPtr>& objects
 			crd1.row = crd2.row = direction.row();
 		}
 	}
-	if (generation < 4) {
+	if (generation < 3) {
 		objects.push_front(make_shared<Curse>(
 			get_coord() + GCoord(crd1.row, crd1.col), 
-			2, 
+			3, 
 			generation+1, 
 			GCoord(crd1.row, crd1.col) 
 			)
 		);
 		objects.push_front(make_shared<Curse>(
 			get_coord() + GCoord(crd2.row, crd2.col),
-			2, 
+			3, 
 			generation+1, 
 			GCoord(crd2.row, crd2.col)
 			)

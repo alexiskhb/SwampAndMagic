@@ -6,22 +6,22 @@
 #include "coords.h"
 #include <map>
 
-static const int 
-	DMG_FLAME     = 3,
-	DMG_CURSE     = 5,
-	DMG_MAGIC     = 7,
-	DMG_MEDKIT    = -20,
-	TIME_SWAMP    = 15,
-	TIME_MAGIC    = 5,
-	TIME_CURSE    = 2,
-	TIME_FLAME    = 5,
-	TIME_INFTY    = -10000,
-	TIME_MEDKIT   = TIME_INFTY,
-	TIME_DRGNEST  = TIME_INFTY,
-	TIME_GRVYARD  = TIME_INFTY,
-	TIME_ZIGGURAT = TIME_INFTY,
-	TIME_HOSPITAL = TIME_INFTY,
-	LIM_MEDKIT    = 5;
+extern int 
+	DMG_FLAME    ,
+	DMG_CURSE    ,
+	DMG_MAGIC    ,
+	DMG_MEDKIT   ,
+	TIME_SWAMP   ,
+	TIME_MAGIC   ,
+	TIME_CURSE   ,
+	TIME_FLAME   ,
+	TIME_INFTY   ,
+	TIME_MEDKIT  ,
+	TIME_DRGNEST ,
+	TIME_GRVYARD ,
+	TIME_ZIGGURAT,
+	TIME_HOSPITAL,
+	LIM_MEDKIT   ;
 
 
 class Object : public BaseObject {

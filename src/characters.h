@@ -7,19 +7,17 @@
 #include "colored_text.h"
 #include "coords.h"
 
-
-static const int HP_KNIGHT   = 100; 
-static const int HP_PRINCESS = 2000;  
-static const int HP_DRAGON   = 150;
-static const int HP_ZOMBIE   = 20; 
-static const int HP_WARLOCK  = 40;
-
-
-static const int DMG_KN_SWORD = 15; 
-static const int DMG_PRINCESS = 0; 
-static const int DMG_DRAGON   = 15;
-static const int DMG_ZOMBIE   = 2;
-static const int DMG_WARLOCK  = 1;
+extern int 
+	HP_KNIGHT    ,
+	HP_PRINCESS  ,
+	HP_DRAGON    ,
+	HP_ZOMBIE    ,
+	HP_WARLOCK   ,
+	DMG_KN_SWORD ,
+	DMG_PRINCESS ,
+	DMG_DRAGON   ,
+	DMG_ZOMBIE   ,
+	DMG_WARLOCK  ;
 
 
 static const std::string ENEMIES("zDW");

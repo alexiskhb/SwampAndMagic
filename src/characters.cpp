@@ -3,6 +3,18 @@
 #include <curses.h>
 #include "control.h"
 
+int 
+	HP_KNIGHT   = 100,
+	HP_PRINCESS = 2000, 
+	HP_DRAGON   = 150,
+	HP_ZOMBIE   = 20,
+	HP_WARLOCK  = 40,
+
+	DMG_KN_SWORD = 15,
+	DMG_PRINCESS = 0,
+	DMG_DRAGON   = 15,
+	DMG_ZOMBIE   = 2,
+	DMG_WARLOCK  = 1;
 
 using namespace std;
 
@@ -409,7 +421,7 @@ void Warlock::magic(list<CharacterPtr>& characters, list<ObjectPtr>& objects) {
 		GCoord(
 			getrow() + sgn0(dc.row()), 
 			getcol() + sgn0(dc.col())), 
-		2, 
+		3, 
 		GCoord(sgn0(dc.row()), sgn0(dc.col()))
 		)
 	);

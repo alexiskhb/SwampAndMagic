@@ -118,7 +118,7 @@ public:
 
 	GCoord get_prev();
 
-	chtype symb();
+	virtual chtype symb();
 
 	virtual void destroy();
 

@@ -280,7 +280,7 @@ Monster::~Monster() {
 bool Monster::move(Map& m, std::list<CharacterPtr>& characters) {
 	prev_coord = coord;
 	if (way.size() > 0) {
-		if (chance(70)) {
+		if (chance(80)) {
 			coord = GCoord(way.front().first, way.front().second);
 			way.pop_front();
 			return false;
@@ -300,12 +300,15 @@ IntIntPairList Monster::shortest_way_to(BaseObjectPtr obj, Map& m) {
 		IntIntPair(obj ->getrow(), obj ->getcol()), std::min(MAP_HEIGHT, MAP_WIDTH)/3);
 }
 
+chtype Monster::symb() {
+	return fsymb | (aggro ? A_BOLD : 0);
+}
 
 
 
 Dragon::Dragon(GCoord acoord) : Monster(acoord, HP_DRAGON, DMG_DRAGON) {
 	log("dragon");
-	fsymb = SYM_DRAGON | A_BOLD | COLOR_PAIR(ID_DRAGON);
+	fsymb = SYM_DRAGON | COLOR_PAIR(ID_DRAGON);
 }
 
 Dragon::~Dragon() {
@@ -322,6 +325,7 @@ void Dragon::magic(list<ObjectPtr>& objects) {
 bool Dragon::attack(list<CharacterPtr>& characters, list<ObjectPtr>& objects, Map& m) {
 	CharacterPtr knight = characters.front();
 	refresh_way(m, characters);
+	aggro = way.size() > 0 || *this % *knight;
 	if (*this % *knight && chance(80)) {
 		slash(characters);
 		return true;
@@ -344,7 +348,7 @@ char Dragon::symbol() {
 
 Zombie::Zombie(GCoord acoord) : Monster(acoord, HP_ZOMBIE, DMG_ZOMBIE) {
 	log("zombie");
-	fsymb = SYM_ZOMBIE | A_BOLD | COLOR_PAIR(ID_ZOMBIE);
+	fsymb = SYM_ZOMBIE | COLOR_PAIR(ID_ZOMBIE);
 }
 
 Zombie::~Zombie() {
@@ -358,6 +362,7 @@ char Zombie::symbol() {
 bool Zombie::attack(list<CharacterPtr>& characters, list<ObjectPtr>& objects, Map& m) {
 	CharacterPtr knight = characters.front();
 	refresh_way(m, characters);
+	aggro = way.size() > 0 || *this % *knight;
 	if (*this % *knight) {
 		slash(characters);
 		return true;
@@ -372,7 +377,7 @@ bool Zombie::attack(list<CharacterPtr>& characters, list<ObjectPtr>& objects, Ma
 
 Warlock::Warlock(GCoord acoord) : Monster(acoord, HP_WARLOCK, DMG_WARLOCK) {
 	log("warlock");
-	fsymb = SYM_WARLOCK | A_BOLD | COLOR_PAIR(ID_WARLOCK);
+	fsymb = SYM_WARLOCK | COLOR_PAIR(ID_WARLOCK);
 }
 
 Warlock::~Warlock() {
@@ -386,6 +391,7 @@ char Warlock::symbol() {
 bool Warlock::attack(list<CharacterPtr>& characters, list<ObjectPtr>& objects, Map& m) {
 	CharacterPtr knight = characters.front();
 	refresh_way(m, characters);
+	aggro = way.size() > 0 || *this % *knight;
 	if (chance(30)) {
 		magic(characters, objects);
 	}

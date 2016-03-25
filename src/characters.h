@@ -99,8 +99,12 @@ public:
 	void refresh_way(Map& m, std::list<CharacterPtr>& characters);
 
 	IntIntPairList shortest_way_to(BaseObjectPtr obj, Map& m);
+
+	chtype symb() override;
 protected:
 	IntIntPairList way;
+
+	bool aggro = false;
 };
 
 

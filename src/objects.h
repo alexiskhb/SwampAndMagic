@@ -4,6 +4,7 @@
 #include <string>
 #include "colored_text.h"
 #include "coords.h"
+#include <map>
 
 static const int 
 	DMG_FLAME     = 3,
@@ -18,7 +19,9 @@ static const int
 	TIME_MEDKIT   = TIME_INFTY,
 	TIME_DRGNEST  = TIME_INFTY,
 	TIME_GRVYARD  = TIME_INFTY,
-	TIME_ZIGGURAT = TIME_INFTY;
+	TIME_ZIGGURAT = TIME_INFTY,
+	TIME_HOSPITAL = TIME_INFTY,
+	LIM_MEDKIT    = 5;
 
 
 class Object : public BaseObject {
@@ -142,14 +145,16 @@ public:
 	char symbol() override;
 
 	void impact(std::list<CharacterPtr>& characters, std::list<ObjectPtr>& objects, Map& m) override;
+
+	static PairKeyMap count;
 };
 
 
 
 
-class Respawn : public Object {
+class Spawn : public Object {
 public:
-	Respawn(GCoord acoord, int freq);
+	Spawn(GCoord acoord, int freq);
 
 	void destroy() override;
 protected:
@@ -157,7 +162,7 @@ protected:
 };
 
 
-class DragonNest : public Respawn {
+class DragonNest : public Spawn {
 public:
 	DragonNest(GCoord acoord);
 
@@ -169,7 +174,7 @@ public:
 };
 
 
-class Graveyard : public Respawn {
+class Graveyard : public Spawn {
 public:
 	Graveyard(GCoord acoord);
 
@@ -181,11 +186,23 @@ public:
 };
 
 
-class Ziggurat : public Respawn {
+class Ziggurat : public Spawn {
 public:
 	Ziggurat(GCoord acoord);
 
 	~Ziggurat() override;
+
+	char symbol() override;
+
+	void impact(std::list<CharacterPtr>& characters, std::list<ObjectPtr>& objects, Map& m) override;
+};
+
+
+class Hospital : public Spawn {
+public:
+	Hospital(GCoord acoord);
+
+	~Hospital() override;
 
 	char symbol() override;
 

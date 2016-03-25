@@ -64,6 +64,8 @@ typedef std::list<BaseObjectPtr> BaseList;
 
 typedef std::pair<int,int> IntIntPair;
 
+typedef std::map<IntIntPair, int> PairKeyMap;
+
 typedef std::list<IntIntPair> IntIntPairList;
 
 typedef std::map<unsigned int, int> UIntIntMap;
@@ -136,6 +138,7 @@ protected:
 	// we need prev_coords to remove reference to object
 	// from previous cell of map after move
 	GCoord prev_coord;
+	const GCoord initial_coord;
 	int health = 1;
 	int damage = 0;
 	chtype fsymb;

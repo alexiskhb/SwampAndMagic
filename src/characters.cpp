@@ -297,7 +297,7 @@ void Monster::refresh_way(Map& m, std::list<CharacterPtr>& characters) {
 IntIntPairList Monster::shortest_way_to(BaseObjectPtr obj, Map& m) {
 	return m.shortest_way(
 		IntIntPair(this->getrow(), this->getcol()), 
-		IntIntPair(obj ->getrow(), obj ->getcol()), std::min(MAP_HEIGHT, MAP_WIDTH)/3);
+		IntIntPair(obj ->getrow(), obj ->getcol()), std::min(MAP_HEIGHT, MAP_WIDTH)/2);
 }
 
 chtype Monster::symb() {

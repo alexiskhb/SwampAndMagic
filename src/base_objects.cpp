@@ -32,8 +32,8 @@ bool chance(int a) {
 
 
 
-BaseObject::BaseObject(GCoord acoord) : coord(acoord), prev_coord(acoord) {
-	fsymb = SYM_EMPTY | COLOR_PAIR(ID_EMPTY) | A_REVERSE | A_BOLD;	
+BaseObject::BaseObject(GCoord acoord) : coord(acoord), prev_coord(acoord), initial_coord(acoord) {
+	fsymb = SYM_EMPTY | COLOR_PAIR(ID_EMPTY) | A_REVERSE | A_BOLD;
 }
 
 BaseObject::~BaseObject() {
@@ -173,6 +173,8 @@ Room& Room::generate(BaseList& relief, Map& m, std::list<ObjectPtr>& objects, in
 	col = rand()%MAP_WIDTH;
 	crd = m.nearest_symb(GCoord(Coord(coord.roomx(), coord.roomy(), row, col)), string(1, SYM_EMPTY), MAP_HEIGHT/2)->get_coord();
 	objects.push_back(make_shared<Ziggurat>(crd));
+
+	objects.push_back(make_shared<Hospital>(coord));
 	return *this;
 }
 
@@ -238,7 +240,7 @@ void Map::create_room(const int ax, const int ay, std::list<ObjectPtr>& objects)
 		return;
 	}
 	world[ax][ay] = std::make_shared<Room>(GCoord(Coord(ax, ay, 0, 0)));
-	world[ax][ay]->generate(relief, *this, objects, 5, time(0));
+	world[ax][ay]->generate(relief, *this, objects, 6, time(0));
 	is_room_exists[cantor_pairing(ax, ay)] = true;
 }
 
@@ -359,22 +361,20 @@ BaseObjectPtr Map::nearest_symb(GCoord from, std::string targets, int max_length
 	int d = 0;
 	GCoord crd;
 	bool found = false;
-	IntIntPair target;
 	deque.push_back(IntIntPair(r, c));
 	while (deque.size() > 0) {
 		log("nearest");
 		r = deque.front().first;
 		c = deque.front().second;
+		deque.pop_front();
 		char p = map(r, c).back()->symbol();
 		for(unsigned int i = 0; i < targets.size() && !found; i++) {
 			found |= targets.find(p) != std::string::npos;
 		}
 		if (found || d >= max_length) {
-			target = IntIntPair(r, c);
 			break;
 		}
 		d = get_distance(GCoord(r, c));
-		deque.pop_front();
 		for(int i = -1; i <= 1; i++) {
 			for(int j = -1; j <= 1; j++) {
 				if (i == 0 && j == 0) {

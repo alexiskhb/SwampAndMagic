@@ -190,8 +190,8 @@ struct {
 		knight = std::make_shared<Knight>(GCoord(MAP_HEIGHT/2, MAP_WIDTH/2));
 		knight->moveto(map->nearest_symb(knight->get_coord(), " ", MAP_HEIGHT)->get_coord());
 
-		int pr_row = rand()%200 - 100; pr_row += pr_row > 0 ? 200 : -200;
-		int pr_col = rand()%200 - 100; pr_col += pr_col > 0 ? 200 : -200;
+		int pr_row = rand()%250 - 125; pr_row += pr_row > 0 ? 250 : -250;
+		int pr_col = rand()%250 - 125; pr_col += pr_col > 0 ? 250 : -250;
 		GCoord pr_coord = GCoord(pr_row, pr_col);
 		map->create_room(pr_coord.roomx(), pr_coord.roomy(), dyn_objects);
 		pr_coord = map->nearest_symb(pr_coord, std::string(1, SYM_EMPTY), MAP_HEIGHT/2)->get_coord();
@@ -267,10 +267,12 @@ struct {
 					}
 				}
 			}
-			render();
-			if (Settings.show_dynamic_glob_map) {
-	 			map->show_global_map(glob_map_special, 2, MAP_WIDTH + 4);
-	 		} 		
+			if (mode != M_MAP) {
+				render();
+				if (Settings.show_dynamic_glob_map) {
+	 				map->show_global_map(glob_map_special, 2, MAP_WIDTH + 4);
+	 			}
+			} 		
 	 	}
 	}
 
@@ -281,8 +283,6 @@ struct {
 	}
 } Game;
 
-#include <iostream>
-using namespace std;
 int main(int argc, char** argv) {
 	freopen("log", "w", stderr);
 	Game.init();

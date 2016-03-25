@@ -4,7 +4,7 @@
 
 using namespace std;
 
-
+PairKeyMap Medkit::count;
 
 Object::Object(GCoord acoord) : BaseObject(acoord), direction(0, 0) {
 	// log("obj");
@@ -228,6 +228,7 @@ Medkit::Medkit(GCoord acoord) : Object(acoord) {
 	health = TIME_MEDKIT;
 	damage = DMG_MEDKIT;
 	fsymb = SYM_MEDKIT | A_BOLD | A_REVERSE | COLOR_PAIR(ID_MEDKIT) | A_BOLD;
+	Medkit::count[IntIntPair(acoord.roomx(), acoord.roomy())] += 1;
 }
 
 Medkit::Medkit(GCoord acoord, int timelife) : Object(acoord) {
@@ -235,10 +236,12 @@ Medkit::Medkit(GCoord acoord, int timelife) : Object(acoord) {
 	health = timelife;
 	damage = DMG_MEDKIT;
 	fsymb = SYM_MEDKIT | A_BOLD | A_REVERSE | COLOR_PAIR(ID_MEDKIT) | A_BOLD;
+	Medkit::count[IntIntPair(acoord.roomx(), acoord.roomy())] += 1;
 }
 
 Medkit::~Medkit() {
 	log("destroy medkit");
+	Medkit::count[IntIntPair(initial_coord.roomx(), initial_coord.roomy())] -= 1;
 }
 
 char Medkit::symbol() {
@@ -253,21 +256,24 @@ void Medkit::impact(list<CharacterPtr>& characters, std::list<ObjectPtr>& object
 			break;
 		}
 	}
+	if (!m.is_penetrable(coord)) {
+		health = 0;
+	}
 }
 
 
 
 
 
-Respawn::Respawn(GCoord acoord, int freq) : Object(acoord), frequency(freq) {
+Spawn::Spawn(GCoord acoord, int freq) : Object(acoord), frequency(freq) {
 }
 
-void Respawn::destroy() {
+void Spawn::destroy() {
 }
 
 
 
-DragonNest::DragonNest(GCoord acoord) : Respawn(acoord, 25+rand()%15) {
+DragonNest::DragonNest(GCoord acoord) : Spawn(acoord, 25+rand()%15) {
 	log("dragonnest");
 	health = TIME_DRGNEST;
 	fsymb = SYM_DRGNEST | A_BOLD | A_REVERSE | COLOR_PAIR(ID_DRGNEST) | A_BOLD;
@@ -290,7 +296,7 @@ void DragonNest::impact(list<CharacterPtr>& characters, std::list<ObjectPtr>& ob
 
 
 
-Graveyard::Graveyard(GCoord acoord) : Respawn(acoord, 5+rand()%5) {
+Graveyard::Graveyard(GCoord acoord) : Spawn(acoord, 5+rand()%5) {
 	log("graveyard");
 	health = TIME_GRVYARD;
 	fsymb = SYM_GRVYARD | A_BOLD | A_REVERSE | COLOR_PAIR(ID_GRVYARD) | A_BOLD;
@@ -314,7 +320,7 @@ void Graveyard::impact(list<CharacterPtr>& characters, std::list<ObjectPtr>& obj
 
 
 
-Ziggurat::Ziggurat(GCoord acoord) : Respawn(acoord, 60+rand()%50) {
+Ziggurat::Ziggurat(GCoord acoord) : Spawn(acoord, 60+rand()%50) {
 	log("ziggurat");
 	health = TIME_ZIGGURAT;
 	fsymb = SYM_ZIGGURAT | A_BOLD | A_REVERSE | COLOR_PAIR(ID_ZIGGURAT) | A_BOLD;
@@ -331,5 +337,31 @@ char Ziggurat::symbol() {
 void Ziggurat::impact(list<CharacterPtr>& characters, std::list<ObjectPtr>& objects, Map& m) {
 	if (turn%frequency == 0) {
 		characters.push_back(std::make_shared<Warlock>(get_coord()));
+	}
+}
+
+
+
+Hospital::Hospital(GCoord acoord) : Spawn(acoord, 10) {
+	log("ziggurat");
+	health = TIME_HOSPITAL;
+	fsymb = SYM_EMPTY | COLOR_PAIR(ID_EMPTY) | A_REVERSE | A_BOLD;
+}
+
+Hospital::~Hospital() {
+	log("destroy ziggurat");
+}
+
+char Hospital::symbol() {
+	return SYM_EMPTY;
+}
+
+void Hospital::impact(list<CharacterPtr>& characters, std::list<ObjectPtr>& objects, Map& m) {
+	static IntIntPair paired = make_pair(get_coord().roomx(), get_coord().roomy());
+	int randrow = rand()%MAP_HEIGHT;
+	int randcol = rand()%MAP_WIDTH;
+	Coord randcrd(get_coord().roomx(), get_coord().roomy(), randrow, randcol);
+	if (turn%frequency == 0 && Medkit::count[paired] < LIM_MEDKIT && m.is_penetrable(GCoord(randcrd))) {
+		objects.push_back(std::make_shared<Medkit>(GCoord(randcrd)));
 	}
 }

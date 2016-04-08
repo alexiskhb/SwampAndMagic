@@ -3,19 +3,22 @@
 #include <map>
 #include <string>
 #include <fstream>
+#include <sstream>
 #include <exception>
 #include "base_objects.h"
 #include "objects.h"
 #include "characters.h"
+#include <iostream>
 
 const int True  = 1;
 const int False = 0;
 const int STREAMSIZE = 256;
 const char* CONFIG_FILENAME = "config.sam";
 
-class ConfigFile : public std::ifstream {
+class ConfigFile : public std::fstream {
 public:
 	virtual ~ConfigFile() {
+		std::cout << "Yes, I was closed\n";
 		if (is_open()) {
 			close();
 		}
@@ -24,13 +27,22 @@ public:
 	// Returns true if not end of file. 
 	// In other case pair is not valid
 	bool get_option(std::pair<std::string, std::string>& opt) {
-		getline(key  , STREAMSIZE, '=' );
-		getline(value, STREAMSIZE, '\n');
+		line[0] = '#';
+		while (std::string(line).size() == 0 || line[0] == '#') {
+			if(!getline(line , 2*STREAMSIZE)) {
+				break;
+			}
+		}
+		std::stringstream ss;
+		ss << line;
+		ss.getline(key  , STREAMSIZE, '=' );
+		ss.getline(value, STREAMSIZE, '\n');
 		opt.first  = std::string(key);
 		opt.second = std::string(value);
-		return key[0] == '#' ? get_option(opt) : !eof();
+		return !eof();
 	}
 private:
+	char line[2*STREAMSIZE];
 	char key[STREAMSIZE];
 	char value[STREAMSIZE];
 };
@@ -64,13 +76,13 @@ public:
 
 	void load_configs() {
 		std::pair<std::string, std::string> opt;
-		ConfigFile original_file;
-		original_file.open(CONFIG_FILENAME);
-		if (!original_file.is_open()) {
+		ConfigFile file;
+		file.open(CONFIG_FILENAME);
+		if (!file.is_open()) {
 			throw BadConfigException();
 		}
-		// ConfigFile original_file;
-		while (original_file.get_option(opt)) {
+		// ConfigFile file;
+		while (file.get_option(opt)) {
 			if (variables.count(opt.first) == 0) {
 				throw BadOptionException(opt.first);
 			}

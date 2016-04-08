@@ -36,12 +36,6 @@ struct {
 
 	Mode mode;
 
-	struct {
-		bool show_minimap     = true;
-		bool show_coordinates = false;
-	} Settings;
-
-
 	bool is_over() {
 		return characters.size() < 2 || knight->hitpoints() <= 0 || princess->hitpoints() <= 0 || is_win();
 	}
@@ -145,7 +139,7 @@ struct {
 		int shift = 2;
 
 		gprint(shift - 1, 0, " ");
-		if (Settings.show_coordinates) {
+		if (Config::instance().show_coordinates) {
 			status = "(" + std::to_string(princess->getcol()) + ", " + std::to_string(-princess->getrow()) + ")";
 			gprint(shift - 1, shift + MAP_WIDTH - status.size(), status.c_str());
 		}
@@ -160,7 +154,7 @@ struct {
 		status = "HP: " + std::to_string(characters.front()->hitpoints());
 		gprint(MAP_HEIGHT+shift, MAP_WIDTH/2 - status.size()/2 - status.size()%2, status.c_str());
 
-		if (Settings.show_coordinates) {
+		if (Config::instance().show_coordinates) {
 			status = "(" + std::to_string(knight->getcol()) + ", " + std::to_string(-knight->getrow()) + ")";
 			gprint(MAP_HEIGHT+shift, shift + MAP_WIDTH - status.size(), status.c_str());
 		}
@@ -209,8 +203,6 @@ struct {
 	}
 
 	void init() {
-		Config::instance().load_characteristics();
-
 		srand(time(0));
 		map = std::make_shared<Map>(relief);
 		map->create_room(0, 0, dyn_objects);
@@ -263,18 +255,18 @@ struct {
 					switch (sg) {
 						break;
 						case CMD_MAP: {
-							Settings.show_minimap = !Settings.show_minimap;						
+							Config::instance().show_minimap = !Config::instance().show_minimap;						
 						}
 						break;
 						case CMD_COORD: {
-							Settings.show_coordinates = !Settings.show_coordinates;
+							Config::instance().show_coordinates = !Config::instance().show_coordinates;
 						}
 					}
 				}
 			}
 			if (mode != M_MAP) {
 				render();
-				if (Settings.show_minimap) {
+				if (Config::instance().show_minimap) {
 	 				map->show_global_map(glob_map_special, 2, MAP_WIDTH + 4);
 	 			}
 			} 		
@@ -289,7 +281,7 @@ struct {
 } Game;
 
 int main(int argc, char** argv) {
-	freopen("log", "w", stderr);
+	Config::instance().load_configs();
 	Game.init_curses();
 	Game.init();
  	Game.main_cycle();

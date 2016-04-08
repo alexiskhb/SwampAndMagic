@@ -1,15 +1,16 @@
-#include "base_objects.h"
-#include "objects.h"
-#include "characters.h"
 #include <map>
 #include <ctime>
-#include "colored_text.h"
 #include <string>
+#include <cstdlib>
 #include <curses.h>
 #include <algorithm>
 #include "bilateral_array.h"
-#include <cstdlib>
+#include "colored_text.h"
+#include "base_objects.h"
+#include "characters.h"
 #include "control.h"
+#include "objects.h"
+#include "config.h"
 
 
 typedef std::map<CharacterPtr, bool> CharacterBoolMap;
@@ -36,8 +37,8 @@ struct {
 	Mode mode;
 
 	struct {
-		bool show_dynamic_glob_map = false;
-		bool show_coordinates      = false;
+		bool show_minimap     = true;
+		bool show_coordinates = false;
 	} Settings;
 
 
@@ -208,6 +209,8 @@ struct {
 	}
 
 	void init() {
+		Config::instance().load_characteristics();
+
 		srand(time(0));
 		map = std::make_shared<Map>(relief);
 		map->create_room(0, 0, dyn_objects);
@@ -260,7 +263,7 @@ struct {
 					switch (sg) {
 						break;
 						case CMD_MAP: {
-							Settings.show_dynamic_glob_map = !Settings.show_dynamic_glob_map;						
+							Settings.show_minimap = !Settings.show_minimap;						
 						}
 						break;
 						case CMD_COORD: {
@@ -271,7 +274,7 @@ struct {
 			}
 			if (mode != M_MAP) {
 				render();
-				if (Settings.show_dynamic_glob_map) {
+				if (Settings.show_minimap) {
 	 				map->show_global_map(glob_map_special, 2, MAP_WIDTH + 4);
 	 			}
 			} 		

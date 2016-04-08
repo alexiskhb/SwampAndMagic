@@ -2,6 +2,7 @@
 #include <ctime>
 #include <string>
 #include <cstdlib>
+#include <iostream>
 #include <curses.h>
 #include <algorithm>
 #include "bilateral_array.h"
@@ -202,7 +203,18 @@ struct {
 		init_pair(ID_ZIGGURAT , COLOR_WHITE , COLOR_BLACK  );
 	}
 
-	void init() {
+	// Return true if initialization was succesful
+	bool init() {
+		try {
+			Config::instance().load_configs();
+		}
+		catch (BadConfigException e) {
+			std::cout << e.what() << std::endl;
+		}
+		catch (BadOptionException e) {
+			std::cout << e.what() << std::endl;
+			return false;
+		}
 		srand(time(0));
 		map = std::make_shared<Map>(relief);
 		map->create_room(0, 0, dyn_objects);
@@ -226,6 +238,7 @@ struct {
 
 		map->move_the_frame(knight->get_coord() - GCoord(MAP_HEIGHT/2, MAP_WIDTH/2));
 		map->create_rooms(dyn_objects);
+		return true;
 	}
 
 	void stop() {
@@ -275,15 +288,18 @@ struct {
 
 	void replay() {
 		stop();
-		init();
+		if(!init()) {
+			return;
+		}
 		main_cycle();
 	}
 } Game;
 
 int main(int argc, char** argv) {
-	Config::instance().load_configs();
+	if (!Game.init()) {
+		return 0;
+	}
 	Game.init_curses();
-	Game.init();
  	Game.main_cycle();
  	while (true) {
  		Game.status = "PRESS '" + std::string(1, CMD_QUIT) + "' TO QUIT OR '" + std::string(1, CMD_REPLAY) + "' TO REPLAY";

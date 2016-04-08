@@ -3,31 +3,57 @@
 #include <map>
 #include <string>
 #include <fstream>
+#include <exception>
 #include "base_objects.h"
 #include "objects.h"
 #include "characters.h"
 
 const int True  = 1;
 const int False = 0;
+const int STREAMSIZE = 256;
+const char* CONFIG_FILENAME = "config.sam";
 
-class File {
+class ConfigFile : public std::ifstream {
 public:
-	File(const char* name) {
-		handle.open(name, std::fstream::in | std::fstream::out);
-	}
-
-	~File() {
-		if (handle.is_open()) {
-			handle.close();
+	virtual ~ConfigFile() {
+		if (is_open()) {
+			close();
 		}
 	}
 
-	void read() {
+	// Returns true if not end of file. 
+	// In other case pair is not valid
+	bool get_option(std::pair<std::string, std::string>& opt) {
+		getline(key  , STREAMSIZE, '=' );
+		getline(value, STREAMSIZE, '\n');
+		opt.first  = std::string(key);
+		opt.second = std::string(value);
+		return key[0] == '#' ? get_option(opt) : !eof();
 	}
 private:
-	std::fstream handle;
+	char key[STREAMSIZE];
+	char value[STREAMSIZE];
 };
 
+
+class BadConfigException : public std::exception {
+public:
+	virtual const char* what() const throw() {
+		return "Config file not found";
+	}
+};
+
+class BadOptionException : public std::exception {
+public:
+	BadOptionException(std::string s) : bad_string(s) {		
+	}
+
+	virtual const char* what() const throw() {
+		return ("Config: invalid key: " + bad_string).c_str();
+	}
+
+	std::string bad_string;
+};
 
 class Config {
 public:
@@ -37,12 +63,33 @@ public:
 	}
 
 	void load_configs() {
-
+		std::pair<std::string, std::string> opt;
+		ConfigFile original_file;
+		original_file.open(CONFIG_FILENAME);
+		if (!original_file.is_open()) {
+			throw BadConfigException();
+		}
+		// ConfigFile original_file;
+		while (original_file.get_option(opt)) {
+			if (variables.count(opt.first) == 0) {
+				throw BadOptionException(opt.first);
+			}
+			int value;
+			try {
+				value = std::stoi(opt.second);
+			}
+			catch (std::invalid_argument) {
+				throw BadOptionException(opt.second + " at " + opt.first);
+			}
+			*variables[opt.first] = value;
+		}
 	}
+	
 	int show_minimap;
+	
 	int show_coordinates;
 private:
-	std::map<std::string, int*> variables; 
+	std::map<std::string, int*> variables;
 	Config() : show_minimap(True), show_coordinates(False) {
 		variables[std::string("CharMaxLifeValue.Knight")]   = &HP_KNIGHT;
 		variables[std::string("CharMaxLifeValue.Dragon")]   = &HP_DRAGON;
@@ -50,18 +97,18 @@ private:
 		variables[std::string("CharMaxLifeValue.Princess")] = &HP_PRINCESS;
 		variables[std::string("CharMaxLifeValue.Warlock")]  = &HP_WARLOCK;
 		
-		variables[std::string("CharDamageValue.Knight")]   = &DMG_KN_SWORD;
-		variables[std::string("CharDamageValue.Dragon")]   = &DMG_DRAGON;
-		variables[std::string("CharDamageValue.Zombie")]   = &DMG_ZOMBIE;
-		variables[std::string("CharDamageValue.Princess")] = &DMG_PRINCESS;
-		variables[std::string("CharDamageValue.Warlock")]  = &DMG_WARLOCK;
+		variables[std::string("CharDamageValue.Knight")]    = &DMG_KN_SWORD;
+		variables[std::string("CharDamageValue.Dragon")]    = &DMG_DRAGON;
+		variables[std::string("CharDamageValue.Zombie")]    = &DMG_ZOMBIE;
+		variables[std::string("CharDamageValue.Princess")]  = &DMG_PRINCESS;
+		variables[std::string("CharDamageValue.Warlock")]   = &DMG_WARLOCK;
 		
-		variables[std::string("ObjDamageValue.Flame")]  = &DMG_FLAME;
-		variables[std::string("ObjDamageValue.Curse")]  = &DMG_CURSE;
-		variables[std::string("ObjDamageValue.Magic")]  = &DMG_MAGIC;
-		variables[std::string("ObjDamageValue.Medkit")] = &DMG_MEDKIT;
+		variables[std::string("ObjDamageValue.Flame")]      = &DMG_FLAME;
+		variables[std::string("ObjDamageValue.Curse")]      = &DMG_CURSE;
+		variables[std::string("ObjDamageValue.Magic")]      = &DMG_MAGIC;
+		variables[std::string("ObjDamageValue.Medkit")]     = &DMG_MEDKIT;
 		
-		variables[std::string("Game.ShowMinimap")]     = &show_minimap;
-		variables[std::string("Game.ShowCoordinates")] = &show_coordinates;
+		variables[std::string("Game.ShowMinimap")]          = &show_minimap;
+		variables[std::string("Game.ShowCoordinates")]      = &show_coordinates;
 	}
 };

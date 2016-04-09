@@ -238,6 +238,7 @@ struct {
 
 		map->move_the_frame(knight->get_coord() - GCoord(MAP_HEIGHT/2, MAP_WIDTH/2));
 		map->create_rooms(dyn_objects);
+		init_curses();
 		return true;
 	}
 
@@ -246,6 +247,7 @@ struct {
 		dyn_objects.clear();
 		relief.clear();
 		glob_map_special.clear();
+		endwin();
 	}
 
 	void main_cycle() {
@@ -299,7 +301,7 @@ int main(int argc, char** argv) {
 	if (!Game.init()) {
 		return 0;
 	}
-	Game.init_curses();
+	// Game.init_curses();
  	Game.main_cycle();
  	while (true) {
  		Game.status = "PRESS '" + std::string(1, CMD_QUIT) + "' TO QUIT OR '" + std::string(1, CMD_REPLAY) + "' TO REPLAY";

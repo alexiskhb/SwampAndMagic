@@ -18,7 +18,6 @@ const char* CONFIG_FILENAME = "config.sam";
 class ConfigFile : public std::fstream {
 public:
 	virtual ~ConfigFile() {
-		std::cout << "Yes, I was closed\n";
 		if (is_open()) {
 			close();
 		}
@@ -94,6 +93,7 @@ public:
 				throw BadOptionException(opt.second + " at " + opt.first);
 			}
 			*variables[opt.first] = value;
+			std::cout << opt.first << " = " << value << std::endl;
 		}
 	}
 	

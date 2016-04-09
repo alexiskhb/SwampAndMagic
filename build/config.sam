@@ -11,7 +11,7 @@ CharMaxLifeValue.Princess=2000
 CharMaxLifeValue.Warlock=40          
 ##
 
-CharDamageValue.Knight=15
+CharDamageValue.Knight=15...........0
 
 
 CharDamageValue.Dragon=15

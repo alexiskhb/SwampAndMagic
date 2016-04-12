@@ -14,7 +14,7 @@ CharMaxLifeValue.Warlock=40
 CharDamageValue.Knight=15...........0
 
 
-CharDamageValue.Dragon=15
+CharDamageValue.Dragon=1500000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 CharDamageValue.Zombie=2
 #ababaca
 CharDamageValue.Princess=0

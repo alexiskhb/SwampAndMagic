@@ -92,9 +92,13 @@ public:
 			catch (std::invalid_argument) {
 				throw BadOptionException(opt.second + " at " + opt.first);
 			}
+			catch (std::out_of_range) {
+				throw BadOptionException(opt.second + " at " + opt.first);	
+			}
 			*variables[opt.first] = value;
 			std::cout << opt.first << " = " << value << std::endl;
 		}
+		std::cout << std::endl;
 	}
 	
 	int show_minimap;
